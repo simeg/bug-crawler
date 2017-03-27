@@ -16,14 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SpringBootApplication
-@RestController
+@SpringBootApplication(scanBasePackages={"app"})
 public class Application {
-
-  @RequestMapping("/")
-  public String home() {
-    return "Hello Docker World";
-  }
 
   public static void main(String[] args) {
     Application app = new Application();
