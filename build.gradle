@@ -4,22 +4,22 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
-        classpath('se.transmode.gradle:gradle-docker:1.2')
+        classpath("se.transmode.gradle:gradle-docker:1.2")
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'docker'
+apply plugin: "java"
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: "org.springframework.boot"
+apply plugin: "docker"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 jar {
-    baseName = 'bug-crawler-container'
-    version =  '0.1.0'
+    baseName = "bug-crawler-container"
+    version =  "0.1.0"
 }
 
 repositories {
@@ -34,7 +34,7 @@ dependencies {
 task buildDocker(type: Docker, dependsOn: build) {
   push = true
   applicationName = jar.baseName
-  dockerfile = file('src/main/docker/Dockerfile')
+  dockerfile = file("src/main/docker/Dockerfile")
   doFirst {
     copy {
       from jar
