@@ -8,25 +8,23 @@ buildscript {
     }
 }
 
-group = 'springio'
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'docker'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 jar {
-    baseName = 'gs-spring-boot-docker'
+    baseName = 'bug-crawler-container'
     version =  '0.1.0'
 }
 
 repositories {
     mavenCentral()
 }
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
