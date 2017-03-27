@@ -5,11 +5,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RestController
@@ -33,11 +38,10 @@ public class Application {
         scheduledExecutorService.scheduleWithFixedDelay(
             // Can be Runnable or lambda. Can lambda replace any class?
             () -> {
-              try {
-                readFromUrl("http://vecka.nu/");
-              } catch (IOException e) {
-                e.printStackTrace();
-              }
+              String content = readFromUrl("http://vecka.nu/");
+              System.out.println("#####################################");
+              System.out.println(parseWeekNumber(content));
+              System.out.println("#####################################");
             },
             0,
             5,
@@ -45,21 +49,66 @@ public class Application {
         );
   }
 
-  private void readFromUrl(String urlString) throws IOException {
-    URL url = new URL(urlString);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+  private String readFromUrl(String theURL) {
+    URL u;
+    InputStream is = null;
+    DataInputStream dis;
+    String s;
+    StringBuffer sb = new StringBuffer();
 
     try {
+      u = new URL(theURL);
+      is = u.openStream();
+      dis = new DataInputStream(new BufferedInputStream(is));
       String line;
-      while ((line = reader.readLine()) != null) {
-        System.out.println(line);
+      while ((s = dis.readLine()) != null) {
+        line = s + "\n";
+        sb.append(line);
       }
-
-      reader.close();
-
-    } catch (Exception e) {
-      throw e;
+    } catch (MalformedURLException mue) {
+      System.out.println("Ouch - a MalformedURLException happened.");
+      mue.printStackTrace();
+      System.exit(1);
+    } catch (IOException ioe) {
+      System.out.println("Oops- an IOException happened.");
+      ioe.printStackTrace();
+      System.exit(1);
+    } finally {
+      try {
+        is.close();
+      } catch (IOException ignored) {}
     }
+    return sb.toString();
+  }
+
+  private String parseWeekNumber(String html) {
+    String output;
+
+    Pattern replaceWhitespacePattern = Pattern.compile("\\s");
+    Matcher matcher;
+    matcher = replaceWhitespacePattern.matcher(html);
+    output = matcher.replaceAll(" ");
+
+    Pattern removeHTMLTagsPattern = Pattern.compile("]*>");
+    matcher = removeHTMLTagsPattern.matcher(output);
+    output = matcher.replaceAll("");
+
+    Pattern leaveOnlyAlphaNumericCharactersPattern = Pattern.compile("[^0-9a-zA-Z ]");
+    matcher = leaveOnlyAlphaNumericCharactersPattern.matcher(output);
+    output = matcher.replaceAll("");
+
+    List<String> htmlElements = Arrays.asList(output.split(" "));
+
+    // Remove empty elements
+    List<String> nonEmptyHtmlElements = htmlElements.stream()
+        .filter(e -> !e.equals(""))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+    int index = nonEmptyHtmlElements.indexOf("week");
+    String week = nonEmptyHtmlElements.get(index + 1);
+
+    return week;
   }
 
 }
