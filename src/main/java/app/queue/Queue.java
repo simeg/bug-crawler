@@ -1,8 +1,8 @@
 package app.queue;
 
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class Queue extends LinkedList<String> {
+public class Queue extends LinkedBlockingQueue<String> {
 
   /*
    * For each transaction - persist in DB
