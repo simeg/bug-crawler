@@ -11,9 +11,15 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class Crawler implements Runnable {
+  /*
+   * Shall find sub-links for provided URL
+   */
 
   private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
 
@@ -23,20 +29,27 @@ public class Crawler implements Runnable {
   }
 
   public Set<String> getSubLinks(String url)  {
-    String lowercaseUrl = url.toLowerCase();
+    if (!isValidUrl(url)) {
+      LOG.log(Level.INFO, "URL not valid, will not crawl: {0}", url);
+      return Collections.emptySet();
+    }
+
+    LOG.log(Level.INFO, "Will get sub links for URL: {0}", url);
+
+    final String lowercaseUrl = url.toLowerCase();
 
     Document document = null;
     try {
       document = Jsoup.connect(lowercaseUrl).get();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Error parsing the URL: {0}", e);
+      LOG.log(Level.SEVERE, "Error parsing the URL: {0}", e.toString());
     }
 
     // Select all <a> elements with an href attribute
-    Elements linkElements = document.select("a[href]");
+    final Elements linkElements = document.select("a[href]");
 
     try {
-      String domain = getDomain(lowercaseUrl);
+      final String domain = getDomain(lowercaseUrl);
 
       return linkElements.stream()
           .distinct()
@@ -46,7 +59,7 @@ public class Crawler implements Runnable {
           .collect(Collectors.toSet());
 
     } catch (URISyntaxException e) {
-      LOG.log(Level.SEVERE, "Malformed URL: {0}", e);
+      LOG.log(Level.SEVERE, "Malformed URL: {0}", e.toString());
     }
 
     return Collections.emptySet();
@@ -59,8 +72,18 @@ public class Crawler implements Runnable {
 
   private String getDomain(String url) throws URISyntaxException {
     // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
-    URI uri = new URI(url);
-    String domain = uri.getHost();
+    final URI uri = new URI(url);
+    final String domain = uri.getHost();
     return domain.startsWith("www.") ? domain.substring(4) : domain;
+  }
+
+  private boolean isValidUrl(String url) {
+    // TODO: Find better way of doing this
+    String urlRegex = "(http|https)://"
+        + "[-A-Za-z0-9+&@#/%?=~_|!:,.;]"
+        + "*[-A-Za-z0-9+&@#/%=~_|]";
+    Pattern p = Pattern.compile(urlRegex);
+    Matcher m = p.matcher(url);
+    return m.find();
   }
 }
