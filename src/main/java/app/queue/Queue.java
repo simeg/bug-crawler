@@ -2,7 +2,7 @@ package app.queue;
 
 import java.util.LinkedList;
 
-public class Queue extends LinkedList {
+public class Queue extends LinkedList<String> {
 
   /*
    * For each transaction - persist in DB
