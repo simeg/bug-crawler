@@ -37,6 +37,8 @@ dependencies {
     // but I can't find it in the Maven repo. What to do?
     // https://mvnrepository.com/artifact/commons-validator/commons-validator
     compile group: 'commons-validator', name: 'commons-validator', version: '1.6'
+
+    testCompile 'junit:junit:4.12'
 }
 
 task buildDocker(type: Docker, dependsOn: build) {
@@ -49,3 +51,4 @@ task buildDocker(type: Docker, dependsOn: build) {
     }
   }
 }
+
