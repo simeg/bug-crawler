@@ -78,6 +78,11 @@ public class Crawler implements Runnable {
   }
 
   private boolean isValidUrl(String url) {
+    //URI uri = URI.create(url);
+    //uri.getScheme()
+    //uri.getHost()
+    // if they look valid => valid URL
+
     // TODO: Find better way of doing this
     String urlRegex = "(http|https)://"
         + "[-A-Za-z0-9+&@#/%?=~_|!:,.;]"

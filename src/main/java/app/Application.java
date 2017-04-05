@@ -63,7 +63,7 @@ public class Application {
             final Set<String> subLinks = new Crawler().getSubLinks(urlToCrawl);
 
             // Add sub-links on to queue.
-            // QUESTION: Should it really do this?
+            // QUESTION: Should it really do this? YES it should
             subLinkQueue.addAll(subLinks);
 
             // URL is crawled and ready to be analyzed
