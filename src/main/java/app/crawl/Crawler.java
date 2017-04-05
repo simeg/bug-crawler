@@ -7,42 +7,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("deprecation")
-public class Crawler implements Runnable {
+public class Crawler {
   /*
-   * Shall find sub-links for provided URL
+   * Finds sub-links for provided URL
    */
 
   private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
 
-  @Override
-  public void run() {
-    // What to do with this? Does this class have to implement Runnable?
-  }
-
   public Set<String> getSubLinks(String url)  {
     if (!isValidUrl(url)) {
-      LOG.log(Level.INFO, "URL not valid, will not crawl: {0}", url);
+      LOG.log(Level.INFO, "{0}: URL not valid, will not crawl: {1}", new Object[] {Thread.currentThread().getName(), url});
       return Collections.emptySet();
     }
 
-    LOG.log(Level.INFO, "Will get sub links for URL: {0}", url);
-
     final String lowercaseUrl = url.toLowerCase();
-
     Document document = null;
     try {
+      LOG.log(Level.INFO, "{0}: Getting sub-links for URL: {1}", new Object[] {Thread.currentThread().getName(), lowercaseUrl});
+
       document = Jsoup.connect(lowercaseUrl).get();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Error parsing the URL: {0}", e.toString());
+      LOG.log(Level.SEVERE, "{0}: Unable to parse the URL: {1}", new Object[] {Thread.currentThread().getName(), e.toString()});
     }
 
     // Select all <a> elements with an href attribute
@@ -59,7 +52,7 @@ public class Crawler implements Runnable {
           .collect(Collectors.toSet());
 
     } catch (URISyntaxException e) {
-      LOG.log(Level.SEVERE, "Malformed URL: {0}", e.toString());
+      LOG.log(Level.SEVERE, "{0}: Malformed URL: {1}", new Object[] {Thread.currentThread().getName(), e.toString()});
     }
 
     return Collections.emptySet();
@@ -78,17 +71,12 @@ public class Crawler implements Runnable {
   }
 
   private boolean isValidUrl(String url) {
-    //URI uri = URI.create(url);
-    //uri.getScheme()
-    //uri.getHost()
-    // if they look valid => valid URL
+    final List<String> validProtocols = Arrays.asList("http", "https");
 
-    // TODO: Find better way of doing this
-    String urlRegex = "(http|https)://"
-        + "[-A-Za-z0-9+&@#/%?=~_|!:,.;]"
-        + "*[-A-Za-z0-9+&@#/%=~_|]";
-    Pattern p = Pattern.compile(urlRegex);
-    Matcher m = p.matcher(url);
-    return m.find();
+    final URI uri = URI.create(url);
+    final String protocol = uri.getScheme();
+    final String host = uri.getHost();
+
+    return host != null && validProtocols.contains(protocol);
   }
 }

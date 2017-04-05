@@ -11,7 +11,7 @@ public class Analyzer {
   private static final Logger LOG = Logger.getLogger(Analyzer.class.getName());
 
   public void analyze(String url) {
-    LOG.log(Level.INFO, "Will analyze URL: {0}", url);
+    LOG.log(Level.INFO, "{0}: Will analyze URL: {1}", new Object[] {Thread.currentThread().getName(), url});
 
     // TODO
   }
