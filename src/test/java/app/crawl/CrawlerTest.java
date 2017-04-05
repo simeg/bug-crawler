@@ -9,6 +9,6 @@ public class CrawlerTest {
   @Test
   public void EXAMPLE() throws Exception {
     assertEquals("EXAMPLE", 1, 1);
-    assertEquals("EXAMPLE", 1, 0);
+    assertEquals("EXAMPLE", 1, 1);
   }
 }
