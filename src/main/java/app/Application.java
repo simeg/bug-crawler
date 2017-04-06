@@ -3,40 +3,28 @@ package app;
 import app.analyze.Analyzer;
 import app.crawl.Crawler;
 import com.google.common.collect.Queues;
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.IOException;
-import java.util.Set;
-import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-@SpringBootApplication(scanBasePackages={"app"})
+@SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
 
-  private static final Logger LOG = Logger.getLogger(Application.class.getName());
+  private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    final ExecutorService executor = Executors.newFixedThreadPool(2);
     final Application app = new Application();
 
-    // QUESTION:
-    // Is this a good approach?
-    executor.submit(() -> {
-      try {
-        // TODO: Add logging
-        app.start();
-      } catch (InterruptedException e) {
-        // TODO
-        e.printStackTrace();
-      }
-    });
-
-    executor.submit(() -> {
-      // TODO: Add logging
-      SpringApplication.run(app.getClass(), args);
-    });
+    app.start();
+    SpringApplication.run(app.getClass(), args);
   }
 
   private void start() throws InterruptedException {
@@ -55,73 +43,76 @@ public class Application {
 
     subLinkQueue.add("http://www.vecka.nu");
 
-    final ExecutorService producer = Executors.newFixedThreadPool(10);
-    final ExecutorService consumer = Executors.newFixedThreadPool(10);
+    final ExecutorService executor = Executors.newFixedThreadPool(50);
 
-    while (true) {
+    for (int i = 0; i < 10; i++) {
+      submitWorker(executor, subLinkQueue, urlToCrawl -> {
+        LOG.info("Starting crawl thread with name: {0}", Thread.currentThread().getName());
 
-      producer.submit(() -> {
-        try {
-          String urlToCrawl;
-          if ((urlToCrawl = subLinkQueue.poll(10, TimeUnit.SECONDS)) != null) {
-
-            LOG.log(Level.INFO, "Starting crawl thread with name: {0}", Thread.currentThread().getName());
-
-            if (!isValidUrl(urlToCrawl)) {
-              // TODO: Is this the best way to do it? Just return
-              LOG.log(
-                  Level.INFO,
-                  "{0}: Consumed URL is invalid - aborting: {1}",
-                  new Object[] {Thread.currentThread().getName(), urlToCrawl});
-              return;
-            }
-
-            final Set<String> subLinks = new Crawler().getSubLinks(urlToCrawl);
-
-            // URL is crawled and ready to be analyzed
-            crawledLinkQueue.add(urlToCrawl);
-
-            if (subLinks.size() > 0) {
-              // Add sub-links back on URL queue
-              subLinkQueue.addAll(subLinks);
-
-              LOG.log(
-                  Level.INFO,
-                  "{0}: Found {1} sub-links: {2}",
-                  new Object[] {Thread.currentThread().getName(), String.valueOf(subLinks.size()), subLinks});
-            } else {
-              LOG.log(
-                  Level.INFO,
-                  "{0}: No sub-links found for: {1}", new Object[] {Thread.currentThread().getName(), urlToCrawl});
-            }
-          }
-        } catch (InterruptedException e) {
-          LOG.log(
-              Level.SEVERE,
-              "{0}: Polling was interrupted: {1}",
-              new Object[] {Thread.currentThread().getName(), e.toString()});
+        if (!isValidUrl(urlToCrawl)) {
+          LOG.info(
+              "{0}: Consumed URL is invalid - aborting: {1}",
+              new Object[]{Thread.currentThread().getName(), urlToCrawl});
+          return;
         }
-      });
 
-      consumer.submit(() -> {
-        try {
-          String urlToAnalyze;
-          if ((urlToAnalyze = crawledLinkQueue.poll(10, TimeUnit.SECONDS)) != null) {
-            LOG.log(Level.INFO, "Starting analyze thread with name: {0}", Thread.currentThread().getName());
+        final Set<String> subLinks = new Crawler().getSubLinks(urlToCrawl);
 
-            // Does nothing right now
-            new Analyzer().analyze(urlToAnalyze);
+        // URL is crawled and ready to be analyzed
+        crawledLinkQueue.add(urlToCrawl);
 
-          }
-        } catch (InterruptedException e) {
-          LOG.log(
-              Level.SEVERE,
-              "{0}: Polling was interrupted: {1}",
-              new Object[] {Thread.currentThread().getName(), e.toString()});
+        if (subLinks.size() > 0) {
+          // Add sub-links back on URL queue
+          subLinkQueue.addAll(subLinks);
+
+          LOG.info(
+              "{}: Found {} sub-links: {}",
+              Thread.currentThread().getName(), String.valueOf(subLinks.size()), subLinks);
+        } else {
+          LOG.info(
+              "{0}: No sub-links found for: {1}",
+              new Object[]{Thread.currentThread().getName(), urlToCrawl});
         }
       });
     }
 
+    for (int i = 0; i < 10; i++) {
+      submitWorker(executor, crawledLinkQueue, urlToAnalyze -> {
+        if (urlToAnalyze != null) {
+          LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
+
+          // Does nothing right now
+          new Analyzer().analyze(urlToAnalyze);
+        }
+      });
+    }
+  }
+
+  private <T> void submitWorker(
+      ExecutorService executor,
+      LinkedBlockingQueue<T> queue,
+      Consumer<T> jobToDo) {
+    executor.submit(() -> {
+      final String oldName = Thread.currentThread().getName();
+      Thread.currentThread().setName("hello");
+
+      while (true) {
+        try {
+          T urlToAnalyze = queue.poll(10, TimeUnit.SECONDS);
+
+          jobToDo.accept(urlToAnalyze);
+
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          LOG.error(
+              "{0}: Polling was interrupted: {1}",
+              new Object[]{Thread.currentThread().getName(), e.toString()});
+          break;
+        }
+      }
+
+      Thread.currentThread().setName(oldName);
+    });
   }
 
   private boolean isValidUrl(String url) {

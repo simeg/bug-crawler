@@ -70,7 +70,7 @@ public class Crawler {
     return domain.startsWith("www.") ? domain.substring(4) : domain;
   }
 
-  private boolean isValidUrl(String url) {
+  static boolean isValidUrl(String url) {
     final List<String> validProtocols = Arrays.asList("http", "https");
 
     final URI uri = URI.create(url);

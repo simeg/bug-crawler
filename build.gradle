@@ -32,7 +32,7 @@ dependencies {
 
     testCompile('junit:junit:4.12')
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    compile(group: 'com.google.guava', name: 'guava', version: '19.0')
+    compile(group: 'com.google.guava', name: 'guava', version: '21.0')
 }
 
 task buildDocker(type: Docker, dependsOn: build) {
