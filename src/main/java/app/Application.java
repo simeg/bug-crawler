@@ -80,7 +80,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = Analyzer.create(bugsQueue);
+        final Analyzer analyzer = new Analyzer();
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         bugsQueue.addAll(bugs);

@@ -1,6 +1,6 @@
 package app.analyze;
 
-import app.queue.PersistentQueue;
+import app.crawl.Parser;
 import com.google.common.collect.Sets;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -18,14 +18,10 @@ public class Analyzer {
 
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Analyzer.class);
 
-  private final PersistentQueue queue;
+  private final Parser parser;
 
-  private Analyzer(PersistentQueue queue) {
-    this.queue = queue;
-  }
-
-  public static Analyzer create(PersistentQueue queue) {
-    return new Analyzer(queue);
+  public Analyzer(Parser parser) {
+    this.parser = parser;
   }
 
   public Set<Bug> analyze(String url) {
@@ -39,9 +35,9 @@ public class Analyzer {
     return result;
   }
 
-  private static Document parseHtml(String url) {
+  private Document parseHtml(String url) {
     try {
-      return Jsoup.connect(url).get();
+      return this.parser.connect(url).get();
     } catch (IOException e) {
       LOG.error("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
       return null;

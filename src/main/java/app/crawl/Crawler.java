@@ -1,6 +1,5 @@
 package app.crawl;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
@@ -17,10 +16,16 @@ import java.util.stream.Collectors;
 
 public class Crawler {
   /*
-   * Finds sub-links for provided URL
+   * Finds sub-links for consumed URL
    */
 
   private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
+
+  private final Parser parser;
+
+  public Crawler(Parser parser) {
+    this.parser = parser;
+  }
 
   public Set<String> getSubLinks(String url)  {
     /*
@@ -41,7 +46,7 @@ public class Crawler {
     try {
       LOG.log(Level.INFO, "{0}: Getting sub-links for URL: {1}", new Object[] {Thread.currentThread().getName(), lowercaseUrl});
 
-      document = Jsoup.connect(lowercaseUrl).get();
+      document = this.parser.connect(lowercaseUrl).get();
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "{0}: Unable to parse the URL: {1}", new Object[] {Thread.currentThread().getName(), e.toString()});
     }
