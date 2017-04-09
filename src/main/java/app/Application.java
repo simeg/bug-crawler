@@ -1,20 +1,19 @@
 package app;
 
 import app.analyze.Analyzer;
+import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.persist.Persister;
 import app.queue.PersistentQueue;
 import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -27,7 +26,7 @@ public class Application {
     final Application app = new Application();
 
     app.start();
-    SpringApplication.run(app.getClass(), args);
+//    SpringApplication.run(app.getClass(), args);
   }
 
   private void start() throws InterruptedException {
@@ -40,11 +39,9 @@ public class Application {
 
     final Persister persister = Persister.create();
 
-    final PersistentQueue<String>
-        subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<String>
-        crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final LinkedBlockingQueue<String> bugsQueue = Queues.newLinkedBlockingQueue();
+    final PersistentQueue<String> subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<String> crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<Bug> bugsQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
 
     subLinkQueue.add("http://www.vecka.nu");
 
@@ -83,8 +80,10 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        // Does nothing right now
-        new Analyzer().analyze(urlToAnalyze);
+        final Analyzer analyzer = Analyzer.create(bugsQueue);
+        final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
+
+        bugsQueue.addAll(bugs);
       }
     });
   }

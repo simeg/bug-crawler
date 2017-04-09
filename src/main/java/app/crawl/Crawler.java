@@ -23,6 +23,14 @@ public class Crawler {
   private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
 
   public Set<String> getSubLinks(String url)  {
+    /*
+     * TODO:
+     * - Cache for not working duplicates (should not live in here though, probably in Application)
+     * - No other files than HTML
+     * - No anchor links
+     * - Normalize
+     */
+
     if (!isValidUrl(url)) {
       LOG.log(Level.INFO, "{0}: URL not valid, will not crawl: {1}", new Object[] {Thread.currentThread().getName(), url});
       return Collections.emptySet();
