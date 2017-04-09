@@ -1,14 +1,13 @@
 package app.crawl;
 
+import app.util.Utilities;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,7 @@ public class Crawler {
      * - Normalize
      */
 
-    if (!isValidUrl(url)) {
+    if (!Utilities.isValidUrl(url)) {
       LOG.info("{}: URL not valid, will not crawl: {}", Thread.currentThread().getName(), url);
       return Collections.emptySet();
     }
@@ -74,15 +73,5 @@ public class Crawler {
     final URI uri = new URI(url);
     final String domain = uri.getHost();
     return domain.startsWith("www.") ? domain.substring(4) : domain;
-  }
-
-  static boolean isValidUrl(String url) {
-    final List<String> validProtocols = Arrays.asList("http", "https");
-
-    final URI uri = URI.create(url);
-    final String protocol = uri.getScheme();
-    final String host = uri.getHost();
-
-    return host != null && validProtocols.contains(protocol);
   }
 }

@@ -6,6 +6,7 @@ import app.crawl.Crawler;
 import app.crawl.HtmlParser;
 import app.persist.Persister;
 import app.queue.PersistentQueue;
+import app.util.Utilities;
 import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +31,7 @@ public class Application {
 //    SpringApplication.run(app.getClass(), args);
   }
 
-  private void start() throws InterruptedException {
-    /*
-     * Init by creating three queues:
-     * - subLinkQueue       (URLs to be crawled)
-     * - crawledLinkQueue   (URLs to be analyzed)
-     * - Bugs
-     */
-
+  private void start() {
     final Persister persister = Persister.create();
 
     final PersistentQueue<String> subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
@@ -51,7 +45,7 @@ public class Application {
     submitWorkerNTimes(10, executor, subLinkQueue, urlToCrawl -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
-      if (!isValidUrl(urlToCrawl)) {
+      if (!Utilities.isValidUrl(urlToCrawl)) {
         LOG.info(
             "{}: Consumed URL is invalid - aborting: {}",
             Thread.currentThread().getName(), urlToCrawl);
@@ -118,11 +112,5 @@ public class Application {
         Thread.currentThread().setName(oldName);
       });
     }
-  }
-
-  private boolean isValidUrl(String url) {
-    // Should this really live here?
-    // TODO
-    return true;
   }
 }

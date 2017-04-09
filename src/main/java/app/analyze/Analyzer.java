@@ -57,7 +57,7 @@ public class Analyzer {
         }
 
       } catch (IOException e) {
-        LOG.error("{}: Could not find file on URL: {}", Thread.currentThread().getName(), url + path);
+        LOG.error("{}: Could not find file {} on URL: {}", Thread.currentThread().getName(), path, url + path);
       }
     });
 
