@@ -5,6 +5,7 @@ import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.persist.Persister;
+import app.persist.PsqlPersister;
 import app.queue.PersistentQueue;
 import app.util.Utilities;
 import com.google.common.collect.Queues;
@@ -35,8 +36,9 @@ public class Application {
   }
 
   void start(String initUrl) {
-    final Persister persister = Persister.create();
 
+    // QUESTION: Possible to use Persister with <String> and <Bug>?
+    final Persister persister = PsqlPersister.create("org.postgresql.Driver");
     final PersistentQueue<String> subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<String> crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<Bug> bugsQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
