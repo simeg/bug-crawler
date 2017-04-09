@@ -27,18 +27,21 @@ public class Application {
   public static void main(String[] args) throws IOException, InterruptedException {
     final Application app = new Application();
 
-    app.start();
+    // TODO: Get this from a website form
+    final String initUrl = "http://www.vecka.nu";
+
+    app.start(initUrl);
 //    SpringApplication.run(app.getClass(), args);
   }
 
-  private void start() {
+  void start(String initUrl) {
     final Persister persister = Persister.create();
 
     final PersistentQueue<String> subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<String> crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<Bug> bugsQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
 
-    subLinkQueue.add("http://www.vecka.nu");
+    subLinkQueue.add(initUrl);
 
     final ExecutorService executor = Executors.newFixedThreadPool(50);
 
