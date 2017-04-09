@@ -1,6 +1,6 @@
 package app.analyze;
 
-import app.crawl.Parser;
+import app.parse.Parser;
 import com.google.common.collect.Sets;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;

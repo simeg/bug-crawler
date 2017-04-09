@@ -3,7 +3,7 @@ package app;
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
-import app.crawl.HtmlParser;
+import app.parse.HtmlParser;
 import app.persist.Persister;
 import app.queue.PersistentQueue;
 import app.util.Utilities;

@@ -1,4 +1,4 @@
-package app.crawl;
+package app.parse;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;

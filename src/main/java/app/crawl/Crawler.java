@@ -1,5 +1,6 @@
 package app.crawl;
 
+import app.parse.Parser;
 import app.util.Utilities;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
