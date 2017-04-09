@@ -5,6 +5,11 @@ import app.crawl.Crawler;
 import app.persist.Persister;
 import app.queue.PersistentQueue;
 import com.google.common.collect.Queues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -12,10 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
@@ -37,7 +38,7 @@ public class Application {
      * - Bugs
      */
 
-    final Persister<String> persister = new Persister<>();
+    final Persister persister = Persister.create();
 
     final PersistentQueue<String>
         subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
@@ -51,12 +52,12 @@ public class Application {
 
     for (int i = 0; i < 10; i++) {
       submitWorker(executor, subLinkQueue, urlToCrawl -> {
-        LOG.info("Starting crawl thread with name: {0}", Thread.currentThread().getName());
+        LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
         if (!isValidUrl(urlToCrawl)) {
           LOG.info(
-              "{0}: Consumed URL is invalid - aborting: {1}",
-              new Object[]{Thread.currentThread().getName(), urlToCrawl});
+              "{}: Consumed URL is invalid - aborting: {}",
+              Thread.currentThread().getName(), urlToCrawl);
           return;
         }
 
@@ -74,8 +75,8 @@ public class Application {
               Thread.currentThread().getName(), String.valueOf(subLinks.size()), subLinks);
         } else {
           LOG.info(
-              "{0}: No sub-links found for: {1}",
-              new Object[]{Thread.currentThread().getName(), urlToCrawl});
+              "{}: No sub-links found for: {}",
+              Thread.currentThread().getName(), urlToCrawl);
         }
       });
     }
@@ -98,6 +99,7 @@ public class Application {
       Consumer<T> jobToDo) {
     executor.submit(() -> {
       final String oldName = Thread.currentThread().getName();
+      // TODO: Set appropriate thread name
       Thread.currentThread().setName("hello");
 
       while (true) {
@@ -109,8 +111,8 @@ public class Application {
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
           LOG.error(
-              "{0}: Polling was interrupted: {1}",
-              new Object[]{Thread.currentThread().getName(), e.toString()});
+              "{}: Polling was interrupted: {}",
+              Thread.currentThread().getName(), e.toString());
           break;
         }
       }
