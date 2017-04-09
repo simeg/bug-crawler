@@ -1,12 +1,32 @@
 package app.persist;
 
-public class Persister<T> {
-  /*
-   * Store data in DB
-   */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-  public boolean store(T url) {
+import java.util.Collection;
+
+public class Persister {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Persister.class);
+  // TODO: Change to some PostgreSQL class. Or even more abstract?
+  private static Class database;
+
+  private Persister() {
+    this.database = database;
+  }
+
+  public static Persister create() {
+    return new Persister();
+  }
+
+  public boolean store(Collection url) {
+    LOG.info(
+        "{}: Storing transaction: {}",
+        Thread.currentThread().getName(),
+        url);
+
     // TODO
+
     return true;
   }
 }
