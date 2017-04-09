@@ -3,6 +3,7 @@ package app;
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
+import app.crawl.HtmlParser;
 import app.persist.Persister;
 import app.queue.PersistentQueue;
 import com.google.common.collect.Queues;
@@ -57,7 +58,7 @@ public class Application {
         return;
       }
 
-      final Set<String> subLinks = new Crawler().getSubLinks(urlToCrawl);
+      final Set<String> subLinks = new Crawler(new HtmlParser()).getSubLinks(urlToCrawl);
 
       // URL is crawled and ready to be analyzed
       crawledLinkQueue.add(urlToCrawl);
@@ -80,7 +81,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = new Analyzer();
+        final Analyzer analyzer = new Analyzer(new HtmlParser());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         bugsQueue.addAll(bugs);

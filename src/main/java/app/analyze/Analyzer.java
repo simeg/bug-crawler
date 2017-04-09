@@ -3,7 +3,6 @@ package app.analyze;
 import app.crawl.Parser;
 import com.google.common.collect.Sets;
 import org.jsoup.Connection.Response;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +27,11 @@ public class Analyzer {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = Sets.newHashSet();
 
-    Document doc = parseHtml(url);
+    Document doc = this.parser.getDocument(url);
 
     result.addAll(getFileBugs(url));
 
     return result;
-  }
-
-  private Document parseHtml(String url) {
-    try {
-      return this.parser.connect(url).get();
-    } catch (IOException e) {
-      LOG.error("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
-      return null;
-    }
   }
 
   private Set<Bug> getFileBugs(String url) {
@@ -57,10 +47,7 @@ public class Analyzer {
 
     paths.forEach(path -> {
       try {
-        Response response = Jsoup.connect(url + path)
-            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")
-            .timeout(10000)
-            .execute();
+        Response response = this.parser.getResponse(url + path);
 
         // QUESTION:
         // Is this a valid way to check?

@@ -4,7 +4,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -41,14 +40,9 @@ public class Crawler {
     }
 
     final String lowercaseUrl = url.toLowerCase();
-    Document document = null;
-    try {
-      LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), lowercaseUrl);
+    LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), lowercaseUrl);
 
-      document = this.parser.connect(lowercaseUrl).get();
-    } catch (IOException e) {
-      LOG.info("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
-    }
+    Document document = this.parser.getDocument(lowercaseUrl);
 
     // Select all <a> elements with an href attribute
     final Elements linkElements = document.select("a[href]");
