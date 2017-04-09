@@ -2,6 +2,7 @@ package app.crawl;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,8 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Crawler {
@@ -19,7 +18,7 @@ public class Crawler {
    * Finds sub-links for consumed URL
    */
 
-  private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Crawler.class);
 
   private final Parser parser;
 
@@ -27,7 +26,7 @@ public class Crawler {
     this.parser = parser;
   }
 
-  public Set<String> getSubLinks(String url)  {
+  public Set<String> getSubLinks(String url) {
     /*
      * TODO:
      * - Cache for not working duplicates (should not live in here though, probably in Application)
@@ -37,18 +36,18 @@ public class Crawler {
      */
 
     if (!isValidUrl(url)) {
-      LOG.log(Level.INFO, "{0}: URL not valid, will not crawl: {1}", new Object[] {Thread.currentThread().getName(), url});
+      LOG.info("{}: URL not valid, will not crawl: {}", Thread.currentThread().getName(), url);
       return Collections.emptySet();
     }
 
     final String lowercaseUrl = url.toLowerCase();
     Document document = null;
     try {
-      LOG.log(Level.INFO, "{0}: Getting sub-links for URL: {1}", new Object[] {Thread.currentThread().getName(), lowercaseUrl});
+      LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), lowercaseUrl);
 
       document = this.parser.connect(lowercaseUrl).get();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "{0}: Unable to parse the URL: {1}", new Object[] {Thread.currentThread().getName(), e.toString()});
+      LOG.info("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
     }
 
     // Select all <a> elements with an href attribute
@@ -65,7 +64,7 @@ public class Crawler {
           .collect(Collectors.toSet());
 
     } catch (URISyntaxException e) {
-      LOG.log(Level.SEVERE, "{0}: Malformed URL: {1}", new Object[] {Thread.currentThread().getName(), e.toString()});
+      LOG.info("{}: Malformed URL: {}", Thread.currentThread().getName(), e.toString());
     }
 
     return Collections.emptySet();
