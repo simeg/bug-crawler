@@ -2,6 +2,8 @@ package app;
 
 import app.analyze.Analyzer;
 import app.crawl.Crawler;
+import app.persist.Persister;
+import app.queue.PersistentQueue;
 import com.google.common.collect.Queues;
 import java.io.IOException;
 import java.util.Set;
@@ -35,10 +37,12 @@ public class Application {
      * - Bugs
      */
 
-    // QUESTION
-    // Why can't I use Queue class here?
-    final LinkedBlockingQueue<String> subLinkQueue = Queues.newLinkedBlockingQueue();
-    final LinkedBlockingQueue<String> crawledLinkQueue = Queues.newLinkedBlockingQueue();
+    final Persister<String> persister = new Persister<>();
+
+    final PersistentQueue<String>
+        subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<String>
+        crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final LinkedBlockingQueue<String> bugsQueue = Queues.newLinkedBlockingQueue();
 
     subLinkQueue.add("http://www.vecka.nu");
@@ -90,7 +94,7 @@ public class Application {
 
   private <T> void submitWorker(
       ExecutorService executor,
-      LinkedBlockingQueue<T> queue,
+      PersistentQueue<T> queue,
       Consumer<T> jobToDo) {
     executor.submit(() -> {
       final String oldName = Thread.currentThread().getName();
