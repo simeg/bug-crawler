@@ -86,15 +86,15 @@ public class PsqlBugPersister implements Persister<Bug> {
   public boolean storeAll(Collection<Bug> bugs) {
     // If at least one bug failed to be stored,
     // return false
-    boolean storeAllResult = true;
+    boolean aggregatedResult = true;
 
     for (Bug bug : bugs) {
       boolean result = store(bug);
       if (!result) {
-        storeAllResult = false;
+        aggregatedResult = false;
       }
     }
 
-    return storeAllResult;
+    return aggregatedResult;
   }
 }
