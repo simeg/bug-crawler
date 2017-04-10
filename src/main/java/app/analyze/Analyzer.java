@@ -1,8 +1,10 @@
 package app.analyze;
 
+import app.analyze.Bug.BugType;
 import app.parse.Parser;
 import com.google.common.collect.Sets;
 import org.jsoup.Connection.Response;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -14,7 +16,7 @@ public class Analyzer {
    * Shall detect security bugs for provided URL
    */
 
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Analyzer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Analyzer.class);
 
   private final Parser parser;
 
@@ -50,7 +52,14 @@ public class Analyzer {
         // Is this a valid way to check?
         if (response.statusCode() == 200) {
           LOG.info("{}: Found file {} on URL: {}", Thread.currentThread().getName(), path, url);
-          result.add(new Bug(url, "Access to " + path, Optional.of(url + path)));
+          result.add(
+              Bug.create(
+                  BugType.FILE_ACCESS,
+                  url,
+                  "Access to " + path,
+                  Optional.of(url + path)
+              )
+          );
         }
 
       } catch (IOException e) {

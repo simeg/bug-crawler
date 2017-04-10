@@ -6,6 +6,6 @@ public interface Persister<T> {
 
   boolean store(T url);
 
-  boolean storeAll(Collection<? extends T> urls);
+  boolean storeAll(Collection<T> urls);
 
 }

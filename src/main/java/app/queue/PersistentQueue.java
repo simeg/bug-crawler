@@ -30,7 +30,7 @@ public class PersistentQueue<T> {
     return this.queue.add(element);
   }
 
-  public boolean addAll(Collection<? extends T> elements) {
+  public boolean addAll(Collection<T> elements) {
     this.persister.storeAll(elements);
     return this.queue.addAll(elements);
   }

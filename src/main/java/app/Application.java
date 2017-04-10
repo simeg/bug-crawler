@@ -5,19 +5,21 @@ import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.persist.Persister;
-import app.persist.PsqlPersister;
+import app.persist.PsqlBugPersister;
+import app.persist.PsqlQueuePersister;
 import app.queue.PersistentQueue;
 import app.util.Utilities;
 import com.google.common.collect.Queues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
@@ -36,14 +38,17 @@ public class Application {
 
   void start(String initUrl) {
 
-    // QUESTION: Possible to use Persister with <String> and <Bug>?
-    final Persister persister = PsqlPersister.create("org.postgresql.Driver");
+    // QUESTION: How do I not have a PsqlBugPersister and one PsqlQueuePersister?
+    final Persister<Bug> bugPersister = PsqlBugPersister.create("org.postgresql.Driver");
+    final Persister<String> persister = PsqlQueuePersister.create("org.postgresql.Driver");
+
     final PersistentQueue<String> subLinkQueue =
         PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<String> crawledLinkQueue =
         PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    // TODO: Create PsqlBugPersister as short term solution
     final PersistentQueue<Bug> bugsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), bugPersister);
 
     subLinkQueue.add(initUrl);
 

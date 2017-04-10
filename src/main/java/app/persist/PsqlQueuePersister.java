@@ -8,9 +8,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 
-public class PsqlPersister<T> implements Persister {
+public class PsqlQueuePersister implements Persister<String> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PsqlPersister.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PsqlQueuePersister.class);
 
   private final Connection connection;
 
@@ -21,11 +21,11 @@ public class PsqlPersister<T> implements Persister {
   private static final String DB_USERNAME = "postgres";
   private static final String DB_PASSWORD = "postgres";
 
-  private PsqlPersister(Connection connection) {
+  private PsqlQueuePersister(Connection connection) {
     this.connection = connection;
   }
 
-  public static PsqlPersister create(String driverClass) {
+  public static PsqlQueuePersister create(String driverClass) {
     try {
       // Load the driver
       Class.forName(driverClass);
@@ -36,7 +36,7 @@ public class PsqlPersister<T> implements Persister {
           DB_PASSWORD);
       LOG.info("{}: Established connection to DB", Thread.currentThread().getName());
 
-      return new PsqlPersister(connection);
+      return new PsqlQueuePersister(connection);
 
     } catch (ClassNotFoundException e) {
       LOG.error("{}: Class for DB driver not found: {}", Thread.currentThread().getName(), driverClass);
@@ -48,9 +48,9 @@ public class PsqlPersister<T> implements Persister {
   }
 
   @Override
-  public boolean store(Object url) {
+  public boolean store(String url) {
     LOG.info(
-        "{}: Storing transaction: {}",
+        "{}: [Will in future] Storing transaction: {}",
         Thread.currentThread().getName(),
         url);
 
@@ -60,9 +60,9 @@ public class PsqlPersister<T> implements Persister {
   }
 
   @Override
-  public boolean storeAll(Collection urls) {
+  public boolean storeAll(Collection<String> urls) {
     LOG.info(
-        "{}: Storing transactions: {}",
+        "{}: [Will in future] Storing transactions: {}",
         Thread.currentThread().getName(),
         urls);
 
