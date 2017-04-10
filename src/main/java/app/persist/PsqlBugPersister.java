@@ -3,6 +3,7 @@ package app.persist;
 import app.analyze.Bug;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +11,15 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
+
+import static org.jooq.util.maven.example.tables.Bug.BUG;
 
 public class PsqlBugPersister implements Persister<Bug> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PsqlBugPersister.class);
 
-  private final Connection connection;
   private final DSLContext context;
 
   // TODO: Put these in a config
@@ -26,8 +29,7 @@ public class PsqlBugPersister implements Persister<Bug> {
   private static final String DB_USERNAME = "postgres";
   private static final String DB_PASSWORD = "postgres";
 
-  private PsqlBugPersister(Connection connection, DSLContext context) {
-    this.connection = connection;
+  private PsqlBugPersister(DSLContext context) {
     this.context = context;
   }
 
@@ -40,11 +42,11 @@ public class PsqlBugPersister implements Persister<Bug> {
           String.format("jdbc:postgresql://%s:%d/%s", HOST, PORT, DB_NAME),
           DB_USERNAME,
           DB_PASSWORD);
-      LOG.info("{}: Established connection to DB", Thread.currentThread().getName());
-
       DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
 
-      return new PsqlBugPersister(connection, context);
+      LOG.info("{}: Established connection to DB", Thread.currentThread().getName());
+
+      return new PsqlBugPersister(context);
 
     } catch (ClassNotFoundException e) {
       LOG.error("{}: Class for DB driver not found: {}", Thread.currentThread().getName(), driverClass);
@@ -57,25 +59,42 @@ public class PsqlBugPersister implements Persister<Bug> {
 
   @Override
   public boolean store(Bug bug) {
-    LOG.info(
-        "{}: Storing bug: {}",
-        Thread.currentThread().getName(),
-        bug.toString());
+    try {
+      LOG.info(
+          "{}: Storing bug: {}",
+          Thread.currentThread().getName(),
+          bug.toString());
 
-    // TODO
+      this.context.insertInto(BUG,
+          BUG.TYPE, BUG.URL, BUG.PATH, BUG.DESCRIPTION, BUG.DATE_ADDED)
+          .values(
+              bug.type.name(),                          // Type
+              bug.url,                                  // URL
+              bug.path.orElse(null),                    // Path
+              bug.description,                          // Description
+              new Timestamp(System.currentTimeMillis()) // Date added
+          ).execute();
+    } catch (DataAccessException e) {
+      LOG.error("{}: Error storing {} in DB: ", Thread.currentThread().getName(), bug.toString(), e.toString());
+      return false;
+    }
 
     return true;
   }
 
   @Override
   public boolean storeAll(Collection<Bug> bugs) {
-    LOG.info(
-        "{}: Storing bugs: {}",
-        Thread.currentThread().getName(),
-        bugs);
+    // If at least one bug failed to be stored,
+    // return false
+    boolean storeAllResult = true;
 
-    // TODO
+    for (Bug bug : bugs) {
+      boolean result = store(bug);
+      if (!result) {
+        storeAllResult = false;
+      }
+    }
 
-    return true;
+    return storeAllResult;
   }
 }

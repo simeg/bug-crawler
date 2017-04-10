@@ -10,10 +10,10 @@ public class Bug {
 
   private static final Logger LOG = LoggerFactory.getLogger(Bug.class);
 
-  private final BugType type;
-  private final String url;
-  private final String description;
-  private final Optional<String> path;
+  public final BugType type;
+  public final String url;
+  public final String description;
+  public final Optional<String> path;
 
   Bug(BugType type, String url, String description, Optional<String> path) {
     this.type = type;
@@ -33,7 +33,7 @@ public class Bug {
 
   @Override
   public String toString() {
-    return String.format("[%s]: %s", this.type.toString(), this.url);
+    return String.format("[%s]: %s", this.type.toString(), this.path.get());
   }
 
   public enum BugType {

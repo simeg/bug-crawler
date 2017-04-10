@@ -93,6 +93,8 @@ public class Application {
         bugsQueue.addAll(bugs);
       }
     });
+
+    //TODO: Have threads with Persister instance running consuming from bugsQueue
   }
 
   private <T> void submitWorkerNTimes(
