@@ -2,15 +2,13 @@ package app.crawl;
 
 import app.parse.Parser;
 import app.util.Utilities;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
 
 public class Crawler {
   /*
@@ -23,6 +21,19 @@ public class Crawler {
 
   public Crawler(Parser parser) {
     this.parser = parser;
+  }
+
+  static String getDomain(String url) {
+    // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
+    try {
+      final URI uri = new URI(url);
+      final String domain = uri.getHost();
+      return domain.startsWith("www.") ? domain.substring(4) : domain;
+    } catch (URISyntaxException e) {
+      LOG.error("{}: Unable to parse URL: {}", Thread.currentThread().getName(), url);
+    }
+
+    return null;
   }
 
   public Set<String> getSubLinks(String url) {
@@ -45,18 +56,15 @@ public class Crawler {
     // Select all <a> elements with an href attribute
     final Elements linkElements = this.parser.queryElements(lowercaseUrl, "a[href]");
 
-    try {
-      final String domain = getDomain(lowercaseUrl);
+    final String domain = getDomain(lowercaseUrl);
 
+    if (domain != null) {
       return linkElements.stream()
           .distinct()
           // Get value of href attribute
           .map(element -> element.attr("href"))
           .map(link -> normalize(domain, link))
           .collect(Collectors.toSet());
-
-    } catch (URISyntaxException e) {
-      LOG.info("{}: Malformed URL: {}", Thread.currentThread().getName(), e.toString());
     }
 
     return Collections.emptySet();
@@ -65,12 +73,5 @@ public class Crawler {
   private String normalize(String domain, String link) {
     // TODO
     return link;
-  }
-
-  private String getDomain(String url) throws URISyntaxException {
-    // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
-    final URI uri = new URI(url);
-    final String domain = uri.getHost();
-    return domain.startsWith("www.") ? domain.substring(4) : domain;
   }
 }
