@@ -75,7 +75,7 @@ public class PsqlBugPersister implements Persister<Bug> {
               new Timestamp(System.currentTimeMillis()) // Date added
           ).execute();
     } catch (DataAccessException e) {
-      LOG.error("{}: Error storing {} in DB: ", Thread.currentThread().getName(), bug.toString(), e.toString());
+      LOG.error("{}: Error storing {} in DB: {}", Thread.currentThread().getName(), bug.toString(), e.toString());
       return false;
     }
 
