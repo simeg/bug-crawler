@@ -12,7 +12,7 @@ public class PsqlPersister<T> implements Persister {
 
   private static final Logger LOG = LoggerFactory.getLogger(PsqlPersister.class);
 
-  private static Connection connection;
+  private final Connection connection;
 
   // TODO: Put these in a config
   private static final String HOST = "localhost";

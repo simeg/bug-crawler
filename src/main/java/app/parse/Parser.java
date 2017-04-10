@@ -1,9 +1,8 @@
 package app.parse;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.Connection.Response;
-
 import java.io.IOException;
+import org.jsoup.Connection.Response;
+import org.jsoup.select.Elements;
 
 public interface Parser {
 
@@ -11,7 +10,7 @@ public interface Parser {
   // This interface is still coupled to JSoup.
   // Feels wrong. Is there a way to un-couple it?
 
-  Document getDocument(String url);
+  Elements queryElements(String url, String query);
 
   Response getResponse(String url) throws IOException;
 }

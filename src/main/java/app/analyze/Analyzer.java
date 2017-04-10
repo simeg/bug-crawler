@@ -3,7 +3,6 @@ package app.analyze;
 import app.parse.Parser;
 import com.google.common.collect.Sets;
 import org.jsoup.Connection.Response;
-import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -26,8 +25,6 @@ public class Analyzer {
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = Sets.newHashSet();
-
-    Document doc = this.parser.getDocument(url);
 
     result.addAll(getFileBugs(url));
 

@@ -9,16 +9,15 @@ import app.persist.PsqlPersister;
 import app.queue.PersistentQueue;
 import app.util.Utilities;
 import com.google.common.collect.Queues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
@@ -39,9 +38,12 @@ public class Application {
 
     // QUESTION: Possible to use Persister with <String> and <Bug>?
     final Persister persister = PsqlPersister.create("org.postgresql.Driver");
-    final PersistentQueue<String> subLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<String> crawledLinkQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<Bug> bugsQueue = PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<String> subLinkQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<String> crawledLinkQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<Bug> bugsQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
 
     subLinkQueue.add(initUrl);
 

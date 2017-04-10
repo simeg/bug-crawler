@@ -42,10 +42,8 @@ public class Crawler {
     final String lowercaseUrl = url.toLowerCase();
     LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), lowercaseUrl);
 
-    Document document = this.parser.getDocument(lowercaseUrl);
-
     // Select all <a> elements with an href attribute
-    final Elements linkElements = document.select("a[href]");
+    final Elements linkElements = this.parser.queryElements(lowercaseUrl, "a[href]");
 
     try {
       final String domain = getDomain(lowercaseUrl);
