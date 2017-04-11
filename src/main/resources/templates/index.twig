@@ -1,1 +1,46 @@
-Hello {{ name }}!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    {#<link rel="icon" href="../../favicon.ico">#}
+
+    <title>Crawler Statistics</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+
+    <style media="screen" type="text/css">
+
+        .stats {
+            font-size: 72px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="row">
+    <div class="col-md-4 text-center">
+        <p class="stats">{{ subLinkQueueSize }}</p>
+        <p>Links about to be crawled</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <p class="stats">{{ urlQueueSize }}</p>
+        <p>URLs about to be analyzed</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <p class="stats">{{ bugQueueSize }}</p>
+        <p>Bugs about to be handled</p>
+    </div>
+</div>
+
+</body>
+</html>

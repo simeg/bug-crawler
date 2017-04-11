@@ -1,5 +1,6 @@
 package app.ui;
 
+import app.queue.QueueSupervisor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -12,7 +13,9 @@ public class ViewController {
 
   @RequestMapping("/{name}")
   public String indexAction(ModelMap model, @PathVariable("name") String name) {
-    model.addAttribute("name", name);
+    model.addAttribute("subLinkQueueSize", QueueSupervisor.subLinkQueue.size());
+    model.addAttribute("urlQueueSize", QueueSupervisor.crawledLinkQueue.size());
+    model.addAttribute("bugQueueSize", QueueSupervisor.bugsQueue.size());
 
     return "index";
   }

@@ -41,4 +41,8 @@ public class PersistentQueue<T> {
     this.persister.store(element);
     return element;
   }
+
+  public int size() {
+    return this.queue.size();
+  }
 }

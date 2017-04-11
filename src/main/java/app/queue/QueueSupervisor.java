@@ -10,17 +10,17 @@ public class QueueSupervisor {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueueSupervisor.class);
 
-  private final PersistentQueue<String> subLinkQueue;
-  private final PersistentQueue<String> crawledLinkQueue;
-  private final PersistentQueue<Bug> bugsQueue;
+  public static PersistentQueue<String> subLinkQueue;
+  public static PersistentQueue<String> crawledLinkQueue;
+  public static PersistentQueue<Bug> bugsQueue;
 
   private QueueSupervisor(
       PersistentQueue<String> subLinkQueue,
       PersistentQueue<String> crawledLinkQueue,
       PersistentQueue<Bug> bugsQueue) {
-    this.subLinkQueue = subLinkQueue;
-    this.crawledLinkQueue = crawledLinkQueue;
-    this.bugsQueue = bugsQueue;
+    QueueSupervisor.subLinkQueue = subLinkQueue;
+    QueueSupervisor.crawledLinkQueue = crawledLinkQueue;
+    QueueSupervisor.bugsQueue = bugsQueue;
   }
 
   public static QueueSupervisor create(Persister<Bug> bugPersister, Persister<String> persister) {
