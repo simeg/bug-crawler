@@ -18,6 +18,12 @@ import static org.jooq.util.maven.example.tables.Bug.BUG;
 
 public class PsqlBugPersister implements Persister<Bug> {
 
+  /*
+   * QUESTION:
+   * How to prevent having this separate Persister for type Bug?
+   * I can't seem to use generic type since it's implementing interface.
+   */
+
   private static final Logger LOG = LoggerFactory.getLogger(PsqlBugPersister.class);
 
   private final DSLContext context;
