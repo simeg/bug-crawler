@@ -8,8 +8,8 @@ import app.persist.Persister;
 import app.persist.PsqlBugPersister;
 import app.persist.PsqlQueuePersister;
 import app.queue.PersistentQueue;
+import app.queue.QueueSupervisor;
 import app.util.Utilities;
-import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -42,19 +42,13 @@ public class Application {
     final Persister<Bug> bugPersister = PsqlBugPersister.create("org.postgresql.Driver");
     final Persister<String> persister = PsqlQueuePersister.create("org.postgresql.Driver");
 
-    final PersistentQueue<String> subLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<String> crawledLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    // TODO: Create PsqlBugPersister as short term solution
-    final PersistentQueue<Bug> bugsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), bugPersister);
+    final QueueSupervisor supervisor = QueueSupervisor.create(bugPersister, persister);
 
-    subLinkQueue.add(initUrl);
+    supervisor.subLinks().add(initUrl);
 
     final ExecutorService executor = Executors.newFixedThreadPool(50);
 
-    submitWorkerNTimes(10, executor, subLinkQueue, urlToCrawl -> {
+    submitWorkerNTimes(10, executor, supervisor.subLinks(), urlToCrawl -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
       if (!Utilities.isValidUrl(urlToCrawl)) {
@@ -67,11 +61,11 @@ public class Application {
       final Set<String> subLinks = new Crawler(new HtmlParser()).getSubLinks(urlToCrawl);
 
       // URL is crawled and ready to be analyzed
-      crawledLinkQueue.add(urlToCrawl);
+      supervisor.crawledLinks().add(urlToCrawl);
 
       if (subLinks.size() > 0) {
         // Add sub-links back on URL queue
-        subLinkQueue.addAll(subLinks);
+        supervisor.subLinks().addAll(subLinks);
 
         LOG.info(
             "{}: Found {} sub-links: {}",
@@ -83,14 +77,14 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, executor, crawledLinkQueue, urlToAnalyze -> {
+    submitWorkerNTimes(10, executor, supervisor.crawledLinks(), urlToAnalyze -> {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
         final Analyzer analyzer = new Analyzer(new HtmlParser());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-        bugsQueue.addAll(bugs);
+        supervisor.bugs().addAll(bugs);
       }
     });
 
