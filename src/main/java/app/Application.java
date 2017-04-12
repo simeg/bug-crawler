@@ -5,11 +5,12 @@ import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.persist.Persister;
-import app.persist.PsqlBugPersister;
-import app.persist.PsqlQueuePersister;
+import app.persist.PsqlPersister;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
 import app.util.Utilities;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,13 +38,21 @@ public class Application {
   }
 
   void start(String initUrl) {
+    // Load DB configurations
+    final Config conf = ConfigFactory.load();
+    final int port = conf.getInt("db.port");
+    final String host = conf.getString("db.host");
+    final String name = conf.getString("db.name");
+    final String username = conf.getString("db.username");
+    final String password = conf.getString("db.password");
 
-    // QUESTION: How do I not have a PsqlBugPersister and one PsqlQueuePersister?
-    final Persister<Bug> bugPersister = PsqlBugPersister.create("org.postgresql.Driver");
-    final Persister<String> persister = PsqlQueuePersister.create("org.postgresql.Driver");
+    // TODO: Make generic method for this? Possible in Java?
+    final Persister<Bug> bugPersister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
+    final Persister<String> persister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
 
     final QueueSupervisor supervisor = QueueSupervisor.create(bugPersister, persister);
 
+    // TODO: Replace when it's possible to provide URL
     supervisor.subLinks().add(initUrl);
 
     final ExecutorService executor = Executors.newFixedThreadPool(50);
