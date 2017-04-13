@@ -34,9 +34,16 @@ public final class Utilities {
      * TODO:
      * - Fix anchor links
     */
+
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }
+
+    // TODO: Consider using regexp for this
+    if (url.startsWith("/")) {
+      return "http:/" + url;
+    }
+
     return "http://" + url;
   }
 }

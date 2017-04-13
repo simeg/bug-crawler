@@ -47,6 +47,7 @@ public class Application {
     final String username = conf.getString("db.username");
     final String password = conf.getString("db.password");
 
+    // TODO: Only use ONE Persister
     final Persister<Bug> bugPersister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
     final Persister<String> persister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
 
@@ -64,9 +65,9 @@ public class Application {
 
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
 
-      if (!Utilities.isValidUrl(urlToCrawl)) {
+      if (!Utilities.isValidUrl(fixedUrl)) {
         LOG.info(
-            "{}: Consumed URL is invalid - aborting: {}",
+            "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
       } else if (blacklist.contains(Utilities.getDomain(fixedUrl))) {
@@ -100,11 +101,45 @@ public class Application {
         final Analyzer analyzer = new Analyzer(new HtmlParser());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-        supervisor.bugs().addAll(bugs);
+        supervisor.bugs().addAllBugs(bugs);
       }
     });
 
-    //TODO: Have threads with Persister instance running consuming from bugsQueue
+    submitBugWorkerNTimes(10, executor, supervisor.bugs(), bugPersister);
+  }
+
+  // QUESTION: Why doesn't the bug queue get cleared?
+  // QUESTION: Generalise this somehow?
+  private void submitBugWorkerNTimes(
+      final int times,
+      ExecutorService executor,
+      PersistentQueue<Bug> queue,
+      Persister<Bug> persister) {
+    for (int i = 0; i < times; i++) {
+      executor.submit(() -> {
+
+        final String oldName = Thread.currentThread().getName();
+        // TODO: Set appropriate thread name
+        Thread.currentThread().setName("hello");
+
+        while (true) {
+          try {
+            Bug bug = queue.poll(10, TimeUnit.SECONDS);
+
+            persister.storeBug(bug);
+
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error(
+                "{}: Polling was interrupted: {}",
+                Thread.currentThread().getName(), e.toString());
+            break;
+          }
+        }
+
+        Thread.currentThread().setName(oldName);
+      });
+    }
   }
 
   private <T> void submitWorkerNTimes(

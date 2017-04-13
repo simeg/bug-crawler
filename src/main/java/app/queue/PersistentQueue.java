@@ -1,5 +1,6 @@
 package app.queue;
 
+import app.analyze.Bug;
 import app.persist.Persister;
 
 import java.util.Collection;
@@ -21,7 +22,7 @@ public class PersistentQueue<T> {
     this.persister = persister;
   }
 
-  public static <T> PersistentQueue<T> create(BlockingQueue<T> queue, Persister<T> persister) {
+  static <T> PersistentQueue<T> create(BlockingQueue<T> queue, Persister<T> persister) {
     return new PersistentQueue<>(queue, persister);
   }
 
@@ -35,7 +36,12 @@ public class PersistentQueue<T> {
     return this.queue.addAll(elements);
   }
 
-  public T poll(long timeout, TimeUnit unit) throws InterruptedException {
+  public boolean addAllBugs(Collection<Bug> bugs) {
+    this.persister.storeAllBugs(bugs);
+    return this.queue.addAll((Collection<? extends T>) bugs);
+  }
+
+  public T poll(long timeout, TimeUnit unit)   throws InterruptedException {
     T element = this.queue.poll(timeout, unit);
 
     this.persister.store(element);

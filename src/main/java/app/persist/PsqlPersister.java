@@ -1,7 +1,9 @@
 package app.persist;
 
+import app.analyze.Bug;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
+
+import static org.jooq.util.maven.example.Tables.BUG;
 
 public class PsqlPersister<T> implements Persister<T> {
 
@@ -52,15 +57,14 @@ public class PsqlPersister<T> implements Persister<T> {
   }
 
   @Override
-  public boolean store(T element) {
+  public boolean storeBug(Bug bug) {
     try {
       LOG.info(
-          "{}: Storing element: {}",
+          "{}: Storing bug: {}",
           Thread.currentThread().getName(),
-          element.toString());
+          bug.toString());
 
-      // TODO: Figure this out
-      /*this.context.insertInto(BUG,
+      this.context.insertInto(BUG,
           BUG.TYPE, BUG.URL, BUG.PATH, BUG.DESCRIPTION, BUG.DATE_ADDED)
           .values(
               bug.type.name(),                          // Type
@@ -72,22 +76,25 @@ public class PsqlPersister<T> implements Persister<T> {
     } catch (DataAccessException e) {
       LOG.error("{}: Error storing {} in DB: {}", Thread.currentThread().getName(), bug.toString(), e.toString());
       return false;
-    }*/
-    } finally {
-      // Nothing
     }
 
     return true;
   }
 
   @Override
-  public boolean storeAll(Collection<T> elements) {
-    // If at least one bug failed to be stored,
+  public boolean store(T url) {
+    // TODO
+    return false;
+  }
+
+  @Override
+  public boolean storeAll(Collection<T> urls) {
+    // If at least one element fails to store,
     // return false
     boolean aggregatedResult = true;
 
-    for (T element : elements) {
-      boolean result = store(element);
+    for (T url : urls) {
+      boolean result = store(url);
       if (!result) {
         aggregatedResult = false;
       }
@@ -95,4 +102,10 @@ public class PsqlPersister<T> implements Persister<T> {
 
     return aggregatedResult;
   }
+
+  @Override
+  public boolean storeAllBugs(Collection<Bug> bugs) {
+    return this.storeAll((Collection<T>) bugs);
+  }
+
 }
