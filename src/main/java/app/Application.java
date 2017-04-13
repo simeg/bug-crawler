@@ -13,6 +13,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
@@ -34,8 +35,8 @@ public class Application {
     // TODO: Get this from a website form
     final String initUrl = "http://www.vecka.nu";
 
-    app.start(initUrl);
 //    SpringApplication.run(app.getClass(), args);
+    app.start(initUrl);
   }
 
   void start(String initUrl) {
@@ -105,41 +106,16 @@ public class Application {
       }
     });
 
-    submitBugWorkerNTimes(10, executor, supervisor.bugs(), bugPersister);
-  }
+    // QUESTION: Why doesn't the bug queue get cleared?
+    submitWorkerNTimes(10, executor, supervisor.bugs(), bug -> {
+      if (bug != null) {
+        LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
-  // QUESTION: Why doesn't the bug queue get cleared?
-  // QUESTION: Generalise this somehow?
-  private void submitBugWorkerNTimes(
-      final int times,
-      ExecutorService executor,
-      PersistentQueue<Bug> queue,
-      Persister<Bug> persister) {
-    for (int i = 0; i < times; i++) {
-      executor.submit(() -> {
-
-        final String oldName = Thread.currentThread().getName();
-        // TODO: Set appropriate thread name
-        Thread.currentThread().setName("hello");
-
-        while (true) {
-          try {
-            Bug bug = queue.poll(10, TimeUnit.SECONDS);
-
-            persister.storeBug(bug);
-
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.error(
-                "{}: Polling was interrupted: {}",
-                Thread.currentThread().getName(), e.toString());
-            break;
-          }
-        }
-
-        Thread.currentThread().setName(oldName);
-      });
-    }
+        final Persister<Bug> localPersister =
+            PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
+        localPersister.storeBug(bug);
+      }
+    });
   }
 
   private <T> void submitWorkerNTimes(
