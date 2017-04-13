@@ -2,13 +2,12 @@ package app.crawl;
 
 import app.parse.Parser;
 import app.util.Utilities;
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.jsoup.select.Elements;
-import org.slf4j.LoggerFactory;
 
 public class Crawler {
   /*
@@ -23,40 +22,26 @@ public class Crawler {
     this.parser = parser;
   }
 
-  static String getDomain(String url) {
-    // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
-    try {
-      final URI uri = new URI(url);
-      final String domain = uri.getHost();
-      return domain.startsWith("www.") ? domain.substring(4) : domain;
-    } catch (URISyntaxException e) {
-      LOG.error("{}: Unable to parse URL: {}", Thread.currentThread().getName(), url);
-    }
-
-    return null;
-  }
-
   public Set<String> getSubLinks(String url) {
     /*
      * TODO:
-     * - Cache for not working duplicates (should not live in here though, probably in Application)
-     * - No other files than HTML
-     * - No anchor links
-     * - Normalize
+     * - Cache for not working duplicates (should not live in here though, probably in Application) - TODO
+     * - No other files than HTML - TODO
      */
 
-    if (!Utilities.isValidUrl(url)) {
-      LOG.info("{}: URL not valid, will not crawl: {}", Thread.currentThread().getName(), url);
+    final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
+
+    if (!Utilities.isValidUrl(fixedUrl)) {
+      LOG.info("{}: URL not valid, will not crawl: {}", Thread.currentThread().getName(), fixedUrl);
       return Collections.emptySet();
     }
 
-    final String lowercaseUrl = url.toLowerCase();
-    LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), lowercaseUrl);
+    LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), fixedUrl);
 
     // Select all <a> elements with an href attribute
-    final Elements linkElements = this.parser.queryElements(lowercaseUrl, "a[href]");
+    final Elements linkElements = this.parser.queryElements(fixedUrl, "a[href]");
 
-    final String domain = getDomain(lowercaseUrl);
+    final String domain = Utilities.getDomain(fixedUrl);
 
     if (domain != null) {
       return linkElements.stream()

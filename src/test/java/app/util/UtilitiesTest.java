@@ -48,4 +48,31 @@ public class UtilitiesTest {
     assertFalse(Utilities.isValidUrl(malformedUrl3));
     assertFalse(Utilities.isValidUrl(malformedUrl4));
   }
+
+  @Test
+  public void testNormalizeProtocol() throws Exception {
+    final String slimDomain = "arbitrary-domain.com";
+    final String domain = "www.arbitrary-domain.com";
+    final String domainHttp = "http://www.arbitrary-domain.com";
+    final String domainHttps = "https://www.arbitrary-domain.com";
+
+    Assert.assertEquals(Utilities.normalizeProtocol(slimDomain), "http://arbitrary-domain.com");
+    Assert.assertEquals(Utilities.normalizeProtocol(domain), "http://www.arbitrary-domain.com");
+    Assert.assertEquals(Utilities.normalizeProtocol(domainHttp), "http://www.arbitrary-domain.com");
+    Assert.assertEquals(Utilities.normalizeProtocol(domainHttps), "https://www.arbitrary-domain.com");
+  }
+
+  @Test
+  public void testGetDomain() throws Exception {
+    final String domain = "http://specific-domain.com";
+    final String domainWww = "http://www.specific-domain.com";
+    final String domainWithTrail = "http://www.specific-domain.com/arbitrary-value/arbitrary-value/";
+    final String domainWithParams =
+        "http://www.specific-domain.com?arbitraryParam1=arbitraryValue1&arbitraryParam2=arbitraryValue2";
+
+    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domain));
+    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWww));
+    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithTrail));
+    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithParams));
+  }
 }
