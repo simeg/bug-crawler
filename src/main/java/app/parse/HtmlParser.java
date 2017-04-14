@@ -1,11 +1,13 @@
 package app.parse;
 
-import java.io.IOException;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class HtmlParser implements Parser {
 
@@ -13,12 +15,16 @@ public class HtmlParser implements Parser {
 
   private final static int TIMEOUT = 10000;
 
-  public Elements queryElements(String url, String cssQuery) {
+  public List<String> queryForAttributeValues(String url, String cssQuery, String attribute) {
     try {
       return Jsoup.connect(url)
           .timeout(TIMEOUT)
           .get()
-          .select(cssQuery);
+          .select(cssQuery)
+          .stream()
+          .map(element -> element.attr(attribute))
+          .map(String::toString)
+          .collect(Collectors.toList());
     } catch (IOException e) {
       LOG.error("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
     }
