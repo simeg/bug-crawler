@@ -13,7 +13,6 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class Application {
             "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
-      } else if (blacklist.contains(Utilities.getDomain(fixedUrl))) {
+      } else if (!isBlacklisted(blacklist, Utilities.getDomain(fixedUrl))) {
         LOG.info("{}: URL is blacklisted, will not do anything more: {}", Thread.currentThread().getName(), fixedUrl);
         return;
       }
@@ -148,4 +147,9 @@ public class Application {
       });
     }
   }
+
+  private boolean isBlacklisted(List<Object> blacklist, String domain) {
+    return blacklist.contains(domain);
+  }
+
 }
