@@ -1,12 +1,10 @@
 package app.route;
 
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class Routes {
-
-  @RequestMapping("/")
+/*  @RequestMapping("/")
   public String home() {
     return "Home url";
   }
@@ -14,5 +12,5 @@ public class Routes {
   @RequestMapping("/custom")
   public String doesNotMatterForNow() {
     return "Custom URL";
-  }
+  }*/
 }

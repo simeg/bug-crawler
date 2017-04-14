@@ -71,6 +71,8 @@ public class Application {
             "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
+
+        // TODO: Fix this isBlacklisted bug. Logic is wrong.
       } else if (false && isBlacklisted(blacklist, Utilities.getDomain(fixedUrl))) {
         LOG.info("{}: URL is blacklisted, will not do anything more: {}", Thread.currentThread().getName(), fixedUrl);
         return;

@@ -13,6 +13,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static org.jooq.util.maven.example.Tables.BUG;
 
@@ -101,6 +103,26 @@ public class PsqlPersister<T> implements Persister<T> {
     }
 
     return aggregatedResult;
+  }
+
+  @Override
+  public List<Bug> getAllBugs() {
+    return this.context.select()
+        .from(BUG)
+        .fetch()
+        .map(record ->
+            Bug.create(
+                Bug.BugType.valueOf(record.get("type").toString()),
+                record.get("url").toString(),
+                record.get("description").toString(),
+                Optional.of(record.get("path").toString())
+            )
+        );
+  }
+
+  @Override
+  public Bug getBugs(String url) {
+    return null;
   }
 
   @Override
