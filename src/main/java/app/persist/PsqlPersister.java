@@ -1,16 +1,12 @@
 package app.persist;
 
 import app.analyze.Bug;
+import app.db.PsqlHandler;
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
 import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +14,7 @@ import java.util.Optional;
 
 import static org.jooq.util.maven.example.Tables.BUG;
 
-public class PsqlPersister<T> implements Persister<T> {
+public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PsqlPersister.class);
 
@@ -35,27 +31,7 @@ public class PsqlPersister<T> implements Persister<T> {
       String dbName,
       String username,
       String password) {
-    try {
-      // Load the driver
-      Class.forName(driverClass);
-
-      Connection connection = DriverManager.getConnection(
-          String.format("jdbc:postgresql://%s:%d/%s", host, port, dbName),
-          username,
-          password);
-      DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
-
-      LOG.info("{}: Established connection to DB", Thread.currentThread().getName());
-
-      return new PsqlPersister(context);
-
-    } catch (ClassNotFoundException e) {
-      LOG.error("{}: Class for DB driver not found: {}", Thread.currentThread().getName(), driverClass);
-    } catch (SQLException e) {
-      LOG.error("{}: Could not connect to DB - is DB started?: {}", Thread.currentThread().getName(), e.toString());
-    }
-
-    return null;
+    return new PsqlPersister(getContext(driverClass, LOG, host, port, dbName, username, password));
   }
 
   @Override
