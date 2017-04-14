@@ -40,8 +40,9 @@ public class Analyzer {
     final Set<Bug> result = Sets.newHashSet();
 
     this.paths.forEach(path -> {
+      String fullUrlPath = url + "/" + path;
       try {
-        Response response = this.parser.getResponse(url + path);
+        Response response = this.parser.getResponse(fullUrlPath);
 
         // QUESTION:
         // Is this a valid way to check?
@@ -52,13 +53,13 @@ public class Analyzer {
                   BugType.FILE_ACCESS,
                   url,
                   "Access to " + path,
-                  Optional.of(url + path)
+                  Optional.of(fullUrlPath)
               )
           );
         }
 
       } catch (IOException e) {
-        LOG.info("{}: Could not find file {} on URL: {}", Thread.currentThread().getName(), path, url + path);
+        LOG.info("{}: Could not find file {} on URL: {}", Thread.currentThread().getName(), path, fullUrlPath);
       }
     });
 
