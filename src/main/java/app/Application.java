@@ -13,6 +13,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class Application {
     // TODO: Get this from a website form
     final String initUrl = "http://www.vecka.nu";
 
-//    SpringApplication.run(app.getClass(), args);
+    SpringApplication.run(app.getClass(), args);
     app.start(initUrl);
   }
 
@@ -70,7 +71,7 @@ public class Application {
             "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
-      } else if (!isBlacklisted(blacklist, Utilities.getDomain(fixedUrl))) {
+      } else if (false && isBlacklisted(blacklist, Utilities.getDomain(fixedUrl))) {
         LOG.info("{}: URL is blacklisted, will not do anything more: {}", Thread.currentThread().getName(), fixedUrl);
         return;
       }
@@ -98,7 +99,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = new Analyzer(new HtmlParser());
+        final Analyzer analyzer = new Analyzer(new HtmlParser(), conf.getList("analyzer.paths").unwrapped());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.bugs().addAllBugs(bugs);

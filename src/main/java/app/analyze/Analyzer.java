@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,9 +20,11 @@ public class Analyzer {
   private static final Logger LOG = LoggerFactory.getLogger(Analyzer.class);
 
   private final Parser parser;
+  private final List<Object> paths;
 
-  public Analyzer(Parser parser) {
+  public Analyzer(Parser parser, List<Object> paths) {
     this.parser = parser;
+    this.paths = paths;
   }
 
   public Set<Bug> analyze(String url) {
@@ -34,17 +37,9 @@ public class Analyzer {
   }
 
   private Set<Bug> getFileBugs(String url) {
-    // TODO: Store these elsewhere?
     final Set<Bug> result = Sets.newHashSet();
-    final Set<String> paths = Sets.newHashSet();
-    paths.add("/phpinfo.php");
-    paths.add("/phpmyadmin");
-    paths.add("/.htaccess");
-    paths.add("/.htaccess.bak");
-    paths.add("/.htpasswd");
-    paths.add("/.htpasswd.bak");
 
-    paths.forEach(path -> {
+    this.paths.forEach(path -> {
       try {
         Response response = this.parser.getResponse(url + path);
 
