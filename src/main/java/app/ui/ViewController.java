@@ -1,7 +1,8 @@
 package app.ui;
 
 import app.analyze.Bug;
-import app.persist.PsqlPersister;
+import app.api.API;
+import app.api.CrawlerAPI;
 import app.queue.QueueSupervisor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -16,12 +17,9 @@ import java.util.List;
 @EnableAutoConfiguration
 public class ViewController {
 
-  @RequestMapping("/")
-  public String indexAction(ModelMap model) {
-    model.addAttribute("subLinkQueueSize", QueueSupervisor.subLinkQueue.size());
-    model.addAttribute("urlQueueSize", QueueSupervisor.crawledLinkQueue.size());
-    model.addAttribute("bugQueueSize", QueueSupervisor.bugsQueue.size());
+  private final API api;
 
+  public ViewController() {
     final Config conf = ConfigFactory.load();
     final int port = conf.getInt("db.port");
     final String host = conf.getString("db.host");
@@ -29,10 +27,17 @@ public class ViewController {
     final String username = conf.getString("db.username");
     final String password = conf.getString("db.password");
 
-    PsqlPersister psqlPersister =
-        PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
+    this.api = CrawlerAPI.create("org.postgresql.Driver", host, port, name, username, password);
+  }
+
+  @RequestMapping("/")
+  public String indexAction(ModelMap model) {
+    model.addAttribute("subLinkQueueSize", QueueSupervisor.subLinkQueue.size());
+    model.addAttribute("urlQueueSize", QueueSupervisor.crawledLinkQueue.size());
+    model.addAttribute("bugQueueSize", QueueSupervisor.bugsQueue.size());
+
     // All bugs are here. Now map to some unordered list
-    List<Bug> bugs = psqlPersister.getAllBugs();
+    List<Bug> bugs = this.api.getAllBugs();
 
     return "index";
   }
