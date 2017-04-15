@@ -8,9 +8,9 @@ public interface Persister<T> {
 
   boolean storeBug(Bug bug);
 
-  boolean storeAllBugs(Collection<Bug> urls);
+  boolean storeBugs(Collection<Bug> urls);
 
   boolean store(T url);
 
-  boolean storeAll(Collection<T> urls);
+  boolean store(Collection<T> urls);
 }

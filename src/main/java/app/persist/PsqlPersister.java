@@ -58,13 +58,18 @@ public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
   }
 
   @Override
+  public boolean storeBugs(Collection<Bug> bugs) {
+    return this.store((Collection<T>) bugs);
+  }
+
+  @Override
   public boolean store(T url) {
     // TODO
     return false;
   }
 
   @Override
-  public boolean storeAll(Collection<T> urls) {
+  public boolean store(Collection<T> urls) {
     // If at least one element fails to store,
     // return false
     boolean aggregatedResult = true;
@@ -77,11 +82,6 @@ public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
     }
 
     return aggregatedResult;
-  }
-
-  @Override
-  public boolean storeAllBugs(Collection<Bug> bugs) {
-    return this.storeAll((Collection<T>) bugs);
   }
 
 }

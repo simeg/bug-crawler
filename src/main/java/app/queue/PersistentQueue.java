@@ -1,6 +1,5 @@
 package app.queue;
 
-import app.analyze.Bug;
 import app.persist.Persister;
 
 import java.util.Collection;
@@ -31,14 +30,9 @@ public class PersistentQueue<T> {
     return this.queue.add(element);
   }
 
-  public boolean addAll(Collection<T> elements) {
-    this.persister.storeAll(elements);
+  public boolean add(Collection<T> elements) {
+    this.persister.store(elements);
     return this.queue.addAll(elements);
-  }
-
-  public boolean addAllBugs(Collection<Bug> bugs) {
-    this.persister.storeAllBugs(bugs);
-    return this.queue.addAll((Collection<? extends T>) bugs);
   }
 
   public T poll(long timeout, TimeUnit unit)   throws InterruptedException {

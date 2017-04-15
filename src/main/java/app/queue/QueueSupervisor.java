@@ -36,12 +36,15 @@ public class QueueSupervisor {
     return new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue);
   }
 
+  /*
+   * Adding to queues
+   */
   public boolean addToAnalyze(String url) {
     return crawledLinkQueue.add(url);
   }
 
   public boolean addToAnalyze(Collection<String> url) {
-    return crawledLinkQueue.addAll(url);
+    return crawledLinkQueue.add(url);
   }
 
   public boolean addToCrawl(String url) {
@@ -49,7 +52,7 @@ public class QueueSupervisor {
   }
 
   public boolean addToCrawl(Collection<String> url) {
-    return subLinkQueue.addAll(url);
+    return subLinkQueue.add(url);
   }
 
   public boolean addToPersist(Bug bug) {
@@ -57,9 +60,12 @@ public class QueueSupervisor {
   }
 
   public boolean addToPersist(Collection<Bug> bug) {
-    return bugsQueue.addAll(bug);
+    return bugsQueue.add(bug);
   }
 
+  /*
+   * Fetching queues and their data
+   */
   // QUESTION:
   // Cleaner way of exposing queues?
   public PersistentQueue<String> subLinks() {
