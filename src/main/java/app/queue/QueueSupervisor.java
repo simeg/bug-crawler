@@ -12,9 +12,9 @@ public class QueueSupervisor {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueueSupervisor.class);
 
-  public static PersistentQueue<String> subLinkQueue;
-  public static PersistentQueue<String> crawledLinkQueue;
-  public static PersistentQueue<Bug> bugsQueue;
+  private static PersistentQueue<String> subLinkQueue;
+  private static PersistentQueue<String> crawledLinkQueue;
+  private static PersistentQueue<Bug> bugsQueue;
 
   private QueueSupervisor(
       PersistentQueue<String> subLinkQueue,
@@ -78,5 +78,17 @@ public class QueueSupervisor {
 
   public PersistentQueue<Bug> bugs() {
     return bugsQueue;
+  }
+
+  public static int getSubLinksInQueue() {
+    return subLinkQueue.size();
+  }
+
+  public static int getCrawledLinksInQueue() {
+    return crawledLinkQueue.size();
+  }
+
+  public static int getBugsLinksInQueue() {
+    return bugsQueue.size();
   }
 }
