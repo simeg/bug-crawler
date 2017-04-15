@@ -35,11 +35,11 @@ public class Analyzer {
     return result;
   }
 
-  private Set<Bug> getFileBugs(String url) {
+  Set<Bug> getFileBugs(String url) {
     final Set<Bug> result = Sets.newHashSet();
 
     this.paths.forEach(path -> {
-      String fullUrlPath = url + "/" + path;
+      final String fullUrlPath = url + "/" + path;
       try {
         int statusCode = this.parser.getResponseStatusCode(fullUrlPath);
 
