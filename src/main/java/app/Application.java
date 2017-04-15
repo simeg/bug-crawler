@@ -71,13 +71,16 @@ public class Application {
         dbConfig.get("username"),
         dbConfig.get("password"));
     supervisor = QueueSupervisor.create(bugPersister, persister);
+
+    // TODO: Measure to see if we can increase amount of threads
+    // http://stackoverflow.com/questions/481970/how-many-threads-is-too-many
     executor = Executors.newFixedThreadPool(50);
   }
 
   void start(String initUrl) {
     supervisor.subLinks().add(initUrl);
 
-    submitWorkerNTimes(10, executor, supervisor.subLinks(), urlToCrawl -> {
+    submitWorkerNTimes(10, executor, supervisor.subLinks(), supervisor, (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
@@ -95,11 +98,11 @@ public class Application {
       final Set<String> subLinks = new Crawler(new HtmlParser()).getSubLinks(fixedUrl);
 
       // URL is crawled and ready to be analyzed
-      supervisor.crawledLinks().add(fixedUrl);
+      supervisor.addToAnalyze(fixedUrl);
 
       if (subLinks.size() > 0) {
         // Add sub-links back on URL queue
-        supervisor.subLinks().addAll(subLinks);
+        supervisor.addToCrawl(subLinks);
 
         LOG.info(
             "{}: Found {} sub-links: {}",
@@ -111,18 +114,18 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, executor, supervisor.crawledLinks(), urlToAnalyze -> {
+    submitWorkerNTimes(10, executor, supervisor.crawledLinks(), supervisor, (String urlToAnalyze) -> {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
         final Analyzer analyzer = new Analyzer(new HtmlParser(), conf.getList("analyzer.filePaths").unwrapped());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-        supervisor.bugs().addAllBugs(bugs);
+        supervisor.addToPersist(bugs);
       }
     });
 
-    submitWorkerNTimes(10, executor, supervisor.bugs(), bug -> {
+    submitWorkerNTimes(10, executor, supervisor.bugs(), supervisor, (Bug bug) -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
@@ -142,6 +145,7 @@ public class Application {
       final int times,
       ExecutorService executor,
       PersistentQueue<T> queue,
+      QueueSupervisor supervisor,
       Consumer<T> jobToDo) {
     for (int i = 0; i < times; i++) {
       executor.submit(() -> {

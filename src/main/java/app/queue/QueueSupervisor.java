@@ -6,6 +6,8 @@ import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 public class QueueSupervisor {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueueSupervisor.class);
@@ -34,17 +36,41 @@ public class QueueSupervisor {
     return new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue);
   }
 
+  public boolean addToAnalyze(String url) {
+    return crawledLinkQueue.add(url);
+  }
+
+  public boolean addToAnalyze(Collection<String> url) {
+    return crawledLinkQueue.addAll(url);
+  }
+
+  public boolean addToCrawl(String url) {
+    return subLinkQueue.add(url);
+  }
+
+  public boolean addToCrawl(Collection<String> url) {
+    return subLinkQueue.addAll(url);
+  }
+
+  public boolean addToPersist(Bug bug) {
+    return bugsQueue.add(bug);
+  }
+
+  public boolean addToPersist(Collection<Bug> bug) {
+    return bugsQueue.addAll(bug);
+  }
+
   // QUESTION:
   // Cleaner way of exposing queues?
   public PersistentQueue<String> subLinks() {
-    return this.subLinkQueue;
+    return subLinkQueue;
   }
 
   public PersistentQueue<String> crawledLinks() {
-    return this.crawledLinkQueue;
+    return crawledLinkQueue;
   }
 
   public PersistentQueue<Bug> bugs() {
-    return this.bugsQueue;
+    return bugsQueue;
   }
 }
