@@ -36,4 +36,17 @@ public class CrawlerTest {
     Assert.assertEquals(expectedSubLinks, actualSubLinks);
   }
 
+  @Test
+  public void testIsValidLink() throws Exception {
+    Assert.assertFalse(this.crawler.isValidLink("document.pdf"));
+    Assert.assertFalse(this.crawler.isValidLink("mailto:address"));
+    Assert.assertFalse(this.crawler.isValidLink("image.png"));
+    Assert.assertFalse(this.crawler.isValidLink(""));
+    Assert.assertFalse(this.crawler.isValidLink("/"));
+
+    Assert.assertTrue(this.crawler.isValidLink("http://irrelevant-website.com"));
+    Assert.assertTrue(this.crawler.isValidLink("http://www.irrelevant-website.com"));
+    Assert.assertTrue(this.crawler.isValidLink("http://irrelevant-website.com/link/link"));
+    Assert.assertTrue(this.crawler.isValidLink("http://irrelevant-website.com?param1=value1&param2=value2"));
+  }
 }

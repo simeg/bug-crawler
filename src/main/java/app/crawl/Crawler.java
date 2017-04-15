@@ -26,7 +26,6 @@ public class Crawler {
     /*
      * TODO:
      * - Cache for not working duplicates (should not live in here though, probably in Application) - TODO
-     * - No other files than HTML - TODO
      */
 
     final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
@@ -54,12 +53,20 @@ public class Crawler {
     return Collections.emptySet();
   }
 
-  private boolean isValidLink(String link) {
-    // TODO
-    // Filter out like mailto, empty links etc.
-    // Maybe filter out files other than html files here?
-    // That has extensions like .pdf etc.
-    return true;
+  boolean isValidLink(String receivedLink) {
+    final String link = receivedLink.toLowerCase().trim();
+    return !(link.equals("") ||
+        link.equals("/") ||
+        link.contains("mailto:") ||
+        link.endsWith(".pdf") ||
+        link.endsWith(".jpg") ||
+        link.endsWith(".jpeg") ||
+        link.endsWith(".png") ||
+        link.endsWith(".tiff") ||
+        link.endsWith(".gif") ||
+        link.endsWith(".bmp") ||
+        link.endsWith(".exif") ||
+        link.endsWith(".svg"));
   }
 
   private String normalize(String domain, String link) {
