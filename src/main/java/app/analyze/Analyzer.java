@@ -3,7 +3,6 @@ package app.analyze;
 import app.analyze.Bug.BugType;
 import app.parse.Parser;
 import com.google.common.collect.Sets;
-import org.jsoup.Connection.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +41,9 @@ public class Analyzer {
     this.paths.forEach(path -> {
       String fullUrlPath = url + "/" + path;
       try {
-        Response response = this.parser.getResponse(fullUrlPath);
+        int statusCode = this.parser.getResponseStatusCode(fullUrlPath);
 
-        // QUESTION:
-        // Is this a valid way to check?
-        if (response.statusCode() == 200) {
+        if (statusCode == 200) {
           LOG.info("{}: Found file {} on URL: {}", Thread.currentThread().getName(), path, url);
           result.add(
               Bug.create(

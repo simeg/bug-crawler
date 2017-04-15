@@ -1,6 +1,5 @@
 package app.parse;
 
-import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,12 @@ public class HtmlParser implements Parser {
   }
 
   @Override
-  public Response getResponse(String url) throws IOException {
+  public int getResponseStatusCode(String url) throws IOException {
     return Jsoup.connect(url)
         .userAgent(
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
         .timeout(TIMEOUT)
-        .execute();
+        .execute()
+        .statusCode();
   }
 }
