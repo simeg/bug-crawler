@@ -3,13 +3,10 @@ package app.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-
 public class UtilitiesTest {
 
   @Test
-  public void testTrueIsValidUrl() throws Exception {
-    // Format
+  public void testIsValidUrlFormats() throws Exception {
     final String validHttp = "http://www.arbitrary-domain.com/arbitray/";
     final String validHttpTwoSlashes = "http://www.arbitrary-domain.com//arbitray/";
     final String validNoWww = "http://arbitrary-domain.com";
@@ -20,33 +17,32 @@ public class UtilitiesTest {
     Assert.assertTrue(Utilities.isValidUrl(validNoWww));
     Assert.assertTrue(Utilities.isValidUrl(validHttpWww));
 
-    // Protocols
-    final String validHttpUrl = "http://www.arbitrary-domain.com";
-    final String validHttpsUrl = "https://www.arbitrary-domain.com";
-    Assert.assertTrue(Utilities.isValidUrl(validHttpUrl));
-    Assert.assertTrue(Utilities.isValidUrl(validHttpsUrl));
-  }
-
-  @Test
-  public void testFalseIsValidUrl() throws Exception {
     final String missingDomain = "http://.com";
-    assertFalse(Utilities.isValidUrl(missingDomain));
-
-    final String invalidProtocol1 = "ftp://www.arbitrary-domain.com";
-    final String invalidProtocol2 = "pop://www.arbitrary-domain.com";
-
-    assertFalse(Utilities.isValidUrl(invalidProtocol1));
-    assertFalse(Utilities.isValidUrl(invalidProtocol2));
+    Assert.assertFalse(Utilities.isValidUrl(missingDomain));
 
     final String malformedUrl1 = "http:/www.arbitrary-domain.com";
     final String malformedUrl2 = "http:www.arbitrary-domain.com";
     final String malformedUrl3 = "httpwww.arbitrary-domain.com";
     final String malformedUrl4 = "http:///www.arbitrary-domain.com";
 
-    assertFalse(Utilities.isValidUrl(malformedUrl1));
-    assertFalse(Utilities.isValidUrl(malformedUrl2));
-    assertFalse(Utilities.isValidUrl(malformedUrl3));
-    assertFalse(Utilities.isValidUrl(malformedUrl4));
+    Assert.assertFalse(Utilities.isValidUrl(malformedUrl1));
+    Assert.assertFalse(Utilities.isValidUrl(malformedUrl2));
+    Assert.assertFalse(Utilities.isValidUrl(malformedUrl3));
+    Assert.assertFalse(Utilities.isValidUrl(malformedUrl4));
+  }
+
+  @Test
+  public void testIsValidUrlProtocols() throws Exception {
+    final String validHttpUrl = "http://www.arbitrary-domain.com";
+    final String validHttpsUrl = "https://www.arbitrary-domain.com";
+    Assert.assertTrue(Utilities.isValidUrl(validHttpUrl));
+    Assert.assertTrue(Utilities.isValidUrl(validHttpsUrl));
+
+    final String invalidProtocol1 = "ftp://www.arbitrary-domain.com";
+    final String invalidProtocol2 = "pop://www.arbitrary-domain.com";
+
+    Assert.assertFalse(Utilities.isValidUrl(invalidProtocol1));
+    Assert.assertFalse(Utilities.isValidUrl(invalidProtocol2));
   }
 
   @Test
