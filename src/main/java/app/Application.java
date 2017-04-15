@@ -101,7 +101,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = new Analyzer(new HtmlParser(), conf.getList("analyzer.paths").unwrapped());
+        final Analyzer analyzer = new Analyzer(new HtmlParser(), conf.getList("analyzer.filePaths").unwrapped());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.bugs().addAllBugs(bugs);
