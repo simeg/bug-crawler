@@ -4,7 +4,6 @@ import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
-import app.persist.Persister;
 import app.persist.PsqlPersister;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
@@ -17,7 +16,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,37 +30,52 @@ public class Application {
 
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
+  private static Config conf;
+  private static QueueSupervisor supervisor;
+  private static ExecutorService executor;
+  private static Map<String, String> dbConfig;
+
   public static void main(String[] args) throws IOException, InterruptedException {
     final Application app = new Application();
 
     // TODO: Get this from a website form
     final String initUrl = "http://www.vecka.nu";
 
+    app.init();
     SpringApplication.run(app.getClass(), args);
     app.start(initUrl);
   }
 
+  void init() {
+    conf = ConfigFactory.load();
+
+    dbConfig = new HashMap<>();
+    dbConfig.put("port", String.valueOf(conf.getInt("db.port")));
+    dbConfig.put("host", conf.getString("db.host"));
+    dbConfig.put("name", conf.getString("db.name"));
+    dbConfig.put("username", conf.getString("db.username"));
+    dbConfig.put("password", conf.getString("db.password"));
+
+    PsqlPersister<Bug> bugPersister = PsqlPersister.create(
+        "org.postgresql.Driver",
+        dbConfig.get("host"),
+        Integer.parseInt(dbConfig.get("port")),
+        dbConfig.get("name"),
+        dbConfig.get("username"),
+        dbConfig.get("password"));
+    PsqlPersister<String> persister = PsqlPersister.create(
+        "org.postgresql.Driver",
+        dbConfig.get("host"),
+        Integer.parseInt(dbConfig.get("port")),
+        dbConfig.get("name"),
+        dbConfig.get("username"),
+        dbConfig.get("password"));
+    supervisor = QueueSupervisor.create(bugPersister, persister);
+    executor = Executors.newFixedThreadPool(50);
+  }
+
   void start(String initUrl) {
-    // Load DB configurations
-    final Config conf = ConfigFactory.load();
-    final int port = conf.getInt("db.port");
-    final String host = conf.getString("db.host");
-    final String name = conf.getString("db.name");
-    final String username = conf.getString("db.username");
-    final String password = conf.getString("db.password");
-
-    // TODO: Only use ONE Persister
-    final Persister<Bug> bugPersister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
-    final Persister<String> persister = PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
-
-    final QueueSupervisor supervisor = QueueSupervisor.create(bugPersister, persister);
-
-    final List<Object> blacklist = conf.getList("crawler.blacklist").unwrapped();
-
-    // TODO: Replace when it's possible to provide URL
     supervisor.subLinks().add(initUrl);
-
-    final ExecutorService executor = Executors.newFixedThreadPool(50);
 
     submitWorkerNTimes(10, executor, supervisor.subLinks(), urlToCrawl -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
@@ -71,10 +87,8 @@ public class Application {
             "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
-
-        // TODO: Fix this isBlacklisted bug. Logic is wrong.
-      } else if (false && isBlacklisted(blacklist, Utilities.getDomain(fixedUrl))) {
-        LOG.info("{}: URL is blacklisted, will not do anything more: {}", Thread.currentThread().getName(), fixedUrl);
+      } else if (isBlacklisted(conf.getList("crawler.blacklist").unwrapped(), Utilities.getDomain(fixedUrl))) {
+        LOG.info("{}: URL is blacklisted - skipping: {}", Thread.currentThread().getName(), fixedUrl);
         return;
       }
 
@@ -108,14 +122,18 @@ public class Application {
       }
     });
 
-    // QUESTION: Why doesn't the bug queue get cleared?
     submitWorkerNTimes(10, executor, supervisor.bugs(), bug -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
-        final Persister<Bug> localPersister =
-            PsqlPersister.create("org.postgresql.Driver", host, port, name, username, password);
-        localPersister.storeBug(bug);
+        final PsqlPersister<Bug> bugPersister = PsqlPersister.create(
+            "org.postgresql.Driver",
+            dbConfig.get("host"),
+            Integer.parseInt(dbConfig.get("port")),
+            dbConfig.get("name"),
+            dbConfig.get("username"),
+            dbConfig.get("password"));
+        bugPersister.storeBug(bug);
       }
     });
   }
@@ -151,7 +169,7 @@ public class Application {
     }
   }
 
-  private boolean isBlacklisted(List<Object> blacklist, String domain) {
+  boolean isBlacklisted(List<Object> blacklist, String domain) {
     return blacklist.contains(domain);
   }
 

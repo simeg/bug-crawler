@@ -22,14 +22,14 @@ public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
     this.context = context;
   }
 
-  public static PsqlPersister create(
+  public static <T> PsqlPersister<T> create(
       String driverClass,
       String host,
       int port,
       String dbName,
       String username,
       String password) {
-    return new PsqlPersister(getContext(driverClass, LOG, host, port, dbName, username, password));
+    return new PsqlPersister<>(getContext(driverClass, LOG, host, port, dbName, username, password));
   }
 
   @Override
