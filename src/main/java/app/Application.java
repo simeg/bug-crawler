@@ -41,7 +41,7 @@ public class Application {
 
     final Config conf = ConfigFactory.load();
     final QueueSupervisor supervisor = getQueueSupervisor(conf);
-    // TODO: Measure to see if we can increase amount of threads
+    // TODO: Measure to see if we should increase amount of threads for improved performance
     // http://stackoverflow.com/questions/481970/how-many-threads-is-too-many
     final ExecutorService executor = Executors.newFixedThreadPool(50);
     app.start(initUrl, supervisor, executor, conf);
