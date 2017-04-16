@@ -19,9 +19,10 @@ public class QueueSupervisor {
   private static PersistentQueue<String> crawledLinkQueue;
   private static PersistentQueue<Bug> bugsQueue;
 
+  private static final int CACHE_INITIAL_CAPACITY = 100000;
+
   private final Set<String> analyzedLinksCache;
   private final Set<String> crawledLinksCache;
-  private final int CACHE_INITIAL_CAPACITY = 100000;
 
   // TODO: Make it possible to only send in pass in one PersistentQueue
   private QueueSupervisor(

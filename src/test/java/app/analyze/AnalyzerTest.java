@@ -3,13 +3,13 @@ package app.analyze;
 import app.parse.Parser;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.assertj.core.util.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public class AnalyzerTest {
     // 404 occurs when website is loaded but no content on website
     when(this.parser.getResponseStatusCode(any(String.class))).thenReturn(404);
 
-    Assert.assertEquals(Sets.newHashSet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(new HashSet<>(), this.analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
@@ -43,7 +43,7 @@ public class AnalyzerTest {
     // Exception occurs when website is unable to load
     when(this.parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(Sets.newHashSet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(new HashSet<>(), this.analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
