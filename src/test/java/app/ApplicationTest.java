@@ -20,11 +20,20 @@ public class ApplicationTest {
 
   @Before
   public void setUp() throws Exception {
-    application = new Application();
     supervisor = Mockito.mock(QueueSupervisor.class);
     executor = Mockito.mock(ExecutorService.class);
     conf = Mockito.mock(Config.class);
+
+    application = new Application();
+  }
+
+  @Test
+  public void testStart() throws Exception {
+    // Just to see that the application starts without any exceptions
+
+    // Using "real" DB until I figure out how to use mocked DB
     application.init(application);
+    application.start("http://www.valid-website.com", supervisor, executor, conf);
   }
 
   @Test
