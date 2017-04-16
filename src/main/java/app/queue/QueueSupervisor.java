@@ -16,6 +16,7 @@ public class QueueSupervisor {
   private static PersistentQueue<String> crawledLinkQueue;
   private static PersistentQueue<Bug> bugsQueue;
 
+  // TODO: Make it possible to only send in pass in one PersistentQueue
   private QueueSupervisor(
       PersistentQueue<String> subLinkQueue,
       PersistentQueue<String> crawledLinkQueue,

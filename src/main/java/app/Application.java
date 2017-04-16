@@ -16,9 +16,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,55 +28,27 @@ public class Application {
 
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
-  private static Config conf;
-  private static QueueSupervisor supervisor;
-  private static ExecutorService executor;
-  private static Map<String, String> dbConfig;
-
   public static void main(String[] args) throws IOException, InterruptedException {
     final Application app = new Application();
 
+    app.init(app);
+    SpringApplication.run(app.getClass(), args);
+  }
+
+  void init(Application app) {
     // TODO: Get this from a website form
     final String initUrl = "http://www.vecka.nu";
 
-    app.init();
-    SpringApplication.run(app.getClass(), args);
-    app.start(initUrl);
-  }
-
-  void init() {
-    conf = ConfigFactory.load();
-
-    dbConfig = new HashMap<>();
-    dbConfig.put("port", String.valueOf(conf.getInt("db.port")));
-    dbConfig.put("host", conf.getString("db.host"));
-    dbConfig.put("name", conf.getString("db.name"));
-    dbConfig.put("username", conf.getString("db.username"));
-    dbConfig.put("password", conf.getString("db.password"));
-
-    PsqlPersister<Bug> bugPersister = PsqlPersister.create(
-        "org.postgresql.Driver",
-        dbConfig.get("host"),
-        Integer.parseInt(dbConfig.get("port")),
-        dbConfig.get("name"),
-        dbConfig.get("username"),
-        dbConfig.get("password"));
-    PsqlPersister<String> persister = PsqlPersister.create(
-        "org.postgresql.Driver",
-        dbConfig.get("host"),
-        Integer.parseInt(dbConfig.get("port")),
-        dbConfig.get("name"),
-        dbConfig.get("username"),
-        dbConfig.get("password"));
-    supervisor = QueueSupervisor.create(bugPersister, persister);
-
+    final Config conf = ConfigFactory.load();
+    final QueueSupervisor supervisor = getQueueSupervisor(conf);
     // TODO: Measure to see if we can increase amount of threads
     // http://stackoverflow.com/questions/481970/how-many-threads-is-too-many
-    executor = Executors.newFixedThreadPool(50);
+    final ExecutorService executor = Executors.newFixedThreadPool(50);
+    app.start(initUrl, supervisor, executor, conf);
   }
 
-  void start(String initUrl) {
-    supervisor.subLinks().add(initUrl);
+  void start(String initUrl, QueueSupervisor supervisor, ExecutorService executor, Config conf) {
+    supervisor.addToCrawl(initUrl);
 
     submitWorkerNTimes(10, executor, supervisor.subLinks(), supervisor, (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
@@ -131,11 +101,11 @@ public class Application {
 
         final PsqlPersister<Bug> bugPersister = PsqlPersister.create(
             "org.postgresql.Driver",
-            dbConfig.get("host"),
-            Integer.parseInt(dbConfig.get("port")),
-            dbConfig.get("name"),
-            dbConfig.get("username"),
-            dbConfig.get("password"));
+            conf.getString("db.host"),
+            conf.getInt("db.port"),
+            conf.getString("db.name"),
+            conf.getString("db.username"),
+            conf.getString("db.password"));
         bugPersister.storeBug(bug);
       }
     });
@@ -171,6 +141,24 @@ public class Application {
         Thread.currentThread().setName(oldName);
       });
     }
+  }
+
+  private QueueSupervisor getQueueSupervisor(Config conf) {
+    PsqlPersister<Bug> bugPersister = PsqlPersister.create(
+        "org.postgresql.Driver",
+        conf.getString("db.host"),
+        conf.getInt("db.port"),
+        conf.getString("db.name"),
+        conf.getString("db.username"),
+        conf.getString("db.password"));
+    PsqlPersister<String> persister = PsqlPersister.create(
+        "org.postgresql.Driver",
+        conf.getString("db.host"),
+        conf.getInt("db.port"),
+        conf.getString("db.name"),
+        conf.getString("db.username"),
+        conf.getString("db.password"));
+    return QueueSupervisor.create(bugPersister, persister);
   }
 
   boolean isBlacklisted(List<Object> blacklist, String domain) {

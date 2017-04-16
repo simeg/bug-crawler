@@ -1,28 +1,30 @@
 package app;
 
+import app.queue.QueueSupervisor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class ApplicationTest {
 
   private Application application;
+  private QueueSupervisor supervisor;
+  private ExecutorService executor;
+  private Config conf;
 
   @Before
   public void setUp() throws Exception {
-    this.application = new Application();
-    this.application.init();
-  }
-
-  @Test
-  public void testAppStartsWithoutExceptions() throws Exception {
-    // Just to see that application can be started without any exceptions
-    final String workingWebsite = "http://www.vecka.nu";
-    this.application.start(workingWebsite);
+    application = new Application();
+    supervisor = Mockito.mock(QueueSupervisor.class);
+    executor = Mockito.mock(ExecutorService.class);
+    conf = Mockito.mock(Config.class);
+    application.init(application);
   }
 
   @Test
@@ -30,9 +32,9 @@ public class ApplicationTest {
     final Config conf = ConfigFactory.load();
     final List<Object> blacklist = conf.getList("crawler.testBlacklist").unwrapped();
 
-    Assert.assertTrue(this.application.isBlacklisted(blacklist, "blacklisted-url1.com"));
-    Assert.assertTrue(this.application.isBlacklisted(blacklist, "blacklisted-url2.com"));
+    Assert.assertTrue(application.isBlacklisted(blacklist, "blacklisted-url1.com"));
+    Assert.assertTrue(application.isBlacklisted(blacklist, "blacklisted-url2.com"));
 
-    Assert.assertFalse(this.application.isBlacklisted(blacklist, "non-blacklisted-url.com"));
+    Assert.assertFalse(application.isBlacklisted(blacklist, "non-blacklisted-url.com"));
   }
 }
