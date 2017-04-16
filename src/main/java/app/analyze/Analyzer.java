@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Analyzer {
   /*
@@ -19,7 +16,7 @@ public class Analyzer {
   private static final Logger LOG = LoggerFactory.getLogger(Analyzer.class);
 
   private static final int RESULT_INITIAL_CAPACITY = 100000;
-  
+
   private final Parser parser;
   private final List<Object> paths;
 
@@ -30,7 +27,7 @@ public class Analyzer {
 
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
-    final Set<Bug> result = new HashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
 
     result.addAll(getFileBugs(url));
 
@@ -38,14 +35,16 @@ public class Analyzer {
   }
 
   Set<Bug> getFileBugs(String url) {
-    final Set<Bug> result = new HashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final int urlHash = parser.getHtmlHash(url);
 
     this.paths.forEach(path -> {
       final String fullUrlPath = url + "/" + path;
       try {
-        int statusCode = this.parser.getResponseStatusCode(fullUrlPath);
+        final int statusCode = parser.getResponseStatusCode(fullUrlPath);
+        final int pathHash = parser.getHtmlHash(fullUrlPath);
 
-        if (statusCode == 200) {
+        if (statusCode == 200 && (urlHash != pathHash)) {
           LOG.info("{}: Found file {} on URL: {}", Thread.currentThread().getName(), path, url);
           result.add(
               Bug.create(

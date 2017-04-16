@@ -9,9 +9,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -24,18 +22,30 @@ public class AnalyzerTest {
   @Before
   public void setUp() throws Exception {
     final Config conf = ConfigFactory.load();
-    List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
+    final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
 
     this.parser = Mockito.mock(Parser.class);
     this.analyzer = new Analyzer(parser, paths);
   }
 
   @Test
+  public void testGetFileBugsMatchingHtmlHashes() throws Exception {
+    when(this.parser.getResponseStatusCode(any(String.class))).thenReturn(200);
+    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(this.parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
+
+    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+  }
+
+  @Test
   public void testGetFileBugs404Response() throws Exception {
     // 404 occurs when website is loaded but no content on website
     when(this.parser.getResponseStatusCode(any(String.class))).thenReturn(404);
+    // Hashes do not match => 404 response rendered different HTML
+    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(this.parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
 
-    Assert.assertEquals(new HashSet<>(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
@@ -43,13 +53,16 @@ public class AnalyzerTest {
     // Exception occurs when website is unable to load
     when(this.parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(new HashSet<>(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
   public void testGetFileBugs() throws Exception {
     when(this.parser.getResponseStatusCode("http://specific-domain.com/filePath1")).thenReturn(200);
     when(this.parser.getResponseStatusCode("http://specific-domain.com/filePath2")).thenReturn(200);
+    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(this.parser.getHtmlHash("http://specific-domain.com/filePath1")).thenReturn(101);
+    when(this.parser.getHtmlHash("http://specific-domain.com/filePath2")).thenReturn(102);
 
     final Bug bug1 = Bug.create(
         Bug.BugType.FILE_ACCESS,
@@ -63,8 +76,11 @@ public class AnalyzerTest {
         "Access to filePath2",
         Optional.of("http://specific-domain.com/filePath2"));
 
-    //TODO: Why is this not working?!
-//    Assert.assertEquals(new HashSet<>(Arrays.asList(bug2, bug1)), this.analyzer.getFileBugs("http://specific-domain.com"));
+    final LinkedHashSet<Bug> expectedBugs = new LinkedHashSet<>(Arrays.asList(bug1, bug2));
+    final Set<Bug> actualBugs = this.analyzer.getFileBugs("http://specific-domain.com");
+
+    Assert.assertEquals(expectedBugs.size(), actualBugs.size());
+    Assert.assertEquals(expectedBugs.toString(), actualBugs.toString());
   }
 
 }

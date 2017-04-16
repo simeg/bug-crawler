@@ -1,6 +1,7 @@
 package app.parse;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,5 +40,17 @@ public class HtmlParser implements Parser {
         .timeout(TIMEOUT)
         .execute()
         .statusCode();
+  }
+
+  @Override
+  public int getHtmlHash(String url) {
+    try {
+      final Document doc = Jsoup.connect(url).get();
+      return doc.body().html().hashCode();
+    } catch (IOException e) {
+      LOG.error("{}: Unable to parse the URL: {}", Thread.currentThread().getName(), e.toString());
+    }
+
+    return -1;
   }
 }
