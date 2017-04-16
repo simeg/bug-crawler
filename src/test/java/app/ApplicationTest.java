@@ -1,5 +1,6 @@
 package app;
 
+import app.parse.Parser;
 import app.queue.QueueSupervisor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -17,12 +18,14 @@ public class ApplicationTest {
   private QueueSupervisor supervisor;
   private ExecutorService executor;
   private Config conf;
+  private Parser parser;
 
   @Before
   public void setUp() throws Exception {
     supervisor = Mockito.mock(QueueSupervisor.class);
     executor = Mockito.mock(ExecutorService.class);
     conf = Mockito.mock(Config.class);
+    parser = Mockito.mock(Parser.class);
 
     application = new Application();
   }
@@ -33,7 +36,7 @@ public class ApplicationTest {
 
     // Using "real" DB until I figure out how to use mocked DB
     application.init(application);
-    application.start("http://www.valid-website.com", supervisor, executor, conf);
+    application.start("http://www.valid-website.com", supervisor, executor, conf, parser);
   }
 
   @Test

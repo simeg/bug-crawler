@@ -4,6 +4,7 @@ import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
+import app.parse.Parser;
 import app.persist.PsqlPersister;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
@@ -44,10 +45,11 @@ public class Application {
     // TODO: Measure to see if we should increase amount of threads for improved performance
     // http://stackoverflow.com/questions/481970/how-many-threads-is-too-many
     final ExecutorService executor = Executors.newFixedThreadPool(50);
-    app.start(initUrl, supervisor, executor, conf);
+    final Parser parser = HtmlParser.create();
+    app.start(initUrl, supervisor, executor, conf, parser);
   }
 
-  void start(String initUrl, QueueSupervisor supervisor, ExecutorService executor, Config conf) {
+  void start(String initUrl, QueueSupervisor supervisor, ExecutorService executor, Config conf, Parser parser) {
     supervisor.addToCrawl(initUrl);
 
     submitWorkerNTimes(10, executor, supervisor.subLinks(), supervisor, (String urlToCrawl) -> {
@@ -65,7 +67,7 @@ public class Application {
         return;
       }
 
-      final Set<String> subLinks = new Crawler(new HtmlParser()).getSubLinks(fixedUrl);
+      final Set<String> subLinks = new Crawler(parser).getSubLinks(fixedUrl);
 
       // URL is crawled and ready to be analyzed
       supervisor.addToAnalyze(fixedUrl);
@@ -88,7 +90,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = new Analyzer(new HtmlParser(), conf.getList("analyzer.filePaths").unwrapped());
+        final Analyzer analyzer = new Analyzer(parser, conf.getList("analyzer.filePaths").unwrapped());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.addToPersist(bugs);
