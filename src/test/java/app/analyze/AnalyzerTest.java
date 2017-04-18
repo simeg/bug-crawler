@@ -24,45 +24,68 @@ public class AnalyzerTest {
     final Config conf = ConfigFactory.load();
     final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
 
-    this.parser = Mockito.mock(Parser.class);
-    this.analyzer = new Analyzer(parser, paths);
+    parser = Mockito.mock(Parser.class);
+    analyzer = new Analyzer(parser, paths);
   }
 
   @Test
   public void testGetFileBugsMatchingHtmlHashes() throws Exception {
-    when(this.parser.getResponseStatusCode(any(String.class))).thenReturn(200);
-    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
-    when(this.parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
+    when(parser.getResponseStatusCode(any(String.class))).thenReturn(200);
+    when(parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
 
-    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
   public void testGetFileBugs404Response() throws Exception {
     // 404 occurs when website is loaded but no content on website
-    when(this.parser.getResponseStatusCode(any(String.class))).thenReturn(404);
+    when(parser.getResponseStatusCode(any(String.class))).thenReturn(404);
     // Hashes do not match => 404 response rendered different HTML
-    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
-    when(this.parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
+    when(parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
 
-    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
   }
 
   @Test
   public void testGetFileBugsThrowException() throws Exception {
     // Exception occurs when website is unable to load
-    when(this.parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
+    when(parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(Collections.emptySet(), this.analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
+  }
+
+  @Test
+  public void testIsWordpress() throws Exception {
+    // Happy
+    final String url = "http://irrelevant-name.com";
+    final String wpWebsite = url + "/wp-login.php";
+
+    when(parser.getResponseStatusCode(wpWebsite)).thenReturn(200);
+    when(parser.getHtmlHash(url)).thenReturn(100);
+    when(parser.getHtmlHash(wpWebsite)).thenReturn(101);
+
+    Assert.assertTrue(analyzer.isWordpress(url));
+
+    // Sad
+    final String url2 = "http://irrelevant-name.com";
+    final String wpWebsite2 = url2 + "/wp-login.php";
+
+    when(parser.getResponseStatusCode(wpWebsite2)).thenReturn(200);
+    when(parser.getHtmlHash(url2)).thenReturn(100);
+    when(parser.getHtmlHash(wpWebsite2)).thenReturn(100);
+
+    Assert.assertFalse(analyzer.isWordpress(url2));
   }
 
   @Test
   public void testGetFileBugs() throws Exception {
-    when(this.parser.getResponseStatusCode("http://specific-domain.com/filePath1")).thenReturn(200);
-    when(this.parser.getResponseStatusCode("http://specific-domain.com/filePath2")).thenReturn(200);
-    when(this.parser.getHtmlHash(any(String.class))).thenReturn(100);
-    when(this.parser.getHtmlHash("http://specific-domain.com/filePath1")).thenReturn(101);
-    when(this.parser.getHtmlHash("http://specific-domain.com/filePath2")).thenReturn(102);
+    when(parser.getResponseStatusCode("http://specific-domain.com/filePath1")).thenReturn(200);
+    when(parser.getResponseStatusCode("http://specific-domain.com/filePath2")).thenReturn(200);
+    when(parser.getHtmlHash(any(String.class))).thenReturn(100);
+    when(parser.getHtmlHash("http://specific-domain.com/filePath1")).thenReturn(101);
+    when(parser.getHtmlHash("http://specific-domain.com/filePath2")).thenReturn(102);
 
     final Bug bug1 = Bug.create(
         Bug.BugType.FILE_ACCESS,
@@ -77,7 +100,7 @@ public class AnalyzerTest {
         Optional.of("http://specific-domain.com/filePath2"));
 
     final LinkedHashSet<Bug> expectedBugs = new LinkedHashSet<>(Arrays.asList(bug1, bug2));
-    final Set<Bug> actualBugs = this.analyzer.getFileBugs("http://specific-domain.com");
+    final Set<Bug> actualBugs = analyzer.getFileBugs("http://specific-domain.com");
 
     Assert.assertEquals(expectedBugs.size(), actualBugs.size());
     Assert.assertEquals(expectedBugs.toString(), actualBugs.toString());
