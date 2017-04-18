@@ -59,6 +59,9 @@ public class Crawler {
         link.equals("/") ||
         link.contains("mailto:") ||
         link.endsWith(".exe") ||
+        link.endsWith(".zip") ||
+        link.endsWith(".rar") ||
+        link.endsWith(".tar") ||
         link.endsWith(".pdf") ||
         link.endsWith(".jpg") ||
         link.endsWith(".jpeg") ||
