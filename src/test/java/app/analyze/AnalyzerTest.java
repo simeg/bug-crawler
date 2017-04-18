@@ -25,7 +25,7 @@ public class AnalyzerTest {
     final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
 
     parser = Mockito.mock(Parser.class);
-    analyzer = new Analyzer(parser, paths);
+    analyzer = Analyzer.create(parser, paths);
   }
 
   @Test
@@ -34,7 +34,7 @@ public class AnalyzerTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
   }
 
   @Test
@@ -45,7 +45,7 @@ public class AnalyzerTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
   }
 
   @Test
@@ -53,30 +53,7 @@ public class AnalyzerTest {
     // Exception occurs when website is unable to load
     when(parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.getFileBugs("http://specific-domain.com"));
-  }
-
-  @Test
-  public void testIsWordpress() throws Exception {
-    // Happy
-    final String url = "http://irrelevant-name.com";
-    final String wpWebsite = url + "/wp-login.php";
-
-    when(parser.getResponseStatusCode(wpWebsite)).thenReturn(200);
-    when(parser.getHtmlHash(url)).thenReturn(100);
-    when(parser.getHtmlHash(wpWebsite)).thenReturn(101);
-
-    Assert.assertTrue(analyzer.isWordpress(url));
-
-    // Sad
-    final String url2 = "http://irrelevant-name.com";
-    final String wpWebsite2 = url2 + "/wp-login.php";
-
-    when(parser.getResponseStatusCode(wpWebsite2)).thenReturn(200);
-    when(parser.getHtmlHash(url2)).thenReturn(100);
-    when(parser.getHtmlHash(wpWebsite2)).thenReturn(100);
-
-    Assert.assertFalse(analyzer.isWordpress(url2));
+    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
   }
 
   @Test
@@ -100,7 +77,7 @@ public class AnalyzerTest {
         Optional.of("http://specific-domain.com/filePath2"));
 
     final LinkedHashSet<Bug> expectedBugs = new LinkedHashSet<>(Arrays.asList(bug1, bug2));
-    final Set<Bug> actualBugs = analyzer.getFileBugs("http://specific-domain.com");
+    final Set<Bug> actualBugs = analyzer.findFileBugs("http://specific-domain.com");
 
     Assert.assertEquals(expectedBugs.size(), actualBugs.size());
     Assert.assertEquals(expectedBugs.toString(), actualBugs.toString());

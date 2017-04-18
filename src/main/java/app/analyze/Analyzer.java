@@ -22,41 +22,30 @@ public class Analyzer {
 
   private final Parser parser;
   private final List<Object> paths;
+  private final HtmlAnalyzer htmlAnalyzer;
 
-  public Analyzer(Parser parser, List<Object> paths) {
+  private Analyzer(Parser parser, List<Object> paths, HtmlAnalyzer htmlAnalyzer) {
     this.parser = parser;
     this.paths = paths;
+    this.htmlAnalyzer = htmlAnalyzer;
+  }
+
+  public static Analyzer create(Parser parser, List<Object> paths) {
+    return new Analyzer(parser, paths, new HtmlAnalyzer(parser));
   }
 
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
 
-    result.addAll(getHtmlBugs(url));
-    result.addAll(getFileBugs(url));
+    result.addAll(htmlAnalyzer.findHtmlBugs(url));
+    result.addAll(findFileBugs(url));
 
     return result;
   }
 
-  private Set<Bug> getHtmlBugs(String url) {
-    if (isWordpress(url)) {
-      // TODO: Find wordpress bugs
-    }
-    return null;
-  }
 
-  boolean isWordpress(String url) {
-    final String wpLoginPage = url + "/wp-login.php";
-    try {
-      return parser.getResponseStatusCode(wpLoginPage) == 200 && !isMatching(parser, url, wpLoginPage);
-    } catch (IOException e) {
-      LOG.error("{}: Error parsing URL: {}", Thread.currentThread().getName(), wpLoginPage);
-    }
-
-    return false;
-  }
-
-  Set<Bug> getFileBugs(String url) {
+  Set<Bug> findFileBugs(String url) {
     final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
 
     this.paths.forEach(path -> {

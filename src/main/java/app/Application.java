@@ -90,7 +90,7 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = new Analyzer(parser, conf.getList("analyzer.filePaths").unwrapped());
+        final Analyzer analyzer = Analyzer.create(parser, conf.getList("analyzer.filePaths").unwrapped());
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.addToPersist(bugs);

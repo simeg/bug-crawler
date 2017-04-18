@@ -37,6 +37,6 @@ public class Bug {
   }
 
   public enum BugType {
-    UNKNOWN, FILE_ACCESS, XSS
+    UNKNOWN, FILE_ACCESS, XSS, HTML
   }
 }
