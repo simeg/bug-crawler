@@ -2,10 +2,12 @@ package app.parse;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,8 +29,9 @@ public class HtmlParser implements Parser {
     return new HtmlParser(new HashMap<>(CACHE_INITIAL_CAPACITY));
   }
 
+  @Override
   public List<String> queryForAttributeValues(String url, String cssQuery, String attribute) {
-    final Document document = getCachedDocument(url);
+    final Document document = getDocument(url);
 
     if (document != null) {
       return document
@@ -39,7 +42,23 @@ public class HtmlParser implements Parser {
           .collect(Collectors.toList());
     }
 
-    return null;
+    return Collections.emptyList();
+  }
+
+  @Override
+  public List<String> query(String url, String cssQuery) {
+    final Document document = getDocument(url);
+
+    if (document != null) {
+      List<String> collect = document
+          .select(cssQuery)
+          .stream()
+          .map(Element::toString)
+          .collect(Collectors.toList());
+      return collect;
+    }
+
+    return Collections.emptyList();
   }
 
   @Override
@@ -54,7 +73,7 @@ public class HtmlParser implements Parser {
 
   @Override
   public int getHtmlHash(String url) {
-    final Document doc = getCachedDocument(url);
+    final Document doc = getDocument(url);
     if (doc != null) {
       return doc.body().html().hashCode();
     }
@@ -62,7 +81,7 @@ public class HtmlParser implements Parser {
     return -1;
   }
 
-  private Document getCachedDocument(String url) {
+  Document getDocument(String url) {
     try {
       Document document = cache.get(url);
 
