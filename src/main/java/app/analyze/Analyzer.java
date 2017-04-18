@@ -38,7 +38,7 @@ public class Analyzer {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
 
-    result.addAll(htmlInspector.findHtmlBugs(url));
+    result.addAll(htmlInspector.inspect(url));
     result.addAll(findFileBugs(url));
 
     return result;

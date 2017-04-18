@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HtmlInspector {
+public class HtmlInspector implements Inspector {
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlInspector.class);
 
@@ -20,6 +20,15 @@ public class HtmlInspector {
 
   public HtmlInspector(Parser parser) {
     this.parser = parser;
+  }
+
+  @Override
+  public Set<Bug> inspect(String url) {
+    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+
+    result.addAll(findHtmlBugs(url));
+
+    return result;
   }
 
   public Set<Bug> findHtmlBugs(String url) {
