@@ -23,11 +23,6 @@ public class Crawler {
   }
 
   public Set<String> getSubLinks(String url) {
-    /*
-     * TODO:
-     * - Cache for not working duplicates (should not live in here though, probably in Application) - TODO
-     */
-
     final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
 
     if (!Utilities.isValidUrl(fixedUrl)) {
