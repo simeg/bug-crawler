@@ -10,15 +10,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HtmlAnalyzer {
+public class HtmlInspector {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HtmlAnalyzer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HtmlInspector.class);
 
   private static final int RESULT_INITIAL_CAPACITY = 100000;
 
   private final Parser parser;
 
-  public HtmlAnalyzer(Parser parser) {
+  public HtmlInspector(Parser parser) {
     this.parser = parser;
   }
 

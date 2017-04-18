@@ -22,23 +22,23 @@ public class Analyzer {
 
   private final Parser parser;
   private final List<Object> paths;
-  private final HtmlAnalyzer htmlAnalyzer;
+  private final HtmlInspector htmlInspector;
 
-  private Analyzer(Parser parser, List<Object> paths, HtmlAnalyzer htmlAnalyzer) {
+  private Analyzer(Parser parser, List<Object> paths, HtmlInspector htmlInspector) {
     this.parser = parser;
     this.paths = paths;
-    this.htmlAnalyzer = htmlAnalyzer;
+    this.htmlInspector = htmlInspector;
   }
 
   public static Analyzer create(Parser parser, List<Object> paths) {
-    return new Analyzer(parser, paths, new HtmlAnalyzer(parser));
+    return new Analyzer(parser, paths, new HtmlInspector(parser));
   }
 
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
 
-    result.addAll(htmlAnalyzer.findHtmlBugs(url));
+    result.addAll(htmlInspector.findHtmlBugs(url));
     result.addAll(findFileBugs(url));
 
     return result;

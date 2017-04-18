@@ -8,15 +8,15 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.when;
 
-public class HtmlAnalyzerTest {
+public class HtmlInspectorTest {
 
-  private HtmlAnalyzer analyzer;
+  private HtmlInspector analyzer;
   private Parser parser;
 
   @Before
   public void setUp() throws Exception {
     parser = Mockito.mock(Parser.class);
-    analyzer = new HtmlAnalyzer(parser);
+    analyzer = new HtmlInspector(parser);
   }
 
   @Test
