@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HtmlInspector implements Inspector {
+public class HtmlInspector implements Inspector<Bug> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlInspector.class);
 

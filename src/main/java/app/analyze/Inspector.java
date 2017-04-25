@@ -2,7 +2,7 @@ package app.analyze;
 
 import java.util.Set;
 
-public interface Inspector {
+public interface Inspector<T> {
 
-  Set<Bug> inspect(String url);
+  Set<T> inspect(String url);
 }
