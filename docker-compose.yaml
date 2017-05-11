@@ -13,6 +13,8 @@ services:
       - POSTGRES_USER=postgres
     ports:
       - '5432:5432'
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
 
 #    This image name should be used if Dockerfile is used:
 #    `docker build -t crawler/db:9.6 .`
