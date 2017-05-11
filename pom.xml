@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.springframework</groupId>
-    <artifactId>bug-crawler-container</artifactId>
+    <groupId>org.simeg</groupId>
+    <artifactId>web-crawler</artifactId>
     <version>0.1.0</version>
 
     <parent>
@@ -128,7 +128,7 @@
                 <version>0.4.13</version>
                 <configuration>
                     <skipDockerBuild>false</skipDockerBuild>
-                    <imageName>bug-crawler-container</imageName>
+                    <imageName>web-crawler</imageName>
                     <dockerDirectory>${basedir}/src/main/docker/crawler</dockerDirectory>
                     <resources>
                         <resource>

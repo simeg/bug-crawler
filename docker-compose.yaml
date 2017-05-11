@@ -3,7 +3,7 @@ services:
 
   crawler:
     container_name: crawler
-    image: 'bug-crawler-container'
+    image: 'web-crawler'
     volumes:
      - .:/tmp
     ports:
