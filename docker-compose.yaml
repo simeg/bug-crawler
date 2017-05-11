@@ -2,14 +2,22 @@ version: "3"
 services:
 
   crawler:
-    build:
-      context: ./src/main/docker/crawler
+    container_name: crawler
+    image: 'bug-crawler-container'
     volumes:
      - .:/tmp
+    ports:
+     - '8080:8080'
+    depends_on:
+     - "db"
+    links:
+     - db
+#    build:
+#      context: ./src/main/docker/crawler
 
   db:
-    #build:
-      #context: ./src/main/docker/db
+    build:
+      context: ./src/main/docker/db
     container_name: db
     image: 'postgres:9.6'
     environment:
@@ -24,7 +32,3 @@ services:
 #    `docker build -t crawler/db:9.6 .`
 #    instead of
 #    `docker-compose build`
-#    image: 'crawler/db:9.6'
-    # links ? to connect crawler and db
-    # https://docs.docker.com/compose/compose-file/#links
-
