@@ -1,4 +1,4 @@
-package app.analyze;
+package app.plugin;
 
 import java.util.Set;
 

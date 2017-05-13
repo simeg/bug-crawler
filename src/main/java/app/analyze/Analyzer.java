@@ -2,6 +2,7 @@ package app.analyze;
 
 import app.analyze.Bug.BugType;
 import app.parse.Parser;
+import app.plugin.HtmlInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

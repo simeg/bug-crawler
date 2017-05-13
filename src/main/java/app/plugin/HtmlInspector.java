@@ -1,5 +1,6 @@
-package app.analyze;
+package app.plugin;
 
+import app.analyze.Bug;
 import app.parse.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
