@@ -2,14 +2,11 @@ version: "3"
 services:
 
   crawler:
-    container_name: crawler
     image: 'web-crawler'
     volumes:
      - .:/tmp
     ports:
      - '8080:8080'
-    depends_on:
-     - "db"
     links:
      - db
 #    build:
@@ -18,17 +15,12 @@ services:
   db:
     build:
       context: ./src/main/docker/db
-    container_name: db
     image: 'postgres:9.6'
     environment:
       - POSTGRES_DB=web_crawler
       - POSTGRES_USER=postgres
+    # Ports are used for accessing the DB outside of Docker
     ports:
       - '5432:5432'
     volumes:
       - ./db-data:/var/lib/postgresql/data
-
-#    This image name should be used if Dockerfile is used:
-#    `docker build -t crawler/db:9.6 .`
-#    instead of
-#    `docker-compose build`
