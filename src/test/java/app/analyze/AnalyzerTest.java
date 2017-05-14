@@ -1,7 +1,7 @@
 package app.analyze;
 
 import app.parse.Parser;
-import app.plugin.HtmlInspector;
+import app.plugin.HtmlComments;
 import app.plugin.Plugin;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -26,7 +26,7 @@ public class AnalyzerTest {
   public void setUp() throws Exception {
     final Config conf = ConfigFactory.load();
     final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
-    final List<Plugin> plugins = Arrays.asList(mock(HtmlInspector.class));
+    final List<Plugin> plugins = Arrays.asList(mock(HtmlComments.class));
 
     parser = Mockito.mock(Parser.class);
     analyzer = Analyzer.create(parser, paths, plugins);

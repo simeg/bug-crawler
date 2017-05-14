@@ -7,8 +7,9 @@ import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
 import app.persist.PsqlPersister;
-import app.plugin.HtmlInspector;
+import app.plugin.HtmlComments;
 import app.plugin.Plugin;
+import app.plugin.Wordpress;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
 import app.util.Utilities;
@@ -104,7 +105,10 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final List<Plugin> plugins = Arrays.asList(new HtmlInspector(parser));
+        final List<Plugin> plugins = Arrays.asList(
+            new HtmlComments(parser),
+            new Wordpress(parser)
+        );
 
         final Analyzer analyzer = Analyzer.create(parser, conf.getList("analyzer.filePaths").unwrapped(), plugins);
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
