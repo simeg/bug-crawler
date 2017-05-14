@@ -1,10 +1,8 @@
-package app.analyze;
+package app.plugin;
 
+import app.analyze.Bug;
 import app.parse.Parser;
-import app.plugin.HtmlComments;
-import app.plugin.Plugin;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,22 +12,17 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AnalyzerTest {
+public class PageFinderTest {
 
-  private Analyzer analyzer;
+  private PageFinder plugin;
   private Parser parser;
 
   @Before
   public void setUp() throws Exception {
-    final Config conf = ConfigFactory.load();
-    final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
-    final List<Plugin> plugins = Arrays.asList(mock(HtmlComments.class));
-
     parser = Mockito.mock(Parser.class);
-    analyzer = Analyzer.create(parser, paths, plugins);
+    plugin = new PageFinder(parser);
   }
 
   @Test
@@ -38,7 +31,7 @@ public class AnalyzerTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
@@ -49,7 +42,7 @@ public class AnalyzerTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
@@ -57,34 +50,33 @@ public class AnalyzerTest {
     // Exception occurs when website is unable to load
     when(parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(Collections.emptySet(), analyzer.findFileBugs("http://specific-domain.com"));
+    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
   public void testGetFileBugs() throws Exception {
-    when(parser.getResponseStatusCode("http://specific-domain.com/filePath1")).thenReturn(200);
-    when(parser.getResponseStatusCode("http://specific-domain.com/filePath2")).thenReturn(200);
+    when(parser.getResponseStatusCode("http://specific-domain.com/phpinfo.php")).thenReturn(200);
+    when(parser.getResponseStatusCode("http://specific-domain.com/phpmyadmin")).thenReturn(200);
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
-    when(parser.getHtmlHash("http://specific-domain.com/filePath1")).thenReturn(101);
-    when(parser.getHtmlHash("http://specific-domain.com/filePath2")).thenReturn(102);
+    when(parser.getHtmlHash("http://specific-domain.com/phpinfo.php")).thenReturn(101);
+    when(parser.getHtmlHash("http://specific-domain.com/phpmyadmin")).thenReturn(102);
 
     final Bug bug1 = Bug.create(
         Bug.BugType.FILE_ACCESS,
-        "http://specific-domain.com/filePath1",
-        "Access to filePath1",
-        Optional.of("http://specific-domain.com/filePath1"));
+        "http://specific-domain.com/phpinfo.php",
+        "Access to phpinfo.php",
+        Optional.of("http://specific-domain.com/phpinfo.php"));
 
     final Bug bug2 = Bug.create(
         Bug.BugType.FILE_ACCESS,
-        "http://specific-domain.com/filePath2",
-        "Access to filePath2",
-        Optional.of("http://specific-domain.com/filePath2"));
+        "http://specific-domain.com/phpmyadmin",
+        "Access to phpmyadmin",
+        Optional.of("http://specific-domain.com/phpmyadmin"));
 
-    final LinkedHashSet<Bug> expectedBugs = new LinkedHashSet<>(Arrays.asList(bug1, bug2));
-    final Set<Bug> actualBugs = analyzer.findFileBugs("http://specific-domain.com");
+    final Set<Bug> expectedBugs = Sets.newHashSet(bug1, bug2);
+    final Set<Bug> actualBugs = plugin.inspect("http://specific-domain.com");
 
     Assert.assertEquals(expectedBugs.size(), actualBugs.size());
     Assert.assertEquals(expectedBugs.toString(), actualBugs.toString());
   }
-
 }

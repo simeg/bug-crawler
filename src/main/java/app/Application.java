@@ -8,6 +8,7 @@ import app.parse.Parser;
 import app.persist.Persister;
 import app.persist.PsqlPersister;
 import app.plugin.HtmlComments;
+import app.plugin.PageFinder;
 import app.plugin.Plugin;
 import app.plugin.Wordpress;
 import app.queue.PersistentQueue;
@@ -107,10 +108,11 @@ public class Application {
 
         final List<Plugin> plugins = Arrays.asList(
             new HtmlComments(parser),
-            new Wordpress(parser)
+            new Wordpress(parser),
+            new PageFinder(parser)
         );
 
-        final Analyzer analyzer = Analyzer.create(parser, conf.getList("analyzer.filePaths").unwrapped(), plugins);
+        final Analyzer analyzer = new Analyzer(plugins);
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.addToPersist(bugs);
