@@ -2,7 +2,7 @@ package app.plugin;
 
 import java.util.Set;
 
-public interface Inspector<T> {
+public interface Plugin<T> {
 
   Set<T> inspect(String url);
 }

@@ -1,6 +1,8 @@
 package app.analyze;
 
 import app.parse.Parser;
+import app.plugin.HtmlInspector;
+import app.plugin.Plugin;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Assert;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AnalyzerTest {
@@ -23,9 +26,10 @@ public class AnalyzerTest {
   public void setUp() throws Exception {
     final Config conf = ConfigFactory.load();
     final List<Object> paths = conf.getList("analyzer.testFilePaths").unwrapped();
+    final List<Plugin> plugins = Arrays.asList(mock(HtmlInspector.class));
 
     parser = Mockito.mock(Parser.class);
-    analyzer = Analyzer.create(parser, paths);
+    analyzer = Analyzer.create(parser, paths, plugins);
   }
 
   @Test

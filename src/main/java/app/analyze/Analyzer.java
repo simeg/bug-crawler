@@ -2,7 +2,7 @@ package app.analyze;
 
 import app.analyze.Bug.BugType;
 import app.parse.Parser;
-import app.plugin.HtmlInspector;
+import app.plugin.Plugin;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,28 +21,31 @@ public class Analyzer {
 
   private final Parser parser;
   private final List<Object> paths;
-  private final HtmlInspector htmlInspector;
+  private final List<Plugin> plugins;
 
-  private Analyzer(Parser parser, List<Object> paths, HtmlInspector htmlInspector) {
+  private Analyzer(Parser parser, List<Object> paths, List<Plugin> plugins) {
     this.parser = parser;
     this.paths = paths;
-    this.htmlInspector = htmlInspector;
+    this.plugins = plugins;
   }
 
-  public static Analyzer create(Parser parser, List<Object> paths) {
-    return new Analyzer(parser, paths, new HtmlInspector(parser));
+  public static Analyzer create(Parser parser, List<Object> paths, List<Plugin> plugins) {
+    return new Analyzer(parser, paths, plugins);
   }
 
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
     final Set<Bug> result = Sets.newHashSet();
 
-    result.addAll(htmlInspector.inspect(url));
+    plugins.forEach((plugin ->
+        result.addAll(plugin.inspect(url))
+    ));
+
+    // TODO: Make a plugin class for finding file bugs
     result.addAll(findFileBugs(url));
 
     return result;
   }
-
 
   Set<Bug> findFileBugs(String url) {
     final Set<Bug> result = Sets.newHashSet();

@@ -6,6 +6,8 @@ import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.PsqlPersister;
+import app.plugin.HtmlInspector;
+import app.plugin.Plugin;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
 import app.util.Utilities;
@@ -17,6 +19,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -90,7 +93,9 @@ public class Application {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final Analyzer analyzer = Analyzer.create(parser, conf.getList("analyzer.filePaths").unwrapped());
+        final List<Plugin> plugins = Arrays.asList(new HtmlInspector(parser));
+
+        final Analyzer analyzer = Analyzer.create(parser, conf.getList("analyzer.filePaths").unwrapped(), plugins);
         final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
         supervisor.addToPersist(bugs);

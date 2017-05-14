@@ -35,7 +35,7 @@ public class PersistentQueue<T> {
     return this.queue.addAll(elements);
   }
 
-  public T poll(long timeout, TimeUnit unit)   throws InterruptedException {
+  public T poll(long timeout, TimeUnit unit) throws InterruptedException {
     T element = this.queue.poll(timeout, unit);
 
     this.persister.store(element);
