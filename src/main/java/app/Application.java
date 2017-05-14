@@ -66,7 +66,7 @@ public class Application {
   ) {
     supervisor.addToCrawl(initUrl);
 
-    submitWorkerNTimes(10, "Crawler", executor, supervisor.subLinks(), supervisor, (String urlToCrawl) -> {
+    submitWorkerNTimes(10, "Crawler", executor, supervisor.subLinks(), (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
@@ -100,7 +100,7 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, "Analyzer", executor, supervisor.crawledLinks(), supervisor, (String urlToAnalyze) -> {
+    submitWorkerNTimes(10, "Analyzer", executor, supervisor.crawledLinks(), (String urlToAnalyze) -> {
       if (urlToAnalyze != null) {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
@@ -113,7 +113,7 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, "Persister", executor, supervisor.bugs(), supervisor, (Bug bug) -> {
+    submitWorkerNTimes(10, "Persister", executor, supervisor.bugs(), (Bug bug) -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
@@ -127,7 +127,6 @@ public class Application {
       String threadName,
       ExecutorService executor,
       PersistentQueue<T> queue,
-      QueueSupervisor supervisor,
       Consumer<T> jobToDo) {
     for (int i = 0; i < times; i++) {
       final int number = i;
