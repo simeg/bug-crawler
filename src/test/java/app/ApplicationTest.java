@@ -1,16 +1,19 @@
 package app;
 
 import app.parse.Parser;
+import app.persist.Persister;
 import app.queue.QueueSupervisor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ApplicationTest {
 
@@ -19,6 +22,7 @@ public class ApplicationTest {
   private ExecutorService executor;
   private Config conf;
   private Parser parser;
+  private Persister persister;
 
   @Before
   public void setUp() throws Exception {
@@ -26,6 +30,7 @@ public class ApplicationTest {
     executor = Mockito.mock(ExecutorService.class);
     conf = Mockito.mock(Config.class);
     parser = Mockito.mock(Parser.class);
+    persister = Mockito.mock(Persister.class);
 
     application = new Application();
   }
@@ -36,7 +41,7 @@ public class ApplicationTest {
 
     // Using "real" DB until I figure out how to use mocked DB
     application.init(application);
-    application.start("http://www.valid-website.com", supervisor, executor, conf, parser);
+    application.start("http://www.valid-website.com", supervisor, executor, conf, parser, persister);
   }
 
   @Test
@@ -44,9 +49,9 @@ public class ApplicationTest {
     final Config conf = ConfigFactory.load();
     final List<Object> blacklist = conf.getList("crawler.testBlacklist").unwrapped();
 
-    Assert.assertTrue(application.isBlacklisted(blacklist, "blacklisted-url1.com"));
-    Assert.assertTrue(application.isBlacklisted(blacklist, "blacklisted-url2.com"));
+    assertTrue(Application.isBlacklisted(blacklist, "blacklisted-url1.com"));
+    assertTrue(Application.isBlacklisted(blacklist, "blacklisted-url2.com"));
 
-    Assert.assertFalse(application.isBlacklisted(blacklist, "non-blacklisted-url.com"));
+    assertFalse(Application.isBlacklisted(blacklist, "non-blacklisted-url.com"));
   }
 }

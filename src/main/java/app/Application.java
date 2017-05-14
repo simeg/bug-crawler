@@ -5,6 +5,7 @@ import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.parse.Parser;
+import app.persist.Persister;
 import app.persist.PsqlPersister;
 import app.plugin.HtmlInspector;
 import app.plugin.Plugin;
@@ -44,15 +45,25 @@ public class Application {
     final String initUrl = "http://www.vecka.nu";
 
     final Config conf = ConfigFactory.load();
-    final QueueSupervisor supervisor = getQueueSupervisor(conf);
-    // TODO: Measure to see if we should increase amount of threads for improved performance
-    // http://stackoverflow.com/questions/481970/how-many-threads-is-too-many
+    // QUESTION:
+    // QueueSupervisor takes two persisters - one for String and one for Bug.
+    // This is not optimal, not sure how to fix it though.
+    final PsqlPersister persister = getPersister(conf);
+    final QueueSupervisor supervisor = QueueSupervisor.create(persister, persister);
+
     final ExecutorService executor = Executors.newFixedThreadPool(50);
     final Parser parser = HtmlParser.create();
-    app.start(initUrl, supervisor, executor, conf, parser);
+    app.start(initUrl, supervisor, executor, conf, parser, persister);
   }
 
-  void start(String initUrl, QueueSupervisor supervisor, ExecutorService executor, Config conf, Parser parser) {
+  void start(
+      String initUrl,
+      QueueSupervisor supervisor,
+      ExecutorService executor,
+      Config conf,
+      Parser parser,
+      Persister persister
+  ) {
     supervisor.addToCrawl(initUrl);
 
     submitWorkerNTimes(10, "Crawler", executor, supervisor.subLinks(), supervisor, (String urlToCrawl) -> {
@@ -106,14 +117,7 @@ public class Application {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
-        final PsqlPersister<Bug> bugPersister = PsqlPersister.create(
-            "org.postgresql.Driver",
-            conf.getString("db.host"),
-            conf.getInt("db.port"),
-            conf.getString("db.name"),
-            conf.getString("db.username"),
-            conf.getString("db.password"));
-        bugPersister.storeBug(bug);
+        persister.storeBug(bug);
       }
     });
   }
@@ -151,25 +155,17 @@ public class Application {
     }
   }
 
-  private QueueSupervisor getQueueSupervisor(Config conf) {
-    PsqlPersister<Bug> bugPersister = PsqlPersister.create(
+  private PsqlPersister getPersister(Config conf) {
+    return PsqlPersister.create(
         "org.postgresql.Driver",
         conf.getString("db.host"),
         conf.getInt("db.port"),
         conf.getString("db.name"),
         conf.getString("db.username"),
         conf.getString("db.password"));
-    PsqlPersister<String> persister = PsqlPersister.create(
-        "org.postgresql.Driver",
-        conf.getString("db.host"),
-        conf.getInt("db.port"),
-        conf.getString("db.name"),
-        conf.getString("db.username"),
-        conf.getString("db.password"));
-    return QueueSupervisor.create(bugPersister, persister);
   }
 
-  boolean isBlacklisted(List<Object> blacklist, String domain) {
+  static boolean isBlacklisted(List<Object> blacklist, String domain) {
     return blacklist.contains(domain);
   }
 
