@@ -30,6 +30,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static app.util.Utilities.isBlacklisted;
+
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
 
@@ -78,7 +80,7 @@ public class Application {
             "{}: Consumed URL is invalid - skipping: {}",
             Thread.currentThread().getName(), fixedUrl);
         return;
-      } else if (isBlacklisted(conf.getList("crawler.blacklist").unwrapped(), Utilities.getDomain(fixedUrl))) {
+      } else if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
         LOG.info("{}: URL is blacklisted - skipping: {}", Thread.currentThread().getName(), fixedUrl);
         return;
       }
@@ -168,10 +170,6 @@ public class Application {
         conf.getString("db.name"),
         conf.getString("db.username"),
         conf.getString("db.password"));
-  }
-
-  static boolean isBlacklisted(List<Object> blacklist, String domain) {
-    return blacklist.contains(domain);
   }
 
 }

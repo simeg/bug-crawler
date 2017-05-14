@@ -1,10 +1,12 @@
 package app.util;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 public final class Utilities {
 
@@ -45,5 +47,24 @@ public final class Utilities {
     }
 
     return "http://" + url;
+  }
+
+  public static boolean isBlacklisted(String domain) {
+    // TODO: Add github to list when vecka.nu is not used as
+    // test website anymore
+    final Set<String> blacklist = Sets.newHashSet(
+        "google.com",
+        "youtube.com",
+        "facebook.com",
+        "baidu.com",
+        "wikipedia.org",
+        "yahoo.com",
+        "reddit.com",
+        "amazon.com",
+        "twitter.com",
+        "instagram.com",
+        "linkedin.com"
+    );
+    return blacklist.contains(domain);
   }
 }
