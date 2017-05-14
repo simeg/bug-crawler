@@ -3,11 +3,11 @@ package app.queue;
 import app.analyze.Bug;
 import app.persist.Persister;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,8 +18,6 @@ public class QueueSupervisor {
   private static PersistentQueue<String> subLinkQueue;
   private static PersistentQueue<String> crawledLinkQueue;
   private static PersistentQueue<Bug> bugsQueue;
-
-  private static final int CACHE_INITIAL_CAPACITY = 100000;
 
   private final Set<String> analyzedLinksCache;
   private final Set<String> crawledLinksCache;
@@ -32,8 +30,8 @@ public class QueueSupervisor {
     QueueSupervisor.subLinkQueue = subLinkQueue;
     QueueSupervisor.crawledLinkQueue = crawledLinkQueue;
     QueueSupervisor.bugsQueue = bugsQueue;
-    analyzedLinksCache = new HashSet<>(CACHE_INITIAL_CAPACITY);
-    crawledLinksCache = new HashSet<>(CACHE_INITIAL_CAPACITY);
+    analyzedLinksCache = Sets.newHashSet();
+    crawledLinksCache = Sets.newHashSet();
   }
 
   public static QueueSupervisor create(Persister<Bug> bugPersister, Persister<String> persister) {
@@ -86,7 +84,7 @@ public class QueueSupervisor {
   }
 
   <T> Set<T> getUniqueElements(Set<T> cache, Collection<T> urls) {
-    final Set<T> uniqueUrls = new HashSet<>(CACHE_INITIAL_CAPACITY);
+    final Set<T> uniqueUrls = Sets.newHashSet();
 
     uniqueUrls.addAll(
         urls.stream()

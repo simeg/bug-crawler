@@ -1,5 +1,6 @@
 package app.parse;
 
+import com.google.common.collect.Maps;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,7 +18,6 @@ public class HtmlParser implements Parser {
   private static final Logger LOG = LoggerFactory.getLogger(HtmlParser.class);
 
   private final static int TIMEOUT = 10000;
-  private final static int CACHE_INITIAL_CAPACITY = 100000;
 
   private final HashMap<String, Document> cache;
 
@@ -26,7 +26,7 @@ public class HtmlParser implements Parser {
   }
 
   public static HtmlParser create() {
-    return new HtmlParser(new HashMap<>(CACHE_INITIAL_CAPACITY));
+    return new HtmlParser(Maps.newHashMap());
   }
 
   @Override

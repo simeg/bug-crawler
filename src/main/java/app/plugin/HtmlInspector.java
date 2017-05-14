@@ -2,11 +2,11 @@ package app.plugin;
 
 import app.analyze.Bug;
 import app.parse.Parser;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 public class HtmlInspector implements Inspector<Bug> {
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlInspector.class);
-
-  private static final int RESULT_INITIAL_CAPACITY = 100000;
 
   private final Parser parser;
 
@@ -25,7 +23,7 @@ public class HtmlInspector implements Inspector<Bug> {
 
   @Override
   public Set<Bug> inspect(String url) {
-    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = Sets.newHashSet();
 
     result.addAll(findHtmlBugs(url));
 
@@ -33,7 +31,7 @@ public class HtmlInspector implements Inspector<Bug> {
   }
 
   public Set<Bug> findHtmlBugs(String url) {
-    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = Sets.newHashSet();
 
     if (isWordpress(url)) {
       final int wpVersion = getWpVersion(url);
@@ -48,7 +46,7 @@ public class HtmlInspector implements Inspector<Bug> {
   }
 
   private Set<Bug> getInterestingHtml(String url) {
-    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = Sets.newHashSet();
 
     queryElements(result, parser.query(url, "admin")
         .stream()

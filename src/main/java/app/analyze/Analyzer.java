@@ -3,11 +3,11 @@ package app.analyze;
 import app.analyze.Bug.BugType;
 import app.parse.Parser;
 import app.plugin.HtmlInspector;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,8 +18,6 @@ public class Analyzer {
    */
 
   private static final Logger LOG = LoggerFactory.getLogger(Analyzer.class);
-
-  private static final int RESULT_INITIAL_CAPACITY = 100000;
 
   private final Parser parser;
   private final List<Object> paths;
@@ -37,7 +35,7 @@ public class Analyzer {
 
   public Set<Bug> analyze(String url) {
     LOG.info("{}: Will analyze URL: {}", Thread.currentThread().getName(), url);
-    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = Sets.newHashSet();
 
     result.addAll(htmlInspector.inspect(url));
     result.addAll(findFileBugs(url));
@@ -47,7 +45,7 @@ public class Analyzer {
 
 
   Set<Bug> findFileBugs(String url) {
-    final Set<Bug> result = new LinkedHashSet<>(RESULT_INITIAL_CAPACITY);
+    final Set<Bug> result = Sets.newHashSet();
 
     this.paths.forEach(path -> {
       final String fullUrlPath = url + "/" + path;
