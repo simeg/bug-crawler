@@ -3,14 +3,16 @@ package app.plugin;
 import app.analyze.Bug;
 import app.parse.Parser;
 import com.google.common.collect.Sets;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +33,7 @@ public class PageFinderTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(100);
 
-    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
+    assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
@@ -42,7 +44,7 @@ public class PageFinderTest {
     when(parser.getHtmlHash(any(String.class))).thenReturn(100);
     when(parser.getHtmlHash("http://specific-domain.com")).thenReturn(101);
 
-    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
+    assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
@@ -50,7 +52,7 @@ public class PageFinderTest {
     // Exception occurs when website is unable to load
     when(parser.getResponseStatusCode(any(String.class))).thenThrow(new IOException());
 
-    Assert.assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
+    assertEquals(Collections.emptySet(), plugin.inspect("http://specific-domain.com"));
   }
 
   @Test
@@ -76,7 +78,6 @@ public class PageFinderTest {
     final Set<Bug> expectedBugs = Sets.newHashSet(bug1, bug2);
     final Set<Bug> actualBugs = plugin.inspect("http://specific-domain.com");
 
-    Assert.assertEquals(expectedBugs.size(), actualBugs.size());
-    Assert.assertEquals(expectedBugs.toString(), actualBugs.toString());
+    assertEquals(expectedBugs.size(), actualBugs.size());
   }
 }

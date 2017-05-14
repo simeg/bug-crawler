@@ -1,7 +1,6 @@
 package app.persist;
 
 import app.analyze.Bug;
-import app.db.PsqlHandler;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
@@ -10,9 +9,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Timestamp;
 import java.util.Collection;
 
+import static app.db.PsqlContextHandler.getContext;
 import static org.jooq.util.maven.example.Tables.BUG;
 
-public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
+public class PsqlPersister<T> implements Persister<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PsqlPersister.class);
 
@@ -40,7 +40,8 @@ public class PsqlPersister<T> extends PsqlHandler implements Persister<T> {
           Thread.currentThread().getName(),
           bug.toString());
 
-      this.context.insertInto(BUG,
+      this.context.insertInto(
+          BUG,
           BUG.TYPE, BUG.URL, BUG.PATH, BUG.DESCRIPTION, BUG.DATE_ADDED)
           .values(
               bug.type.name(),                          // Type

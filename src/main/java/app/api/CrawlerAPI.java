@@ -2,7 +2,6 @@ package app.api;
 
 import app.analyze.Bug;
 import app.analyze.Bug.BugType;
-import app.db.PsqlHandler;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -11,9 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
+import static app.db.PsqlContextHandler.getContext;
 import static org.jooq.util.maven.example.Tables.BUG;
 
-public class CrawlerAPI extends PsqlHandler implements API {
+public class CrawlerAPI implements API {
 
   private static final Logger LOG = LoggerFactory.getLogger(CrawlerAPI.class);
 

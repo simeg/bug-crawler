@@ -9,11 +9,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-// QUESTION:
-// Is this a good pattern?
-abstract public class PsqlHandler {
+public class PsqlContextHandler {
 
-  protected static DSLContext getContext(
+  public static DSLContext getContext(
       String driverClass,
       Logger logger,
       String host,
