@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class HtmlComments implements Plugin {
   /*
    * Looks for comments in the HTML containing the
-   * words 'password' and 'user'
+   * words 'password' and 'user'.
    */
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlComments.class);

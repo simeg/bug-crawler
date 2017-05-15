@@ -57,14 +57,13 @@ public class Application {
 
     final ExecutorService executor = Executors.newFixedThreadPool(50);
     final Parser parser = HtmlParser.create();
-    app.start(initUrl, supervisor, executor, conf, parser, persister);
+    app.start(initUrl, supervisor, executor, parser, persister);
   }
 
   void start(
       String initUrl,
       QueueSupervisor supervisor,
       ExecutorService executor,
-      Config conf,
       Parser parser,
       Persister persister
   ) {
