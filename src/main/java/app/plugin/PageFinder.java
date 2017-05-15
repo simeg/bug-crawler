@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class PageFinder implements Plugin<Bug> {
+public class PageFinder implements Plugin {
   /*
    * Looks for pages known for being used for
    * sensitive access, configuration etc.

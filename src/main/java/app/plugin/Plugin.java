@@ -1,8 +1,10 @@
 package app.plugin;
 
+import app.analyze.Bug;
+
 import java.util.Set;
 
-public interface Plugin<T> {
+public interface Plugin {
 
-  Set<T> inspect(String url);
+  Set<Bug> inspect(String url);
 }

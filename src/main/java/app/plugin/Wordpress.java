@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-public class Wordpress implements Plugin<Bug> {
+public class Wordpress implements Plugin {
   /*
    * Handles all Wordpress related bugs. Will only
    * actually do something if the website is a

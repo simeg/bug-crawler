@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HtmlComments implements Plugin<Bug> {
+public class HtmlComments implements Plugin {
   /*
    * Looks for comments in the HTML containing the
    * words 'password' and 'user'
