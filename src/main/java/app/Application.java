@@ -13,7 +13,11 @@ import app.plugin.Plugin;
 import app.plugin.Wordpress;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
+import app.request.RequestImpl;
+import app.request.Requester;
+import app.request.UrlRequest;
 import app.util.Utilities;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
@@ -23,6 +27,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -53,11 +58,14 @@ public class Application {
     // QueueSupervisor takes two persisters - one for String and one for Bug.
     // This is not optimal, not sure how to fix it though.
     final PsqlPersister persister = getPersister(conf);
-    final QueueSupervisor supervisor = QueueSupervisor.create(persister, persister);
+    final QueueSupervisor supervisor = QueueSupervisor.create(persister, persister, persister);
+    final HashMap<String, Object> requestCache = Maps.newHashMap();
+    final RequestImpl requestImpl = new RequestImpl();
+    final Requester requester = new Requester(requestImpl, supervisor.requests(), requestCache);
 
-    final ExecutorService executor = Executors.newFixedThreadPool(50);
     final Parser parser = HtmlParser.create();
-    app.start(initUrl, supervisor, executor, parser, persister);
+    final ExecutorService executor = Executors.newFixedThreadPool(50);
+    app.start(initUrl, supervisor, executor, parser, persister, requester);
   }
 
   void start(
@@ -65,8 +73,8 @@ public class Application {
       QueueSupervisor supervisor,
       ExecutorService executor,
       Parser parser,
-      Persister persister
-  ) {
+      Persister persister,
+      Requester requester) {
     supervisor.addToCrawl(initUrl);
 
     submitWorkerNTimes(10, "Crawler", executor, supervisor.subLinks(), (String urlToCrawl) -> {
@@ -127,6 +135,40 @@ public class Application {
         persister.storeBug(bug);
       }
     });
+
+    submitRequestWorkers(10, "Requester", executor, supervisor.requests(), requester);
+  }
+
+  private void submitRequestWorkers(
+      final int times,
+      String threadName,
+      ExecutorService executor,
+      PersistentQueue<UrlRequest> queue,
+      Requester requester) {
+    for (int i = 0; i < times; i++) {
+      final int number = i;
+      executor.submit(() -> {
+        final String oldName = Thread.currentThread().getName();
+        Thread.currentThread().setName(threadName + "-" + number);
+
+        while (true) {
+          try {
+            final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
+
+            final Object result = requester.request(urlRequest.url);
+
+            urlRequest.future.complete(result);
+
+          } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+//            LOG.error("{}: Error requesting url={}", Thread.currentThread().getName(), urlRequest.url, e.toString());
+            break;
+          }
+        }
+
+        Thread.currentThread().setName(oldName);
+      });
+    }
   }
 
   private <T> void submitWorkerNTimes(
@@ -143,7 +185,7 @@ public class Application {
 
         while (true) {
           try {
-            T url = queue.poll(10, TimeUnit.SECONDS);
+            final T url = queue.poll(10, TimeUnit.SECONDS);
 
             jobToDo.accept(url);
 

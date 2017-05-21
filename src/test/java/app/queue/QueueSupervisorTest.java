@@ -2,6 +2,7 @@ package app.queue;
 
 import app.analyze.Bug;
 import app.persist.PsqlPersister;
+import app.request.UrlRequest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,8 @@ public class QueueSupervisorTest {
   public void setUp() throws Exception {
     final PsqlPersister<Bug> bugPersister = Mockito.mock(PsqlPersister.class);
     final PsqlPersister<String> persister = Mockito.mock(PsqlPersister.class);
-    supervisor = QueueSupervisor.create(bugPersister, persister);
+    final PsqlPersister<UrlRequest> requestQueue = Mockito.mock(PsqlPersister.class);
+    supervisor = QueueSupervisor.create(bugPersister, persister, requestQueue);
   }
 
   @Test

@@ -2,6 +2,7 @@ package app.queue;
 
 import app.analyze.Bug;
 import app.persist.Persister;
+import app.request.UrlRequest;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ public class QueueSupervisor {
   private static PersistentQueue<String> subLinkQueue;
   private static PersistentQueue<String> crawledLinkQueue;
   private static PersistentQueue<Bug> bugsQueue;
+  private static PersistentQueue<UrlRequest> requestQueue;
 
   private final Set<String> analyzedLinksCache;
   private final Set<String> crawledLinksCache;
@@ -26,23 +28,30 @@ public class QueueSupervisor {
   private QueueSupervisor(
       PersistentQueue<String> subLinkQueue,
       PersistentQueue<String> crawledLinkQueue,
-      PersistentQueue<Bug> bugsQueue) {
+      PersistentQueue<Bug> bugsQueue,
+      PersistentQueue<UrlRequest> requestQueue) {
     QueueSupervisor.subLinkQueue = subLinkQueue;
     QueueSupervisor.crawledLinkQueue = crawledLinkQueue;
     QueueSupervisor.bugsQueue = bugsQueue;
+    QueueSupervisor.requestQueue = requestQueue;
     analyzedLinksCache = Sets.newHashSet();
     crawledLinksCache = Sets.newHashSet();
   }
 
-  public static QueueSupervisor create(Persister<Bug> bugPersister, Persister<String> persister) {
+  public static QueueSupervisor create(
+      Persister<Bug> bugPersister,
+      Persister<String> persister,
+      Persister<UrlRequest> requestPersister) {
     final PersistentQueue<String> subLinkQueue =
         PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<String> crawledLinkQueue =
         PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
     final PersistentQueue<Bug> bugsQueue =
         PersistentQueue.create(Queues.newLinkedBlockingQueue(), bugPersister);
+    final PersistentQueue<UrlRequest> requestsQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), requestPersister);
 
-    return new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue);
+    return new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
   }
 
   /*
@@ -106,7 +115,7 @@ public class QueueSupervisor {
    * Fetching queues and their data
    */
   // QUESTION:
-  // Cleaner way of exposing queues?
+  // Cleaner way of exposing queues? Yes - Dependency injection
   public PersistentQueue<String> subLinks() {
     return subLinkQueue;
   }
@@ -117,6 +126,10 @@ public class QueueSupervisor {
 
   public PersistentQueue<Bug> bugs() {
     return bugsQueue;
+  }
+
+  public PersistentQueue<UrlRequest> requests() {
+    return requestQueue;
   }
 
   public static int getSubLinksInQueue() {

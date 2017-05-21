@@ -32,6 +32,8 @@ public final class Utilities {
   }
 
   public static String normalizeProtocol(String url) {
+    // https://jsoup.org/cookbook/extracting-data/working-with-urls
+
     /*
      * TODO:
      * - Fix anchor links
