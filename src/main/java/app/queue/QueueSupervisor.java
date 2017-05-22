@@ -1,9 +1,7 @@
 package app.queue;
 
 import app.analyze.Bug;
-import app.persist.Persister;
 import app.request.UrlRequest;
-import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,7 @@ public class QueueSupervisor {
   private final Set<String> crawledLinksCache;
 
   // TODO: Make it possible to only send in pass in one PersistentQueue
-  private QueueSupervisor(
+  public QueueSupervisor(
       PersistentQueue<String> subLinkQueue,
       PersistentQueue<String> crawledLinkQueue,
       PersistentQueue<Bug> bugsQueue,
@@ -36,22 +34,6 @@ public class QueueSupervisor {
     QueueSupervisor.requestQueue = requestQueue;
     analyzedLinksCache = Sets.newHashSet();
     crawledLinksCache = Sets.newHashSet();
-  }
-
-  public static QueueSupervisor create(
-      Persister<Bug> bugPersister,
-      Persister<String> persister,
-      Persister<UrlRequest> requestPersister) {
-    final PersistentQueue<String> subLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<String> crawledLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<Bug> bugsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), bugPersister);
-    final PersistentQueue<UrlRequest> requestsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), requestPersister);
-
-    return new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
   }
 
   /*

@@ -21,7 +21,7 @@ public class PersistentQueue<T> {
     this.persister = persister;
   }
 
-  static <T> PersistentQueue<T> create(BlockingQueue<T> queue, Persister<T> persister) {
+  public static <T> PersistentQueue<T> create(BlockingQueue<T> queue, Persister<T> persister) {
     return new PersistentQueue<>(queue, persister);
   }
 

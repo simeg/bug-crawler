@@ -18,6 +18,7 @@ import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
@@ -54,11 +55,20 @@ public class Application {
     final String initUrl = "http://www.vecka.nu";
 
     final Config conf = ConfigFactory.load();
-    // QUESTION:
-    // QueueSupervisor takes three persisters
-    // This is not optimal, not sure how to fix it though.
     final PsqlPersister persister = getPersister(conf);
-    final QueueSupervisor supervisor = QueueSupervisor.create(persister, persister, persister);
+
+    // QUESTION: How to solve this type thing going on?
+    final PersistentQueue<String> subLinkQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<String> crawledLinkQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<Bug> bugsQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+    final PersistentQueue<UrlRequest> requestsQueue =
+        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
+
+    final QueueSupervisor supervisor =
+        new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
 
     final HashMap<String, Object> requestCache = Maps.newHashMap();
     final RequestImpl requestImpl = new RequestImpl();
