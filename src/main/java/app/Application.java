@@ -127,7 +127,7 @@ public class Application {
         LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
         final List<Plugin> plugins = Arrays.asList(
-            new HtmlComments(parser),
+            new HtmlComments(requester, parser),
             new Wordpress(parser),
             new PageFinder(parser)
         );

@@ -46,16 +46,15 @@ public class HtmlParser implements Parser {
   }
 
   @Override
-  public List<String> query(String url, String cssQuery) {
-    final Document document = getDocument(url);
+  public List<String> query(String html, String cssQuery) {
+    final Document document = getParsedHtml(html);
 
     if (document != null) {
-      List<String> collect = document
+      return document
           .select(cssQuery)
           .stream()
           .map(Element::toString)
           .collect(Collectors.toList());
-      return collect;
     }
 
     return Collections.emptyList();

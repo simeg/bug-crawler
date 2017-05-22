@@ -7,7 +7,7 @@ public interface Parser {
 
   List<String> queryForAttributeValues(String html, String query, String attribute);
 
-  List<String> query(String url, String query);
+  List<String> query(String html, String query);
 
   int getResponseStatusCode(String url) throws IOException;
 
