@@ -1,12 +1,17 @@
 package app.crawl;
 
 import app.parse.Parser;
+import app.request.Requester;
 import app.util.Utilities;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class Crawler {
@@ -16,9 +21,13 @@ public class Crawler {
 
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Crawler.class);
 
+  private static final int FUTURE_TIMEOUT = 10;
+
+  private final Requester requester;
   private final Parser parser;
 
-  public Crawler(Parser parser) {
+  public Crawler(Requester requester, Parser parser) {
+    this.requester = requester;
     this.parser = parser;
   }
 
@@ -31,9 +40,11 @@ public class Crawler {
     }
 
     LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), fixedUrl);
+    final CompletableFuture future = this.requester.get(url);
+    final String html = getHtml(future);
 
     // Select all <a> elements with an href attribute and return their href values
-    final List<String> subLinks = this.parser.queryForAttributeValues(fixedUrl, "a[href]", "href");
+    final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "href");
 
     final String domain = Utilities.getDomain(fixedUrl);
 
@@ -46,6 +57,26 @@ public class Crawler {
     }
 
     return Collections.emptySet();
+  }
+
+  private static String getHtml(CompletableFuture future) {
+    while (!future.isDone()) {
+      try {
+        return future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS).toString();
+
+      } catch (InterruptedException e) {
+        LOG.error("{}: Error when handling future. Thread was interrupted {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (ExecutionException e) {
+        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (TimeoutException e) {
+        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
+            Thread.currentThread().getName(), e.toString());
+      }
+    }
+
+    return null;
   }
 
   boolean isValidLink(String receivedLink) {

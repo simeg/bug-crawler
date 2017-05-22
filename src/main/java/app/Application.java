@@ -55,10 +55,11 @@ public class Application {
 
     final Config conf = ConfigFactory.load();
     // QUESTION:
-    // QueueSupervisor takes two persisters - one for String and one for Bug.
+    // QueueSupervisor takes three persisters
     // This is not optimal, not sure how to fix it though.
     final PsqlPersister persister = getPersister(conf);
     final QueueSupervisor supervisor = QueueSupervisor.create(persister, persister, persister);
+
     final HashMap<String, Object> requestCache = Maps.newHashMap();
     final RequestImpl requestImpl = new RequestImpl();
     final Requester requester = new Requester(requestImpl, supervisor.requests(), requestCache);
@@ -92,7 +93,7 @@ public class Application {
         return;
       }
 
-      final Set<String> subLinks = new Crawler(parser).getSubLinks(fixedUrl);
+      final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(fixedUrl);
 
       // URL is crawled and ready to be analyzed
       supervisor.addToAnalyze(fixedUrl);
@@ -102,8 +103,8 @@ public class Application {
         supervisor.addToCrawl(subLinks);
 
         LOG.info(
-            "{}: Found {} sub-links: {}",
-            Thread.currentThread().getName(), String.valueOf(subLinks.size()), subLinks);
+            "{}: Found {} sub-links for: {}",
+            Thread.currentThread().getName(), String.valueOf(subLinks.size()), fixedUrl);
       } else {
         LOG.info(
             "{}: No sub-links found for: {}",

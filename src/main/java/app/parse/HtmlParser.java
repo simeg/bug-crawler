@@ -30,8 +30,8 @@ public class HtmlParser implements Parser {
   }
 
   @Override
-  public List<String> queryForAttributeValues(String url, String cssQuery, String attribute) {
-    final Document document = getDocument(url);
+  public List<String> queryForAttributeValues(String html, String cssQuery, String attribute) {
+    final Document document = getParsedHtml(html);
 
     if (document != null) {
       return document
@@ -98,5 +98,9 @@ public class HtmlParser implements Parser {
     }
 
     return null;
+  }
+
+  private static Document getParsedHtml(String html) {
+    return Jsoup.parse(html);
   }
 }

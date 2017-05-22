@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface Parser {
 
-  List<String> queryForAttributeValues(String url, String query, String attribute);
+  List<String> queryForAttributeValues(String html, String query, String attribute);
 
   List<String> query(String url, String query);
 
