@@ -90,7 +90,7 @@ public class HtmlComments implements Plugin {
   private static String getHtml(CompletableFuture future) {
     while (!future.isDone()) {
       try {
-        return future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS).toString();
+        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
 
       } catch (InterruptedException e) {
         LOG.error("{}: Error when handling future. Thread was interrupted {}",

@@ -128,7 +128,7 @@ public class Application {
         final List<Plugin> plugins = Arrays.asList(
             new HtmlComments(requester, parser),
             new Wordpress(requester, parser),
-            new PageFinder(requester, parser)
+            new PageFinder(requester)
         );
 
         final Analyzer analyzer = new Analyzer(plugins);

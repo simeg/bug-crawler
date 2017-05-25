@@ -16,7 +16,7 @@ public class PageFinderTest {
   public void setUp() throws Exception {
     parser = Mockito.mock(Parser.class);
     requester = Mockito.mock(Requester.class);
-    plugin = new PageFinder(requester, parser);
+    plugin = new PageFinder(requester);
   }
 
   @Test
