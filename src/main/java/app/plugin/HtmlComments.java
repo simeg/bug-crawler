@@ -11,16 +11,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
+import static app.plugin.PluginUtilities.getFutureResult;
 
 public class HtmlComments implements Plugin {
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlComments.class);
-
-  private static final int FUTURE_TIMEOUT = 10;
 
   private final Requester requester;
   private final Parser parser;
@@ -34,31 +31,20 @@ public class HtmlComments implements Plugin {
   public String getDescription() {
     return
         "Looks for comments in the HTML " +
-            "containing the words 'password' and 'user'";
+            "containing the words 'password' and 'admin'";
   }
 
   @Override
   public Set<Bug> inspect(String url) {
-    final Set<Bug> result = Sets.newHashSet();
-
-    result.addAll(getInterestingHtml(url));
-
-    return result;
-  }
-
-  private Set<Bug> getInterestingHtml(String url) {
-    final Set<Bug> result = Sets.newHashSet();
-
-    result.addAll(queryForString(url, "admin"));
-    result.addAll(queryForString(url, "password"));
-//    result.addAll(queryPasswordForms(url));
-
-    return result;
+    return Sets.union(
+        queryForString(url, "admin"),
+        queryForString(url, "password")
+    );
   }
 
   private Set<Bug> queryForString(String url, String query) {
     final CompletableFuture future = requester.get(url, UrlRequest.RequestType.HTML);
-    final String html = getHtml(future);
+    final String html = String.valueOf(getFutureResult(future));
 
     return parser.query(html, query)
         .stream()
@@ -90,23 +76,4 @@ public class HtmlComments implements Plugin {
         .collect(Collectors.toSet());
   }
 
-  private static String getHtml(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
-
-      } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
-      }
-    }
-
-    return null;
-  }
 }

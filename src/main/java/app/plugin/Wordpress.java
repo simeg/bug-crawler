@@ -10,15 +10,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
+import static app.plugin.PluginUtilities.getFutureResult;
+import static app.plugin.PluginUtilities.isMatching;
 
 public class Wordpress implements Plugin {
 
   private static final Logger LOG = LoggerFactory.getLogger(Wordpress.class);
-
-  private static final int FUTURE_TIMEOUT = 10;
 
   private final Requester requester;
 
@@ -58,57 +56,10 @@ public class Wordpress implements Plugin {
     final String wpLoginUrl = url + "/wp-login.php";
 
     final CompletableFuture future = requester.get(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
-    final int statusCode = getStatusCode(future);
+    final int statusCode = (int) getFutureResult(future);
 
-    final boolean isWordpressInstance = (statusCode == 200 && !isMatching(url, wpLoginUrl));
+    final boolean isWordpressInstance = (statusCode == 200 && !isMatching(requester, url, wpLoginUrl));
     return isWordpressInstance;
   }
 
-  private boolean isMatching(String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
-    final CompletableFuture otherUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
-    final String baseUrlHtml = getHtmlHash(baseUrlFuture);
-    final String otherUrlHtml = getHtmlHash(otherUrlFuture);
-    return baseUrlHtml.equals(otherUrlHtml);
-  }
-
-  private static int getStatusCode(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return (int) future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
-
-      } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
-      }
-    }
-
-    return -1;
-  }
-
-  private static String getHtmlHash(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
-
-      } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
-      }
-    }
-
-    return null;
-  }
 }

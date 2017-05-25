@@ -12,18 +12,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
+import static app.plugin.PluginUtilities.getFutureResult;
+import static app.plugin.PluginUtilities.isMatching;
 
 public class PageFinder implements Plugin {
 
   private static final Logger LOG = LoggerFactory.getLogger(PageFinder.class);
 
-  private static final int FUTURE_TIMEOUT = 10;
-
-  private final Requester requester;
-  private final List<String> pagePaths =
+  private static final List<String> pagePaths =
       Arrays.asList(
           "phpinfo.php",
           "phpmyadmin",
@@ -33,6 +30,8 @@ public class PageFinder implements Plugin {
           ".htpasswd",
           ".htpasswd.bak"
       );
+
+  private final Requester requester;
 
   public PageFinder(Requester requester) {
     this.requester = requester;
@@ -55,12 +54,12 @@ public class PageFinder implements Plugin {
       final String fullUrlPath = url + "/" + path;
 
       final CompletableFuture future = requester.get(url, UrlRequest.RequestType.STATUS_CODE);
-      final int statusCode = getStatusCode(future);
+      final int statusCode = (int) getFutureResult(future);
 
       // If the url + path has exactly the same HTML content as the url,
       // it's a false-positive and should not be reported as a potential bug.
       // Therefore we're checking here to see if they are matching.
-      final boolean isMatching = isMatching(url, fullUrlPath);
+      final boolean isMatching = isMatching(requester, url, fullUrlPath);
 
       if (statusCode == 200 && !isMatching) {
         LOG.info("{}: Found file {} on URL: {}", Thread.currentThread().getName(), path, url);
@@ -76,54 +75,6 @@ public class PageFinder implements Plugin {
     });
 
     return result;
-  }
-
-  private boolean isMatching(String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
-    final CompletableFuture otherUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
-    final String baseUrlHtmlHash = getHtmlHash(baseUrlFuture);
-    final String otherUrlHtmlHash = getHtmlHash(otherUrlFuture);
-    return baseUrlHtmlHash.equals(otherUrlHtmlHash);
-  }
-
-  private static int getStatusCode(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return (int) future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
-
-      } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
-      }
-    }
-
-    return -1;
-  }
-
-  private static String getHtmlHash(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
-
-      } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
-      }
-    }
-
-    return null;
   }
 
 }
