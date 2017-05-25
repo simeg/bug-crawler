@@ -76,9 +76,9 @@ public class PageFinder implements Plugin {
     return result;
   }
 
-  private boolean isMatching(String baseUrl, String fullUrlPath) {
+  private boolean isMatching(String baseUrl, String otherUrl) {
     final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML);
-    final CompletableFuture pathUrlFuture = requester.get(fullUrlPath, UrlRequest.RequestType.HTML);
+    final CompletableFuture pathUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML);
     final String baseUrlHtml = getHtmlHash(baseUrlFuture);
     final String pathUrlHtml = getHtmlHash(pathUrlFuture);
     return baseUrlHtml.equals(pathUrlHtml);

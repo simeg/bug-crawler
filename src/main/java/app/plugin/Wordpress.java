@@ -1,15 +1,18 @@
 package app.plugin;
 
 import app.analyze.Bug;
-import app.parse.Parser;
 import app.request.Requester;
+import app.request.UrlRequest;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Wordpress implements Plugin {
   /*
@@ -18,12 +21,12 @@ public class Wordpress implements Plugin {
 
   private static final Logger LOG = LoggerFactory.getLogger(Wordpress.class);
 
-  private final Requester requester;
-  private final Parser parser;
+  private static final int FUTURE_TIMEOUT = 10;
 
-  public Wordpress(Requester requester, Parser parser) {
+  private final Requester requester;
+
+  public Wordpress(Requester requester) {
     this.requester = requester;
-    this.parser = parser;
   }
 
   @Override
@@ -49,20 +52,59 @@ public class Wordpress implements Plugin {
   }
 
   boolean isWordpress(String url) {
-    final String wpLoginPage = url + "/wp-login.php";
-    try {
-      // TODO: Make this request go through queue, not "on the side"
-      return parser.getResponseStatusCode(wpLoginPage) == 200 && !isMatching(parser, url, wpLoginPage);
-    } catch (IOException e) {
-      LOG.error("{}: Error parsing URL: {}", Thread.currentThread().getName(), wpLoginPage);
-    }
+    final String wpLoginUrl = url + "/wp-login.php";
 
-    return false;
+    final CompletableFuture future = requester.get(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
+    final int statusCode = getStatusCode(future);
+
+    return statusCode == 200 && !isMatching(url, wpLoginUrl);
   }
 
-  private boolean isMatching(Parser parser, String url, String fullUrlPath) {
-    final int urlHash = parser.getHtmlHash(url);
-    final int pathHash = parser.getHtmlHash(fullUrlPath);
-    return urlHash == pathHash;
+  private boolean isMatching(String baseUrl, String otherUrl) {
+    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML);
+    final CompletableFuture pathUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML);
+    final String baseUrlHtml = getHtmlHash(baseUrlFuture);
+    final String pathUrlHtml = getHtmlHash(pathUrlFuture);
+    return baseUrlHtml.equals(pathUrlHtml);
+  }
+
+  private static int getStatusCode(CompletableFuture future) {
+    while (!future.isDone()) {
+      try {
+        return (int) future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
+
+      } catch (InterruptedException e) {
+        LOG.error("{}: Error when handling future. Thread was interrupted {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (ExecutionException e) {
+        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (TimeoutException e) {
+        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
+            Thread.currentThread().getName(), e.toString());
+      }
+    }
+
+    return -1;
+  }
+
+  private static String getHtmlHash(CompletableFuture future) {
+    while (!future.isDone()) {
+      try {
+        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
+
+      } catch (InterruptedException e) {
+        LOG.error("{}: Error when handling future. Thread was interrupted {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (ExecutionException e) {
+        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
+            Thread.currentThread().getName(), e.toString());
+      } catch (TimeoutException e) {
+        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
+            Thread.currentThread().getName(), e.toString());
+      }
+    }
+
+    return null;
   }
 }
