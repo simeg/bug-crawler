@@ -2,6 +2,7 @@ package app.plugin;
 
 import app.analyze.Bug;
 import app.parse.Parser;
+import app.request.Requester;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,16 +13,16 @@ import java.util.Set;
 
 public class Wordpress implements Plugin {
   /*
-   * Handles all Wordpress related bugs. Will only
-   * actually do something if the website is a
-   * Wordpress instance.
+   * Handles all Wordpress related bugs.
    */
 
   private static final Logger LOG = LoggerFactory.getLogger(Wordpress.class);
 
+  private final Requester requester;
   private final Parser parser;
 
-  public Wordpress(Parser parser) {
+  public Wordpress(Requester requester, Parser parser) {
+    this.requester = requester;
     this.parser = parser;
   }
 

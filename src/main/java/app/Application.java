@@ -127,8 +127,8 @@ public class Application {
 
         final List<Plugin> plugins = Arrays.asList(
             new HtmlComments(requester, parser),
-            new Wordpress(parser),
-            new PageFinder(parser)
+            new Wordpress(requester, parser),
+            new PageFinder(requester, parser)
         );
 
         final Analyzer analyzer = new Analyzer(plugins);
@@ -164,14 +164,13 @@ public class Application {
         while (true) {
           try {
             final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
-
-            final Object result = requester.request(urlRequest.url);
-
-            urlRequest.future.complete(result);
+            urlRequest.future.complete(requestType(requester, urlRequest));
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-//            LOG.error("{}: Error requesting url={}", Thread.currentThread().getName(), urlRequest.url, e.toString());
+            LOG.error(
+                "{}: Polling was interrupted: {}",
+                Thread.currentThread().getName(), e.toString());
             break;
           }
         }
@@ -179,6 +178,20 @@ public class Application {
         Thread.currentThread().setName(oldName);
       });
     }
+  }
+
+  private Object requestType(Requester requester, UrlRequest request) {
+    switch (request.type) {
+      case HTML:
+        return requester.requestHtml(request.url);
+      case STATUS_CODE:
+        return requester.requestStatusCode(request.url);
+      default:
+        LOG.error("{}: Unknown request type={}", Thread.currentThread().getName(), request.type);
+        break;
+    }
+
+    return null;
   }
 
   private <T> void submitWorkerNTimes(

@@ -4,8 +4,9 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Requester {
 
-  CompletableFuture get(String url);
+  CompletableFuture get(String url, UrlRequest.RequestType type);
 
-  Object request(String url);
+  Object requestHtml(String url);
 
+  int requestStatusCode(String url);
 }

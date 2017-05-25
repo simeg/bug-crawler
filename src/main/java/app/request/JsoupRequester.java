@@ -15,6 +15,9 @@ public class JsoupRequester implements Requester {
   private static final Logger LOG = LoggerFactory.getLogger(JsoupRequester.class);
 
   private static final int TIMEOUT = 10000;
+  private static final String USER_AGENT =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
+          "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final PersistentQueue queue;
   private final HashMap<String, Object> cache;
@@ -24,37 +27,51 @@ public class JsoupRequester implements Requester {
     this.cache = requestCache;
   }
 
-  public CompletableFuture get(String url) {
+  @Override
+  public CompletableFuture get(String url, UrlRequest.RequestType type) {
     final CompletableFuture future = new CompletableFuture();
-    queue.add(new UrlRequest(url, future));
+    queue.add(new UrlRequest(url, future, type));
 
     return future;
   }
 
-  public Object request(String url) {
+  @Override
+  public Object requestHtml(String url) {
     if (cache.containsKey(url)) {
       return cache.get(url);
     }
 
-    final Document result = this.performRequest(url);
+    final Document result = this.makeRequest(url);
     cache.put(url, result);
 
     return result;
   }
 
-  private Document performRequest(String url) {
+  private Document makeRequest(String url) {
     try {
       return Jsoup.connect(url)
           .timeout(TIMEOUT)
-          .userAgent(
-              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) " +
-                  "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                  "Chrome/56.0.2924.87 Safari/537.36")
+          .userAgent(USER_AGENT)
           .get();
     } catch (IOException e) {
       LOG.error("{}: Unable to requesting URL={} with error {}", Thread.currentThread().getName(), url, e.toString());
     }
 
     return null;
+  }
+
+  @Override
+  public int requestStatusCode(String url) {
+    try {
+      return Jsoup.connect(url)
+          .timeout(TIMEOUT)
+          .userAgent(USER_AGENT)
+          .execute()
+          .statusCode();
+    } catch (IOException e) {
+      LOG.error("{}: Unable to requesting URL={} with error {}", Thread.currentThread().getName(), url, e.toString());
+    }
+
+    return -1;
   }
 }

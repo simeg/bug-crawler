@@ -3,6 +3,7 @@ package app.plugin;
 import app.analyze.Bug;
 import app.parse.Parser;
 import app.request.Requester;
+import app.request.UrlRequest;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class HtmlComments implements Plugin {
   }
 
   private Set<Bug> queryForString(String url, String query) {
-    final CompletableFuture future = requester.get(url);
+    final CompletableFuture future = requester.get(url, UrlRequest.RequestType.HTML);
     final String html = getHtml(future);
 
     return parser.query(html, query)

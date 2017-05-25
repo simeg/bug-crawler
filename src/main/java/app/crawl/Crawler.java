@@ -2,6 +2,7 @@ package app.crawl;
 
 import app.parse.Parser;
 import app.request.Requester;
+import app.request.UrlRequest;
 import app.util.Utilities;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class Crawler {
     }
 
     LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), fixedUrl);
-    final CompletableFuture future = this.requester.get(url);
+    final CompletableFuture future = this.requester.get(url, UrlRequest.RequestType.HTML);
     final String html = getHtml(future);
 
     // Select all <a> elements with an href attribute and return their href values
@@ -62,7 +63,7 @@ public class Crawler {
   private static String getHtml(CompletableFuture future) {
     while (!future.isDone()) {
       try {
-        return future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS).toString();
+        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
 
       } catch (InterruptedException e) {
         LOG.error("{}: Error when handling future. Thread was interrupted {}",
