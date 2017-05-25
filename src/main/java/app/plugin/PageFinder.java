@@ -17,13 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class PageFinder implements Plugin {
-  /*
-   * Looks for pages known for being used for
-   * sensitive access, configuration etc.
-   *
-   * If a page is found and it differs from
-   * the root domain it's marked as a bug.
-   */
 
   private static final Logger LOG = LoggerFactory.getLogger(PageFinder.class);
 
@@ -43,6 +36,15 @@ public class PageFinder implements Plugin {
 
   public PageFinder(Requester requester) {
     this.requester = requester;
+  }
+
+  @Override
+  public String getDescription() {
+    return
+        "Looks for pages known for being used " +
+            "for sensitive access, configuration etc.\n\n" +
+            "If a page is found and it differs from the " +
+            "root domain it's marked as a bug.";
   }
 
   @Override

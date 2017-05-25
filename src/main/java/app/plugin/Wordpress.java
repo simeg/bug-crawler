@@ -15,9 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class Wordpress implements Plugin {
-  /*
-   * Handles all Wordpress related bugs.
-   */
 
   private static final Logger LOG = LoggerFactory.getLogger(Wordpress.class);
 
@@ -27,6 +24,12 @@ public class Wordpress implements Plugin {
 
   public Wordpress(Requester requester) {
     this.requester = requester;
+  }
+
+  @Override
+  public String getDescription() {
+    return
+        "Handles all Wordpress related bugs";
   }
 
   @Override

@@ -17,10 +17,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class HtmlComments implements Plugin {
-  /*
-   * Looks for comments in the HTML containing the
-   * words 'password' and 'user'.
-   */
 
   private static final Logger LOG = LoggerFactory.getLogger(HtmlComments.class);
 
@@ -32,6 +28,13 @@ public class HtmlComments implements Plugin {
   public HtmlComments(Requester requester, Parser parser) {
     this.requester = requester;
     this.parser = parser;
+  }
+
+  @Override
+  public String getDescription() {
+    return
+        "Looks for comments in the HTML " +
+            "containing the words 'password' and 'user'";
   }
 
   @Override
