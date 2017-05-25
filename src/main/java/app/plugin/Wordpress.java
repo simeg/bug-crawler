@@ -60,15 +60,16 @@ public class Wordpress implements Plugin {
     final CompletableFuture future = requester.get(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
     final int statusCode = getStatusCode(future);
 
-    return statusCode == 200 && !isMatching(url, wpLoginUrl);
+    final boolean isWordpressInstance = (statusCode == 200 && !isMatching(url, wpLoginUrl));
+    return isWordpressInstance;
   }
 
   private boolean isMatching(String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML);
-    final CompletableFuture pathUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML);
+    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
+    final CompletableFuture otherUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
     final String baseUrlHtml = getHtmlHash(baseUrlFuture);
-    final String pathUrlHtml = getHtmlHash(pathUrlFuture);
-    return baseUrlHtml.equals(pathUrlHtml);
+    final String otherUrlHtml = getHtmlHash(otherUrlFuture);
+    return baseUrlHtml.equals(otherUrlHtml);
   }
 
   private static int getStatusCode(CompletableFuture future) {

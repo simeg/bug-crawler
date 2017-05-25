@@ -19,10 +19,10 @@ public class JsoupRequester implements Requester {
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
           "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
-  private final PersistentQueue queue;
-  private final HashMap<String, Object> cache;
+  private final PersistentQueue<UrlRequest> queue;
+  private final HashMap<String, Document> cache;
 
-  public JsoupRequester(PersistentQueue queue, HashMap<String, Object> requestCache) {
+  public JsoupRequester(PersistentQueue queue, HashMap<String, Document> requestCache) {
     this.queue = queue;
     this.cache = requestCache;
   }
@@ -45,6 +45,23 @@ public class JsoupRequester implements Requester {
     cache.put(url, result);
 
     return result;
+  }
+
+  @Override
+  public Object requestHtmlHash(String url) {
+    if (cache.containsKey(url)) {
+      return cache.get(url).body().html().hashCode();
+    }
+
+    final Document result = this.makeRequest(url);
+    cache.put(url, result);
+
+    if (result != null) {
+      // Only hash the content of the <body> element
+      return result.body().html().hashCode();
+    }
+
+    return null;
   }
 
   private Document makeRequest(String url) {

@@ -8,5 +8,7 @@ public interface Requester {
 
   Object requestHtml(String url);
 
+  Object requestHtmlHash(String url);
+
   int requestStatusCode(String url);
 }

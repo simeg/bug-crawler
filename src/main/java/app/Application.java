@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -70,7 +71,7 @@ public class Application {
     final QueueSupervisor supervisor =
         new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
 
-    final HashMap<String, Object> requestCache = Maps.newHashMap();
+    final HashMap<String, Document> requestCache = Maps.newHashMap();
     final Requester requester = new JsoupRequester(supervisor.requests(), requestCache);
 
     final Parser parser = HtmlParser.create();
@@ -184,6 +185,8 @@ public class Application {
     switch (request.type) {
       case HTML:
         return requester.requestHtml(request.url);
+      case HTML_HASH:
+        return requester.requestHtmlHash(request.url);
       case STATUS_CODE:
         return requester.requestStatusCode(request.url);
       default:

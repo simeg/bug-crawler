@@ -79,11 +79,11 @@ public class PageFinder implements Plugin {
   }
 
   private boolean isMatching(String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML);
-    final CompletableFuture pathUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML);
-    final String baseUrlHtml = getHtmlHash(baseUrlFuture);
-    final String pathUrlHtml = getHtmlHash(pathUrlFuture);
-    return baseUrlHtml.equals(pathUrlHtml);
+    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
+    final CompletableFuture otherUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
+    final String baseUrlHtmlHash = getHtmlHash(baseUrlFuture);
+    final String otherUrlHtmlHash = getHtmlHash(otherUrlFuture);
+    return baseUrlHtmlHash.equals(otherUrlHtmlHash);
   }
 
   private static int getStatusCode(CompletableFuture future) {
