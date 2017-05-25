@@ -13,7 +13,6 @@ import app.plugin.Plugin;
 import app.plugin.Wordpress;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
-import app.request.RequestImpl;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
@@ -71,8 +70,7 @@ public class Application {
         new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
 
     final HashMap<String, Object> requestCache = Maps.newHashMap();
-    final RequestImpl requestImpl = new RequestImpl();
-    final Requester requester = new Requester(requestImpl, supervisor.requests(), requestCache);
+    final Requester requester = new Requester(supervisor.requests(), requestCache);
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
@@ -170,7 +168,7 @@ public class Application {
 
             urlRequest.future.complete(result);
 
-          } catch (IOException | InterruptedException e) {
+          } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 //            LOG.error("{}: Error requesting url={}", Thread.currentThread().getName(), urlRequest.url, e.toString());
             break;
