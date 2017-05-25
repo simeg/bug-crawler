@@ -3,6 +3,7 @@ package app;
 import app.parse.Parser;
 import app.persist.Persister;
 import app.queue.QueueSupervisor;
+import app.request.JsoupRequester;
 import app.request.Requester;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class ApplicationTest {
     executor = Mockito.mock(ExecutorService.class);
     parser = Mockito.mock(Parser.class);
     persister = Mockito.mock(Persister.class);
-    requester = Mockito.mock(Requester.class);
+    requester = Mockito.mock(JsoupRequester.class);
 
     application = new Application();
   }

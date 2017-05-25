@@ -13,6 +13,7 @@ import app.plugin.Plugin;
 import app.plugin.Wordpress;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
+import app.request.JsoupRequester;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
@@ -70,7 +71,7 @@ public class Application {
         new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
 
     final HashMap<String, Object> requestCache = Maps.newHashMap();
-    final Requester requester = new Requester(supervisor.requests(), requestCache);
+    final Requester requester = new JsoupRequester(supervisor.requests(), requestCache);
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
