@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 import static app.db.PsqlContextHandler.getContext;
-import static org.jooq.util.maven.example.Tables.BUG;
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
 
 public class PsqlPersister<T> implements Persister<T> {
 
@@ -42,7 +42,7 @@ public class PsqlPersister<T> implements Persister<T> {
 
       this.context.insertInto(
           BUG,
-          BUG.TYPE, BUG.URL, BUG.PATH, BUG.DESCRIPTION, BUG.DATE_ADDED)
+          BUG.TYPE, BUG.BASE_URL, BUG.PATH, BUG.DESCRIPTION, BUG.TIME_INSERTED)
           .values(
               bug.type.name(),                          // Type
               bug.url,                                  // URL

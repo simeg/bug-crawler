@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static app.db.PsqlContextHandler.getContext;
-import static org.jooq.util.maven.example.Tables.BUG;
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
 
 public class CrawlerAPI implements API {
 
@@ -44,7 +44,7 @@ public class CrawlerAPI implements API {
   @Override
   public List<Bug> getBugs(String url) {
     return context.selectFrom(BUG)
-        .where(BUG.URL.equal(url))
+        .where(BUG.BASE_URL.equal(url))
         .fetch()
         .map(this::toBug);
   }
@@ -52,7 +52,7 @@ public class CrawlerAPI implements API {
   private Bug toBug(Record record) {
     return Bug.create(
         BugType.valueOf(record.get(BUG.TYPE)),
-        record.get(BUG.URL),
+        record.get(BUG.BASE_URL),
         record.get(BUG.DESCRIPTION),
         Optional.of(record.get("path").toString())
     );

@@ -180,7 +180,7 @@
                             <inputSchema>public</inputSchema>
                         </database>
                         <target>
-                            <packageName>org.jooq.util.maven.example</packageName>
+                            <packageName>org.jooq.util.maven.web_crawler</packageName>
                             <directory>target/generated-sources/jooq</directory>
                         </target>
                     </generator>
