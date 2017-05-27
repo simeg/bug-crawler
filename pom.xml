@@ -14,8 +14,10 @@
     </parent>
 
     <properties>
+        <docker.image.name>web-crawler</docker.image.name>
         <java.version>1.8</java.version>
         <jooq.version>3.9.2</jooq.version>
+        <postgres.version>42.1.1</postgres.version>
     </properties>
 
     <repositories>
@@ -28,6 +30,7 @@
             <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>spring-releases</id>
@@ -48,17 +51,17 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>21.0</version>
+            <version>22.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.0.0</version>
+            <version>${postgres.version}</version>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.1-901.jdbc4</version>
+            <version>9.1-901-1.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -100,6 +103,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>1.5.3.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -129,7 +133,7 @@
                 <version>0.4.13</version>
                 <configuration>
                     <skipDockerBuild>false</skipDockerBuild>
-                    <imageName>web-crawler</imageName>
+                    <imageName>${docker.image.name}</imageName>
                     <dockerDirectory>${basedir}/src/main/docker/crawler</dockerDirectory>
                     <resources>
                         <resource>
@@ -160,8 +164,7 @@
                     <dependency>
                         <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
-                        <!--<version>9.4.1212</version>-->
-                        <version>42.1.1</version>
+                        <version>${postgres.version}</version>
                     </dependency>
                 </dependencies>
 
