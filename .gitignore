@@ -1,7 +1,4 @@
-.gradle
-build/
 *.iml
 .idea
 target/
-app/db-data/
-
+db-data/
