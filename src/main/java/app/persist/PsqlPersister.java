@@ -45,10 +45,10 @@ public class PsqlPersister<T> implements Persister<T> {
           BUG.TYPE, BUG.BASE_URL, BUG.PATH, BUG.DESCRIPTION, BUG.TIME_INSERTED)
           .values(
               bug.type.name(),                          // Type
-              bug.url,                                  // URL
+              bug.baseUrl,                              // Base URL
               bug.path.orElse(null),                    // Path
               bug.description,                          // Description
-              new Timestamp(System.currentTimeMillis()) // Date added
+              new Timestamp(System.currentTimeMillis()) // Time inserted
           ).execute();
     } catch (DataAccessException e) {
       LOG.error("{}: Error storing {} in DB: {}", Thread.currentThread().getName(), bug.toString(), e.toString());

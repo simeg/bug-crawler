@@ -10,33 +10,35 @@ public class Bug {
 
   private static final Logger LOG = LoggerFactory.getLogger(Bug.class);
 
+  public enum BugType {
+    UNKNOWN, FILE_ACCESS, XSS, HTML
+  }
+
   public final BugType type;
-  public final String url;
+  public final String baseUrl;
   public final String description;
   public final Optional<String> path;
 
-  Bug(BugType type, String url, String description, Optional<String> path) {
+  Bug(BugType type, String baseUrl, String description, Optional<String> path) {
     this.type = type;
-    this.url = url;
+    this.baseUrl = baseUrl;
     this.description = description;
     this.path = path;
   }
 
-  public static Bug create(BugType type, String url, String description, Optional<String> path) {
+  public static Bug create(BugType type, String baseUrl, String description, Optional<String> path) {
     if (!Enums.getIfPresent(BugType.class, type.name()).isPresent()) {
       LOG.warn("{}: Bug type not found: {}", Thread.currentThread().getName(), type);
       type = BugType.UNKNOWN;
     }
 
-    return new Bug(type, url, description, path);
+    return new Bug(type, baseUrl, description, path);
   }
 
   @Override
   public String toString() {
+    // TODO: about `this.path.get()`, make sure it has a value before using it
     return String.format("[%s]: %s", this.type.toString(), this.path.get());
   }
 
-  public enum BugType {
-    UNKNOWN, FILE_ACCESS, XSS, HTML
-  }
 }
