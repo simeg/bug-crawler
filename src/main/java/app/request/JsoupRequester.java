@@ -54,9 +54,9 @@ public class JsoupRequester implements Requester {
     }
 
     final Document result = this.makeRequest(url);
-    cache.put(url, result);
 
     if (result != null) {
+      cache.put(url, result);
       // Only hash the content of the <body> element
       return result.body().html().hashCode();
     }
