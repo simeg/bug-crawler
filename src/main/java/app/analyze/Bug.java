@@ -24,7 +24,7 @@ public class Bug {
 
   public static Bug create(BugType type, String url, String description, Optional<String> path) {
     if (!Enums.getIfPresent(BugType.class, type.name()).isPresent()) {
-      LOG.error("{}: Bug type not found: {}", Thread.currentThread().getName(), type);
+      LOG.warn("{}: Bug type not found: {}", Thread.currentThread().getName(), type);
       type = BugType.UNKNOWN;
     }
 

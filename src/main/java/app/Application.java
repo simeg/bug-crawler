@@ -169,7 +169,7 @@ public class Application {
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.error(
+            LOG.warn(
                 "{}: Polling was interrupted: {}",
                 Thread.currentThread().getName(), e.toString());
             break;
@@ -190,7 +190,7 @@ public class Application {
       case STATUS_CODE:
         return requester.requestStatusCode(request.url);
       default:
-        LOG.error("{}: Unknown request type={}", Thread.currentThread().getName(), request.type);
+        LOG.warn("{}: Unknown request type=[{}]", Thread.currentThread().getName(), request.type);
         break;
     }
 
@@ -217,7 +217,7 @@ public class Application {
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.error(
+            LOG.warn(
                 "{}: Polling was interrupted: {}",
                 Thread.currentThread().getName(), e.toString());
             break;

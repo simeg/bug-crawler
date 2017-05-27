@@ -25,7 +25,7 @@ public final class Utilities {
       final String domain = uri.getHost();
       return domain.startsWith("www.") ? domain.substring(4) : domain;
     } catch (URISyntaxException e) {
-      LOG.error("{}: Unable to parse URL: {}", Thread.currentThread().getName(), url);
+      LOG.warn("{}: Unable to parse URL: {}", Thread.currentThread().getName(), url);
     }
 
     return null;
