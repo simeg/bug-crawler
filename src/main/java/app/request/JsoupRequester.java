@@ -42,7 +42,9 @@ public class JsoupRequester implements Requester {
     }
 
     final Document result = this.makeRequest(url);
-    cache.put(url, result);
+    if (result != null) {
+      cache.put(url, result);
+    }
 
     return result;
   }
@@ -61,6 +63,8 @@ public class JsoupRequester implements Requester {
       return result.body().html().hashCode();
     }
 
+    // QUESTION:
+    // Throw exception here instead?
     return null;
   }
 
@@ -74,6 +78,8 @@ public class JsoupRequester implements Requester {
       LOG.warn("Unable to get requested URL=[{}] with error=[{}]", url, e.toString());
     }
 
+    // QUESTION:
+    // Throw exception here instead?
     return null;
   }
 
@@ -86,9 +92,11 @@ public class JsoupRequester implements Requester {
           .execute()
           .statusCode();
     } catch (IOException e) {
-      LOG.warn("Unable to get requested URL=[{}] with error={}", url, e.toString());
+      LOG.warn("Unable to get requested URL=[{}] with error=[{}]", url, e.toString());
     }
 
+    // QUESTION:
+    // Throw exception here instead?
     return -1;
   }
 }

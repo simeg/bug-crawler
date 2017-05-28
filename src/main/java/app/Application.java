@@ -94,8 +94,7 @@ public class Application {
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
 
       if (!Utilities.isValidUrl(fixedUrl)) {
-        LOG.info(
-            "Consumed URL is invalid - skipping: {}", fixedUrl);
+        LOG.info("Consumed URL is invalid - skipping: {}", fixedUrl);
         return;
       } else if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
         LOG.info("URL is blacklisted - skipping: {}", fixedUrl);
@@ -111,11 +110,9 @@ public class Application {
         // Add sub-links back on URL queue
         supervisor.addToCrawl(subLinks);
 
-        LOG.info(
-            "Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
+        LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
       } else {
-        LOG.info(
-            "No sub-links found for: {}", fixedUrl);
+        LOG.info("No sub-links found for: {}", fixedUrl);
       }
     });
 
@@ -166,8 +163,7 @@ public class Application {
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.warn(
-                "Polling was interrupted: {}", e.toString());
+            LOG.warn("Polling was interrupted: {}", e.toString());
             break;
           }
         }
@@ -213,8 +209,7 @@ public class Application {
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.warn(
-                "Polling was interrupted: {}", e.toString());
+            LOG.warn("Polling was interrupted: {}", e.toString());
             break;
           }
         }
