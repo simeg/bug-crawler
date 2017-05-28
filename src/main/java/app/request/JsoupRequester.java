@@ -71,7 +71,7 @@ public class JsoupRequester implements Requester {
           .userAgent(USER_AGENT)
           .get();
     } catch (IOException e) {
-      LOG.warn("{}: Unable to get requested URL=[{}] with error=[{}]", Thread.currentThread().getName(), url, e.toString());
+      LOG.warn("Unable to get requested URL=[{}] with error=[{}]", url, e.toString());
     }
 
     return null;
@@ -86,7 +86,7 @@ public class JsoupRequester implements Requester {
           .execute()
           .statusCode();
     } catch (IOException e) {
-      LOG.warn("{}: Unable to get requested URL={} with error={}", Thread.currentThread().getName(), url, e.toString());
+      LOG.warn("Unable to get requested URL=[{}] with error={}", url, e.toString());
     }
 
     return -1;

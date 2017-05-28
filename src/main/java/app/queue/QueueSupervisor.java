@@ -68,7 +68,7 @@ public class QueueSupervisor {
   <T> boolean isUnique(Set<T> cache, T url) {
     final boolean isUnique = cache.add(url);
     if (!isUnique) {
-//      LOG.info("{}: Skipping duplicate url: {}", Thread.currentThread().getName(), url);
+//      LOG.info("Skipping duplicate url: {}", url);
       return false;
     }
     return true;
@@ -84,7 +84,7 @@ public class QueueSupervisor {
               if (isUnique) {
                 return true;
               } else {
-//                LOG.info("{}: Skipping duplicate url: {}", Thread.currentThread().getName(), url);
+//                LOG.info("Skipping duplicate url: {}", url);
                 return false;
               }
             })

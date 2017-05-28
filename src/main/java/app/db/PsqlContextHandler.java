@@ -29,17 +29,17 @@ public class PsqlContextHandler {
           password);
       DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
 
-      logger.info("{}: Established connection to DB", Thread.currentThread().getName());
+      logger.info("Established connection to DB");
 
       return context;
 
     } catch (ClassNotFoundException e) {
-      logger.error("{}: Class for DB driver not found: {}", Thread.currentThread().getName(), driverClass);
+      logger.error("Class for DB driver not found: {}", driverClass);
       // QUESTION:
       // More graceful way of shutting the entire application down?
       //System.exit(1);
     } catch (SQLException e) {
-      logger.error("{}: Could not connect to DB - is DB started?: {}", Thread.currentThread().getName(), e.toString());
+      logger.error("Could not connect to DB - is DB started?: {}", e.toString());
       //System.exit(1);
     }
 

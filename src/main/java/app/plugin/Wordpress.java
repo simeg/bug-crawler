@@ -38,10 +38,7 @@ public class Wordpress implements Plugin {
 
       // TODO: Find wordpress bugs
     } else {
-      LOG.info(
-          "{}: Website is not a Wordpress instance, will not look for Wordpress bugs",
-          Thread.currentThread().getName()
-      );
+      LOG.info("Website is not a Wordpress instance, will not look for Wordpress bugs");
     }
 
     return Collections.emptySet();

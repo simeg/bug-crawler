@@ -62,7 +62,7 @@ public class PageFinder implements Plugin {
       final boolean isMatching = isMatching(requester, url, fullUrlPath);
 
       if (statusCode == 200 && !isMatching) {
-        LOG.info("{}: Found file {} on URL: {}", Thread.currentThread().getName(), path, url);
+        LOG.info("Found file {} on URL: {}", path, url);
         result.add(
             Bug.create(
                 Bug.BugType.FILE_ACCESS,

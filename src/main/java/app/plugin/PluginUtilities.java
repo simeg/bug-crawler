@@ -30,14 +30,11 @@ public class PluginUtilities {
         return future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
 
       } catch (InterruptedException e) {
-        LOG.error("{}: Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Thread was interrupted {}", e.toString());
       } catch (ExecutionException e) {
-        LOG.error("{}: Future was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Future was interrupted {}", e.toString());
       } catch (TimeoutException e) {
-        LOG.error("{}: Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Future took too long time to finish {}", e.toString());
       }
     }
 

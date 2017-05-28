@@ -36,11 +36,11 @@ public class Crawler {
     final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
 
     if (!Utilities.isValidUrl(fixedUrl)) {
-      LOG.info("{}: URL not valid, will not crawl: {}", Thread.currentThread().getName(), fixedUrl);
+      LOG.info("URL not valid, will not crawl: {}", fixedUrl);
       return Collections.emptySet();
     }
 
-    LOG.info("{}: Getting sub-links for URL: {}", Thread.currentThread().getName(), fixedUrl);
+    LOG.info("Getting sub-links for URL: {}", fixedUrl);
     final CompletableFuture future = this.requester.get(url, UrlRequest.RequestType.HTML);
     final String html = getHtml(future);
 
@@ -66,14 +66,11 @@ public class Crawler {
         return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
 
       } catch (InterruptedException e) {
-        LOG.error("{}: Error when handling future. Thread was interrupted {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Error when handling future. Thread was interrupted {}", e.toString());
       } catch (ExecutionException e) {
-        LOG.error("{}: Error when handling future. Future was completed exceptionally {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Error when handling future. Future was completed exceptionally {}", e.toString());
       } catch (TimeoutException e) {
-        LOG.error("{}: Error when handling future. Future took too long time to finish {}",
-            Thread.currentThread().getName(), e.toString());
+        LOG.error("Error when handling future. Future took too long time to finish {}", e.toString());
       }
     }
 

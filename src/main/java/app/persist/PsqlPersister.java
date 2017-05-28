@@ -35,10 +35,7 @@ public class PsqlPersister<T> implements Persister<T> {
   @Override
   public boolean storeBug(Bug bug) {
     try {
-      LOG.info(
-          "{}: Storing bug: {}",
-          Thread.currentThread().getName(),
-          bug.toString());
+      LOG.info("Storing bug: {}", bug.toString());
 
       this.context.insertInto(
           BUG,
@@ -51,7 +48,7 @@ public class PsqlPersister<T> implements Persister<T> {
               new Timestamp(System.currentTimeMillis()) // Time inserted
           ).execute();
     } catch (DataAccessException e) {
-      LOG.error("{}: Error storing {} in DB: {}", Thread.currentThread().getName(), bug.toString(), e.toString());
+      LOG.error("Error storing {} in DB: {}", bug.toString(), e.toString());
       return false;
     }
 

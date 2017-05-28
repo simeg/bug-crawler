@@ -95,11 +95,10 @@ public class Application {
 
       if (!Utilities.isValidUrl(fixedUrl)) {
         LOG.info(
-            "{}: Consumed URL is invalid - skipping: {}",
-            Thread.currentThread().getName(), fixedUrl);
+            "Consumed URL is invalid - skipping: {}", fixedUrl);
         return;
       } else if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
-        LOG.info("{}: URL is blacklisted - skipping: {}", Thread.currentThread().getName(), fixedUrl);
+        LOG.info("URL is blacklisted - skipping: {}", fixedUrl);
         return;
       }
 
@@ -113,12 +112,10 @@ public class Application {
         supervisor.addToCrawl(subLinks);
 
         LOG.info(
-            "{}: Found {} sub-links for: {}",
-            Thread.currentThread().getName(), String.valueOf(subLinks.size()), fixedUrl);
+            "Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
       } else {
         LOG.info(
-            "{}: No sub-links found for: {}",
-            Thread.currentThread().getName(), fixedUrl);
+            "No sub-links found for: {}", fixedUrl);
       }
     });
 
@@ -170,8 +167,7 @@ public class Application {
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.warn(
-                "{}: Polling was interrupted: {}",
-                Thread.currentThread().getName(), e.toString());
+                "Polling was interrupted: {}", e.toString());
             break;
           }
         }
@@ -190,7 +186,7 @@ public class Application {
       case STATUS_CODE:
         return requester.requestStatusCode(request.url);
       default:
-        LOG.warn("{}: Unknown request type=[{}]", Thread.currentThread().getName(), request.type);
+        LOG.warn("Unknown request type=[{}]", request.type);
         break;
     }
 
@@ -218,8 +214,7 @@ public class Application {
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.warn(
-                "{}: Polling was interrupted: {}",
-                Thread.currentThread().getName(), e.toString());
+                "Polling was interrupted: {}", e.toString());
             break;
           }
         }

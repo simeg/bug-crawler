@@ -19,7 +19,7 @@ public class Analyzer {
   }
 
   public Set<Bug> analyze(String url) {
-    LOG.info("{}: Will now analyze URL: {}", Thread.currentThread().getName(), url);
+    LOG.info("Will now analyze URL: {}", url);
     final Set<Bug> result = Sets.newHashSet();
 
     plugins.forEach((plugin ->
