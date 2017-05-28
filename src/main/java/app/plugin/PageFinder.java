@@ -64,7 +64,7 @@ public class PageFinder implements Plugin {
       if (statusCode == 200 && !isMatching) {
         LOG.info("Found file {} on URL: {}", path, url);
         result.add(
-            Bug.create(
+            new Bug(
                 Bug.BugType.FILE_ACCESS,
                 url,
                 "Access to " + path,

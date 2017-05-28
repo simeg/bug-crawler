@@ -50,7 +50,7 @@ public class CrawlerAPI implements API {
   }
 
   private Bug toBug(Record record) {
-    return Bug.create(
+    return new Bug(
         BugType.valueOf(record.get(BUG.TYPE)),
         record.get(BUG.BASE_URL),
         record.get(BUG.DESCRIPTION),

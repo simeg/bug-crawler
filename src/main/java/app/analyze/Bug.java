@@ -1,6 +1,5 @@
 package app.analyze;
 
-import com.google.common.base.Enums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +10,7 @@ public class Bug {
   private static final Logger LOG = LoggerFactory.getLogger(Bug.class);
 
   public enum BugType {
-    UNKNOWN, FILE_ACCESS, XSS, HTML
+    FILE_ACCESS, XSS, HTML
   }
 
   public final BugType type;
@@ -19,20 +18,11 @@ public class Bug {
   public final String description;
   public final Optional<String> path;
 
-  Bug(BugType type, String baseUrl, String description, Optional<String> path) {
+  public Bug(BugType type, String baseUrl, String description, Optional<String> path) {
     this.type = type;
     this.baseUrl = baseUrl;
     this.description = description;
     this.path = path;
-  }
-
-  public static Bug create(BugType type, String baseUrl, String description, Optional<String> path) {
-    if (!Enums.getIfPresent(BugType.class, type.name()).isPresent()) {
-      LOG.warn("Bug type not found: {}", type);
-      type = BugType.UNKNOWN;
-    }
-
-    return new Bug(type, baseUrl, description, path);
   }
 
   @Override

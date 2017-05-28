@@ -49,7 +49,7 @@ public class HtmlComments implements Plugin {
     return parser.query(html, query)
         .stream()
         .map((element) ->
-            Bug.create(
+            new Bug(
                 Bug.BugType.HTML,
                 url,
                 "String \"" + query + "\" found in HTML",
@@ -68,7 +68,7 @@ public class HtmlComments implements Plugin {
           return e;
         })
         .map((element) ->
-            Bug.create(
+            new Bug(
                 Bug.BugType.HTML,
                 url,
                 "String \"username\" found in HTML", // Not correct
