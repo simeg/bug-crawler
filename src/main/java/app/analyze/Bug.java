@@ -27,8 +27,12 @@ public class Bug {
 
   @Override
   public String toString() {
-    // TODO: about `this.path.get()`, make sure it has a value before using it
-    return String.format("[%s]: %s", this.type.toString(), this.path.get());
+    String path = "";
+    if (this.path.isPresent()) {
+      path = this.path.get();
+    }
+
+    return String.format("[%s]: %s", this.type.toString(), path);
   }
 
 }
