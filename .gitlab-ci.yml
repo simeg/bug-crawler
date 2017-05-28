@@ -1,0 +1,7 @@
+image: maven:3.5.0-jdk-8-alpine
+
+test:
+  script: "mvn test -B"
+
+build:
+  script: "mvn test -B"

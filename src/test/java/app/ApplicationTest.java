@@ -36,7 +36,7 @@ public class ApplicationTest {
     // Just to see that the application starts without any exceptions
 
     // Using "real" DB until I figure out how to use mocked DB
-    application.init(application);
-    application.start("http://www.valid-website.com", supervisor, executor, parser, persister, requester);
+//    application.init(application);
+//    application.start("http://www.valid-website.com", supervisor, executor, parser, persister, requester);
   }
 }

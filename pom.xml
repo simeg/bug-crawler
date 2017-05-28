@@ -146,12 +146,12 @@
             </plugin>
 
             <!-- jOOQ configuration -->
-            <plugin>
+            <!--<plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
                 <version>${jooq.version}</version>
 
-                <!-- The plugin should hook into the generate goal -->
+                &lt;!&ndash; The plugin should hook into the generate goal &ndash;&gt;
                 <executions>
                     <execution>
                         <goals>
@@ -190,7 +190,7 @@
                     </generator>
                 </configuration>
             </plugin>
-
+-->
         </plugins>
     </build>
 
