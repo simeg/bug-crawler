@@ -1,5 +1,7 @@
 package app.db;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -8,12 +10,14 @@ import org.slf4j.Logger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import org.slf4j.LoggerFactory;
 
 public class PsqlContextHandler {
 
+  private static final Logger LOG = LoggerFactory.getLogger(PsqlContextHandler.class);
+
   public static DSLContext getContext(
       String driverClass,
-      Logger logger,
       String host,
       int port,
       String dbName,
@@ -27,22 +31,32 @@ public class PsqlContextHandler {
           String.format("jdbc:postgresql://%s:%d/%s", host, port, dbName),
           username,
           password);
+
+
+      try (PreparedStatement statement = connection.prepareStatement("INSERT ? ")) {
+      statement.execute();
+      }
+
+      try (PreparedStatement statement = connection.prepareStatement("SELECT FROM ... WHERE ... = ? ")) {
+        statement.setString(0, "");
+        try (ResultSet resultSet = statement.getResultSet()) {
+          while (resultSet.next()) {
+            final String data = resultSet.getString("data");
+          }
+        }
+      }
+
       DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
 
-      logger.info("Established connection to DB");
+      LOG.info("Established connection to DB");
 
       return context;
 
     } catch (ClassNotFoundException e) {
-      logger.error("Class for DB driver not found: {}", driverClass);
-      // QUESTION:
-      // More graceful way of shutting the entire application down?
-      //System.exit(1);
-    } catch (SQLException e) {
-      logger.error("Could not connect to DB - is DB started?: {}", e.toString());
-      //System.exit(1);
-    }
+      throw new RuntimeException("Failed find database driver", e);
 
-    return null;
+    } catch (SQLException e) {
+      throw new RuntimeException("Could not connect to DB - is DB started?", e);
+    }
   }
 }

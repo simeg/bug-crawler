@@ -1,7 +1,7 @@
 package app.queue;
 
 import app.persist.Persister;
-
+import com.google.common.collect.Queues;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -13,16 +13,16 @@ public class PersistentQueue<T> {
    * be restarted in the same exact state
    */
 
-  private final BlockingQueue<T> queue;
-  private final Persister<T> persister;
+  private final BlockingQueue<T> queue; // Misha: call it delegate?
+  private final Persister persister;
 
-  private PersistentQueue(BlockingQueue<T> queue, Persister<T> persister) {
+  private PersistentQueue(BlockingQueue<T> queue, Persister persister) {
     this.queue = queue;
     this.persister = persister;
   }
 
-  public static <T> PersistentQueue<T> create(BlockingQueue<T> queue, Persister<T> persister) {
-    return new PersistentQueue<>(queue, persister);
+  public static <T> PersistentQueue<T> create(Persister persister) {
+    return new PersistentQueue<>(Queues.newLinkedBlockingQueue(), persister);
   }
 
   public boolean add(T element) {

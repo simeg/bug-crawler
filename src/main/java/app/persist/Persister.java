@@ -1,16 +1,53 @@
 package app.persist;
 
-import app.analyze.Bug;
+import static app.db.PsqlContextHandler.getContext;
 
 import java.util.Collection;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface Persister<T> {
+public class Persister {
 
-  boolean storeBug(Bug bug);
+  private static final Logger LOG = LoggerFactory.getLogger(Persister.class);
 
-  boolean storeBugs(Collection<Bug> urls);
+  private final DSLContext context;
 
-  boolean store(T url);
+  private Persister(DSLContext context) {
+    this.context = context;
+  }
 
-  boolean store(Collection<T> urls);
+  public static Persister create(
+      String driverClass,
+      String host,
+      int port,
+      String dbName,
+      String username,
+      String password) {
+    return new Persister(getContext(driverClass, host, port, dbName, username, password));
+  }
+
+  public boolean store(Object object) {
+    // Misha:
+    // Any object can be serialized to JSON like this (as long as you configure it's class with
+    // proper annotations like @JsonProperty and stuff):
+    // new ObjectMapper().writeValueAsString(object)
+    return false;
+  }
+
+  public boolean store(Collection<?> urls) {
+    // If at least one element fails to store,
+    // return false
+    boolean aggregatedResult = true;
+
+    for (Object url : urls) {
+      boolean result = store(url);
+      if (!result) {
+        aggregatedResult = false;
+      }
+    }
+
+    return aggregatedResult;
+  }
+
 }

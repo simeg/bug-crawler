@@ -30,7 +30,7 @@ public class CrawlerAPI implements API {
       String dbName,
       String username,
       String password) {
-    return new CrawlerAPI(getContext(driverClass, LOG, host, port, dbName, username, password));
+    return new CrawlerAPI(getContext(driverClass, host, port, dbName, username, password));
   }
 
   @Override

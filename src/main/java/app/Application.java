@@ -1,16 +1,18 @@
 package app;
 
+import static app.util.Utilities.isBlacklisted;
+
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
-import app.persist.PsqlPersister;
 import app.plugin.HtmlComments;
 import app.plugin.PageFinder;
 import app.plugin.Plugin;
 import app.plugin.Wordpress;
+import app.queue.MyQueueId;
 import app.queue.PersistentQueue;
 import app.queue.QueueSupervisor;
 import app.request.JsoupRequester;
@@ -18,15 +20,8 @@ import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,8 +31,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-import static app.util.Utilities.isBlacklisted;
+import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
@@ -56,20 +54,13 @@ public class Application {
     final String initUrl = "http://www.vecka.nu";
 
     final Config conf = ConfigFactory.load();
-    final PsqlPersister persister = getPersister(conf);
+    final Persister persister = getPersister(conf);
 
-    // QUESTION: How to solve this type thing going on?
-    final PersistentQueue<String> subLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<String> crawledLinkQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<Bug> bugsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-    final PersistentQueue<UrlRequest> requestsQueue =
-        PersistentQueue.create(Queues.newLinkedBlockingQueue(), persister);
-
-    final QueueSupervisor supervisor =
-        new QueueSupervisor(subLinkQueue, crawledLinkQueue, bugsQueue, requestsQueue);
+    final QueueSupervisor supervisor = new QueueSupervisor(
+        MyQueues.BUG,
+        MyQueues.CRAWLED,
+        MyQueues.REQUEST,
+        MyQueues.SUBLINK);
 
     final HashMap<String, Document> requestCache = Maps.newHashMap();
     final Requester requester = new JsoupRequester(supervisor.requests(), requestCache);
@@ -103,12 +94,13 @@ public class Application {
 
       final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(fixedUrl);
 
+
       // URL is crawled and ready to be analyzed
       supervisor.addToAnalyze(fixedUrl);
 
       if (subLinks.size() > 0) {
         // Add sub-links back on URL queue
-        supervisor.addToCrawl(subLinks);
+        supervisor.get(MyQueues.CRAWLED).add(subLinks);
 
         LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
       } else {
@@ -116,28 +108,30 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, "Analyzer", executor, supervisor.crawledLinks(), (String urlToAnalyze) -> {
-      if (urlToAnalyze != null) {
-        LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
+    submitWorkerNTimes(10, "Analyzer", executor, supervisor.crawledLinks(),
+        (String urlToAnalyze) -> {
+          if (urlToAnalyze != null) {
+            LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
 
-        final List<Plugin> plugins = Arrays.asList(
-            new HtmlComments(requester, parser),
-            new Wordpress(requester),
-            new PageFinder(requester)
-        );
+            final List<Plugin> plugins = Arrays.asList(
+                new HtmlComments(requester, parser),
+                new Wordpress(requester),
+                new PageFinder(requester)
+            );
 
-        final Analyzer analyzer = new Analyzer(plugins);
-        final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
+            final Analyzer analyzer = new Analyzer(plugins);
+            final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-        supervisor.addToPersist(bugs);
-      }
-    });
+            supervisor.addToPersist(bugs);
+          }
+        });
 
     submitWorkerNTimes(10, "Persister", executor, supervisor.bugs(), (Bug bug) -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
-        persister.storeBug(bug);
+        // Misha: what's with this
+//        persister.storeBug(bug);
       }
     });
 
@@ -219,8 +213,8 @@ public class Application {
     }
   }
 
-  private PsqlPersister getPersister(Config conf) {
-    return PsqlPersister.create(
+  private Persister getPersister(Config conf) {
+    return Persister.create(
         "org.postgresql.Driver",
         conf.getString("db.host"),
         conf.getInt("db.port"),
@@ -229,4 +223,12 @@ public class Application {
         conf.getString("db.password"));
   }
 
+
+  public static class MyQueues {
+
+    static QueueSupervisor.QueueId<Bug> BUG = new QueueSupervisor.QueueId<>();
+    static QueueSupervisor.QueueId<String> SUBLINK = new QueueSupervisor.QueueId<>();
+    static QueueSupervisor.QueueId<String> CRAWLED = new QueueSupervisor.QueueId<>();
+    static QueueSupervisor.QueueId<String> REQUEST = new QueueSupervisor.QueueId<>();
+  }
 }

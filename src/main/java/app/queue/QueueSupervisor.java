@@ -2,7 +2,11 @@ package app.queue;
 
 import app.analyze.Bug;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Queue;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,18 +26,22 @@ public class QueueSupervisor {
   private final Set<String> analyzedLinksCache;
   private final Set<String> crawledLinksCache;
 
+  private final ImmutableMap<QueueId, PersistentQueue> queues;
+
   // TODO: Make it possible to only send in pass in one PersistentQueue
-  public QueueSupervisor(
-      PersistentQueue<String> subLinkQueue,
-      PersistentQueue<String> crawledLinkQueue,
-      PersistentQueue<Bug> bugsQueue,
-      PersistentQueue<UrlRequest> requestQueue) {
-    QueueSupervisor.subLinkQueue = subLinkQueue;
-    QueueSupervisor.crawledLinkQueue = crawledLinkQueue;
-    QueueSupervisor.bugsQueue = bugsQueue;
-    QueueSupervisor.requestQueue = requestQueue;
+  public QueueSupervisor(QueueId... ids) {
+
+    // Misha: TODO: create a queue for each queue id
+    for (QueueId id : ids) {
+    }
+    queues = ImmutableMap.of();
+
     analyzedLinksCache = Sets.newHashSet();
     crawledLinksCache = Sets.newHashSet();
+  }
+
+  public <T> PersistentQueue<T> get(QueueId<T> id) {
+    return (PersistentQueue<T>) queues.get(id);
   }
 
   /*
@@ -124,5 +132,8 @@ public class QueueSupervisor {
 
   public static int getBugsLinksInQueue() {
     return bugsQueue.size();
+  }
+
+  public static class QueueId<T> {
   }
 }
