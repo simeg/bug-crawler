@@ -4,6 +4,7 @@ import app.parse.Parser;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
@@ -15,12 +16,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static app.util.Utilities.getFutureResult;
+
 public class Crawler {
   /*
    * Finds sub-links for consumed URL
    */
 
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Crawler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Crawler.class);
 
   private static final int FUTURE_TIMEOUT = 10;
 
@@ -42,7 +45,7 @@ public class Crawler {
 
     LOG.info("Getting sub-links for URL: {}", fixedUrl);
     final CompletableFuture future = this.requester.get(url, UrlRequest.RequestType.HTML);
-    final String html = getHtml(future);
+    final String html = String.valueOf(getFutureResult(future));
 
     // Select all <a> elements with an href attribute and return their href values
     final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "href");

@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.plugin.PluginUtilities.getFutureResult;
-import static app.plugin.PluginUtilities.isMatching;
+import static app.util.Utilities.getFutureResult;
+import static app.util.Utilities.isMatching;
 
 public class SubPage implements Plugin {
 

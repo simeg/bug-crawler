@@ -130,12 +130,12 @@ public class Application {
       }
     });
 
-    submitRequestWorkers(10, "Requester", executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
+    submitRequestWorkers(10, executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
   }
 
+  @SuppressWarnings("unchecked")
   private void submitRequestWorkers(
       final int times,
-      String threadName,
       ExecutorService executor,
       SimpleQueue<UrlRequest> queue,
       Requester requester) {
@@ -143,7 +143,7 @@ public class Application {
       final int number = i;
       executor.submit(() -> {
         final String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName(threadName + "-" + number);
+        Thread.currentThread().setName("Requester" + "-" + number);
 
         while (true) {
           try {
