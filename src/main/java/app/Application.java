@@ -12,9 +12,9 @@ import app.plugin.HtmlComments;
 import app.plugin.PageFinder;
 import app.plugin.Plugin;
 import app.plugin.Wordpress;
-import app.queue.MyQueueId;
-import app.queue.PersistentQueue;
+import app.queue.QueueId;
 import app.queue.QueueSupervisor;
+import app.queue.SimpleQueue;
 import app.request.JsoupRequester;
 import app.request.Requester;
 import app.request.UrlRequest;
@@ -56,18 +56,14 @@ public class Application {
     final Config conf = ConfigFactory.load();
     final Persister persister = getPersister(conf);
 
-    final QueueSupervisor supervisor = new QueueSupervisor(
-        MyQueues.BUG,
-        MyQueues.CRAWLED,
-        MyQueues.REQUEST,
-        MyQueues.SUBLINK);
+    final QueueSupervisor supervisor = QueueSupervisor.create(persister);
 
     final HashMap<String, Document> requestCache = Maps.newHashMap();
-    final Requester requester = new JsoupRequester(supervisor.requests(), requestCache);
+    final Requester requester = new JsoupRequester(supervisor.get(QueueId.REQUEST), requestCache);
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
-    app.start(initUrl, supervisor, executor, parser, persister, requester);
+    app.start(initUrl, supervisor, executor, parser, requester);
   }
 
   void start(
@@ -75,11 +71,10 @@ public class Application {
       QueueSupervisor supervisor,
       ExecutorService executor,
       Parser parser,
-      Persister persister,
       Requester requester) {
-    supervisor.addToCrawl(initUrl);
+    supervisor.get(QueueId.SUBLINK).add(initUrl);
 
-    submitWorkerNTimes(10, "Crawler", executor, supervisor.subLinks(), (String urlToCrawl) -> {
+    submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.SUBLINK), (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
@@ -94,13 +89,12 @@ public class Application {
 
       final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(fixedUrl);
 
-
       // URL is crawled and ready to be analyzed
-      supervisor.addToAnalyze(fixedUrl);
+      supervisor.get(QueueId.CRAWLED).add(fixedUrl);
 
       if (subLinks.size() > 0) {
         // Add sub-links back on URL queue
-        supervisor.get(MyQueues.CRAWLED).add(subLinks);
+        subLinks.forEach(link -> supervisor.get(QueueId.CRAWLED).add(link));
 
         LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
       } else {
@@ -108,7 +102,7 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, "Analyzer", executor, supervisor.crawledLinks(),
+    submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.CRAWLED),
         (String urlToAnalyze) -> {
           if (urlToAnalyze != null) {
             LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
@@ -122,11 +116,11 @@ public class Application {
             final Analyzer analyzer = new Analyzer(plugins);
             final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-            supervisor.addToPersist(bugs);
+            bugs.forEach(bug -> supervisor.get(QueueId.BUG).add(bug));
           }
         });
 
-    submitWorkerNTimes(10, "Persister", executor, supervisor.bugs(), (Bug bug) -> {
+    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.BUG), (Bug bug) -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
@@ -135,14 +129,14 @@ public class Application {
       }
     });
 
-    submitRequestWorkers(10, "Requester", executor, supervisor.requests(), requester);
+    submitRequestWorkers(10, "Requester", executor, supervisor.get(QueueId.REQUEST), requester);
   }
 
   private void submitRequestWorkers(
       final int times,
       String threadName,
       ExecutorService executor,
-      PersistentQueue<UrlRequest> queue,
+      SimpleQueue<UrlRequest> queue,
       Requester requester) {
     for (int i = 0; i < times; i++) {
       final int number = i;
@@ -187,7 +181,7 @@ public class Application {
       final int times,
       String threadName,
       ExecutorService executor,
-      PersistentQueue<T> queue,
+      SimpleQueue<T> queue,
       Consumer<T> jobToDo) {
     for (int i = 0; i < times; i++) {
       final int number = i;
@@ -223,12 +217,4 @@ public class Application {
         conf.getString("db.password"));
   }
 
-
-  public static class MyQueues {
-
-    static QueueSupervisor.QueueId<Bug> BUG = new QueueSupervisor.QueueId<>();
-    static QueueSupervisor.QueueId<String> SUBLINK = new QueueSupervisor.QueueId<>();
-    static QueueSupervisor.QueueId<String> CRAWLED = new QueueSupervisor.QueueId<>();
-    static QueueSupervisor.QueueId<String> REQUEST = new QueueSupervisor.QueueId<>();
-  }
 }

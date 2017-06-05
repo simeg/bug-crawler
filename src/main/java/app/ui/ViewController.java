@@ -3,7 +3,6 @@ package app.ui;
 import app.analyze.Bug;
 import app.api.API;
 import app.api.CrawlerAPI;
-import app.queue.QueueSupervisor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -32,9 +31,10 @@ public class ViewController {
 
   @RequestMapping("/")
   public String indexAction(ModelMap model) {
-    model.addAttribute("subLinkQueueSize", QueueSupervisor.getSubLinksInQueue());
-    model.addAttribute("urlQueueSize", QueueSupervisor.getCrawledLinksInQueue());
-    model.addAttribute("bugQueueSize", QueueSupervisor.getBugsLinksInQueue());
+    // TODO Inject QueueSupervisor
+    // model.addAttribute("subLinkQueueSize", supervisor.get(QueueId.SUBLINK).size());
+    // model.addAttribute("urlQueueSize", supervisor.get(QueueId.CRAWLED).size());
+    // model.addAttribute("bugQueueSize", supervisor.get(QueueId.BUG).size());
 
     // All bugs are here. Now map to some unordered list
     List<Bug> bugs = this.api.getAllBugs();

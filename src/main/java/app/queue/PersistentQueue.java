@@ -1,48 +1,33 @@
 package app.queue;
 
 import app.persist.Persister;
-import com.google.common.collect.Queues;
-import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class PersistentQueue<T> {
-  /*
-   * For each transaction - persist in DB
-   * so if application shuts down, it can
-   * be restarted in the same exact state
-   */
+public class PersistentQueue<T> implements SimpleQueue<T> {
 
-  private final BlockingQueue<T> queue; // Misha: call it delegate?
   private final Persister persister;
+  private final SimpleQueue<T> queue;
 
-  private PersistentQueue(BlockingQueue<T> queue, Persister persister) {
-    this.queue = queue;
+  public PersistentQueue(Persister persister, SimpleQueue<T> queue) {
     this.persister = persister;
+    this.queue = queue;
   }
 
-  public static <T> PersistentQueue<T> create(Persister persister) {
-    return new PersistentQueue<>(Queues.newLinkedBlockingQueue(), persister);
+  @Override
+  public void add(T item) {
+    persister.store(item);
+    queue.add(item);
   }
 
-  public boolean add(T element) {
-    this.persister.store(element);
-    return this.queue.add(element);
-  }
-
-  public boolean add(Collection<T> elements) {
-    this.persister.store(elements);
-    return this.queue.addAll(elements);
-  }
-
+  @Override
   public T poll(long timeout, TimeUnit unit) throws InterruptedException {
-    T element = this.queue.poll(timeout, unit);
-
-    this.persister.store(element);
-    return element;
+    T item = queue.poll(timeout, unit);
+    persister.remove(item);
+    return item;
   }
 
+  @Override
   public int size() {
-    return this.queue.size();
+    return queue.size();
   }
 }

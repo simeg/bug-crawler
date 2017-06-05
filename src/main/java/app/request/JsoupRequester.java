@@ -1,14 +1,13 @@
 package app.request;
 
-import app.queue.PersistentQueue;
+import app.queue.SimpleQueue;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
 
 public class JsoupRequester implements Requester {
 
@@ -19,10 +18,10 @@ public class JsoupRequester implements Requester {
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
           "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
-  private final PersistentQueue<UrlRequest> queue;
+  private final SimpleQueue<UrlRequest> queue;
   private final HashMap<String, Document> cache;
 
-  public JsoupRequester(PersistentQueue queue, HashMap<String, Document> requestCache) {
+  public JsoupRequester(SimpleQueue<UrlRequest> queue, HashMap<String, Document> requestCache) {
     this.queue = queue;
     this.cache = requestCache;
   }
