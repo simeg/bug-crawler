@@ -26,10 +26,9 @@ public class QueueSupervisor {
   }
 
   static SimpleQueue<?> createQueue(Persister persister) {
-    return new CachingQueue<>(
-        new PersistentQueue<>(
-            persister,
-            SimpleQueue.create(Queues.newLinkedBlockingQueue())));
+    return new PersistentQueue<>(
+        persister,
+        SimpleQueue.create(Queues.newLinkedBlockingQueue()));
   }
 
   @SuppressWarnings("unchecked")
