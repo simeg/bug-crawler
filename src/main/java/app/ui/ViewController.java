@@ -32,9 +32,9 @@ public class ViewController {
   @RequestMapping("/")
   public String indexAction(ModelMap model) {
     // TODO Inject QueueSupervisor
-    // model.addAttribute("subLinkQueueSize", supervisor.get(QueueId.SUBLINK).size());
-    // model.addAttribute("urlQueueSize", supervisor.get(QueueId.CRAWLED).size());
-    // model.addAttribute("bugQueueSize", supervisor.get(QueueId.BUG).size());
+    // model.addAttribute("subLinkQueueSize", supervisor.get(QueueId.TO_BE_CRAWLED).size());
+    // model.addAttribute("urlQueueSize", supervisor.get(QueueId.TO_BE_ANALYZED).size());
+    // model.addAttribute("bugQueueSize", supervisor.get(QueueId.TO_BE_STORED_AS_BUG).size());
 
     // All bugs are here. Now map to some unordered list
     List<Bug> bugs = this.api.getAllBugs();

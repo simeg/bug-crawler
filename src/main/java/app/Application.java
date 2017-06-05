@@ -1,7 +1,5 @@
 package app;
 
-import static app.util.Utilities.isBlacklisted;
-
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
@@ -22,6 +20,12 @@ import app.util.Utilities;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,11 +35,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import static app.util.Utilities.isBlacklisted;
 
 @SpringBootApplication(scanBasePackages = {"app"})
 public class Application {
@@ -59,7 +60,7 @@ public class Application {
     final QueueSupervisor supervisor = QueueSupervisor.create(persister);
 
     final HashMap<String, Document> requestCache = Maps.newHashMap();
-    final Requester requester = new JsoupRequester(supervisor.get(QueueId.REQUEST), requestCache);
+    final Requester requester = new JsoupRequester(supervisor.get(QueueId.TO_BE_REQUESTED), requestCache);
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
@@ -72,9 +73,9 @@ public class Application {
       ExecutorService executor,
       Parser parser,
       Requester requester) {
-    supervisor.get(QueueId.SUBLINK).add(initUrl);
+    supervisor.get(QueueId.TO_BE_CRAWLED).add(initUrl);
 
-    submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.SUBLINK), (String urlToCrawl) -> {
+    submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED), (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
       final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
@@ -90,11 +91,11 @@ public class Application {
       final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(fixedUrl);
 
       // URL is crawled and ready to be analyzed
-      supervisor.get(QueueId.CRAWLED).add(fixedUrl);
+      supervisor.get(QueueId.TO_BE_ANALYZED).add(fixedUrl);
 
       if (subLinks.size() > 0) {
         // Add sub-links back on URL queue
-        subLinks.forEach(link -> supervisor.get(QueueId.CRAWLED).add(link));
+        subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_ANALYZED).add(link));
 
         LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
       } else {
@@ -102,7 +103,7 @@ public class Application {
       }
     });
 
-    submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.CRAWLED),
+    submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
           if (urlToAnalyze != null) {
             LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
@@ -116,11 +117,11 @@ public class Application {
             final Analyzer analyzer = new Analyzer(plugins);
             final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-            bugs.forEach(bug -> supervisor.get(QueueId.BUG).add(bug));
+            bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
           }
         });
 
-    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.BUG), (Bug bug) -> {
+    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG), (Bug bug) -> {
       if (bug != null) {
         LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
@@ -129,7 +130,7 @@ public class Application {
       }
     });
 
-    submitRequestWorkers(10, "Requester", executor, supervisor.get(QueueId.REQUEST), requester);
+    submitRequestWorkers(10, "Requester", executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
   }
 
   private void submitRequestWorkers(

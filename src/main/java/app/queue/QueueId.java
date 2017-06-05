@@ -8,10 +8,10 @@ import java.util.Set;
 
 public interface QueueId<T> {
 
-  QueueId<Bug> BUG = Registry.create();
-  QueueId<String> SUBLINK = Registry.create();
-  QueueId<String> CRAWLED = Registry.create();
-  QueueId<UrlRequest> REQUEST = Registry.create();
+  QueueId<Bug> TO_BE_STORED_AS_BUG = Registry.create();
+  QueueId<String> TO_BE_CRAWLED = Registry.create();
+  QueueId<String> TO_BE_ANALYZED = Registry.create();
+  QueueId<UrlRequest> TO_BE_REQUESTED = Registry.create();
 
   class Registry {
 
