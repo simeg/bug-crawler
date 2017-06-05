@@ -2,7 +2,6 @@ package app.persist;
 
 import static app.db.PsqlContextHandler.getContext;
 
-import java.util.Collection;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,27 +26,14 @@ public class Persister {
     return new Persister(getContext(driverClass, host, port, dbName, username, password));
   }
 
-  public boolean store(Object object) {
+  public void store(Object item) {
     // Misha:
     // Any object can be serialized to JSON like this (as long as you configure it's class with
     // proper annotations like @JsonProperty and stuff):
     // new ObjectMapper().writeValueAsString(object)
-    return false;
   }
 
-  public boolean store(Collection<?> urls) {
-    // If at least one element fails to store,
-    // return false
-    boolean aggregatedResult = true;
-
-    for (Object url : urls) {
-      boolean result = store(url);
-      if (!result) {
-        aggregatedResult = false;
-      }
-    }
-
-    return aggregatedResult;
+  public void remove(Object item) {
+    // TODO
   }
-
 }
