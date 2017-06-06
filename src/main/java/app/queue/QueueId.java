@@ -13,6 +13,10 @@ public interface QueueId<T> {
   QueueId<String> TO_BE_ANALYZED = Registry.create();
   QueueId<UrlRequest> TO_BE_REQUESTED = Registry.create();
 
+  static void initialize() {
+    // Dummy method to be called to force static initialization of this class
+  }
+
   class Registry {
 
     private static Set<QueueId> ALL_IDS = Sets.newHashSet();
@@ -25,6 +29,7 @@ public interface QueueId<T> {
     }
 
     static ImmutableSet<QueueId> getAll() {
+      QueueId.initialize();
       return ImmutableSet.copyOf(ALL_IDS);
     }
   }
