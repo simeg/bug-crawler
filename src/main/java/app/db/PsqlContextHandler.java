@@ -1,16 +1,14 @@
 package app.db;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import org.slf4j.LoggerFactory;
 
 public class PsqlContextHandler {
 
@@ -32,7 +30,7 @@ public class PsqlContextHandler {
           username,
           password);
 
-
+/*
       try (PreparedStatement statement = connection.prepareStatement("INSERT ? ")) {
       statement.execute();
       }
@@ -45,6 +43,7 @@ public class PsqlContextHandler {
           }
         }
       }
+*/
 
       DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
 

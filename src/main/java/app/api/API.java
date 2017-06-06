@@ -1,12 +1,58 @@
 package app.api;
 
 import app.analyze.Bug;
+import app.analyze.Bug.BugType;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface API {
+import static app.db.PsqlContextHandler.getContext;
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
 
-  List<Bug> getAllBugs();
+public class API {
 
-  List<Bug> getBugs(String url);
+  private static final Logger LOG = LoggerFactory.getLogger(API.class);
+
+  private final DSLContext context;
+
+  public API(DSLContext context) {
+    this.context = context;
+  }
+
+  public static API create(
+      String driverClass,
+      String host,
+      int port,
+      String dbName,
+      String username,
+      String password) {
+    return new API(getContext(driverClass, host, port, dbName, username, password));
+  }
+
+  public List<Bug> getAllBugs() {
+    return this.context.select()
+        .from(BUG)
+        .fetch()
+        .map(this::toBug);
+  }
+
+  public List<Bug> getBugs(String url) {
+    return context.selectFrom(BUG)
+        .where(BUG.BASE_URL.equal(url))
+        .fetch()
+        .map(this::toBug);
+  }
+
+  private Bug toBug(Record record) {
+    return new Bug(
+        BugType.valueOf(record.get(BUG.TYPE)),
+        record.get(BUG.BASE_URL),
+        record.get(BUG.DESCRIPTION),
+        Optional.of(record.get("path").toString())
+    );
+  }
 }
