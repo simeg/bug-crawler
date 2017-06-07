@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +62,7 @@ public final class Utilities {
   public static boolean isBlacklisted(String domain) {
     // TODO: Add github to list when vecka.nu is not used as
     // test website anymore
-    final Set<String> blacklist = Sets.newHashSet(
+    return Sets.newHashSet(
         "google.com",
         "youtube.com",
         "facebook.com",
@@ -75,8 +74,7 @@ public final class Utilities {
         "twitter.com",
         "instagram.com",
         "linkedin.com"
-    );
-    return blacklist.contains(domain);
+    ).contains(domain);
   }
 
   public static Object getFutureResult(CompletableFuture future) {
