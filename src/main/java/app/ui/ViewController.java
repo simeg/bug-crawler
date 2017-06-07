@@ -34,19 +34,20 @@ public class ViewController {
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public String formSubmit(@ModelAttribute Options options) {
+    api.runApp(options.getUrl());
     return "running";
   }
 
-  public static class Options {
+  private static class Options {
 
-    private String website;
+    private String url;
 
-    public String getWebsite() {
-      return website;
+    public String getUrl() {
+      return url;
     }
 
-    public void setWebsite(String website) {
-      this.website = website;
+    public void setUrl(String url) {
+      this.url = url;
     }
   }
 

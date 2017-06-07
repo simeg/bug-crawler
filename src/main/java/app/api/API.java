@@ -1,5 +1,6 @@
 package app.api;
 
+import app.Application;
 import app.analyze.Bug;
 import app.analyze.Bug.BugType;
 import org.jooq.DSLContext;
@@ -31,6 +32,10 @@ public class API {
       String username,
       String password) {
     return new API(getContext(driverClass, host, port, dbName, username, password));
+  }
+
+  public void runApp(String url) {
+    new Application().init(url);
   }
 
   public List<Bug> getAllBugs() {

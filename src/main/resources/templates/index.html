@@ -31,7 +31,7 @@
 <section class="row" id="outer-container">
     <section class="col-md-6 col-md-offset-3">
         <form method="post" action="#" th:action="@{/}" th:object="${options}">
-            <input type="text" class="form-control" th:field="*{website}" placeholder="URL"/>
+            <input type="text" class="form-control" th:field="*{url}" placeholder="URL"/>
             <section id="button-group">
                 <button class="btn btn-default" type="submit">Submit</button>
                 <button class="btn btn-default" type="reset">Reset</button>

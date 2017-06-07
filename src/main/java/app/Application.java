@@ -45,15 +45,10 @@ public class Application {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     final Application app = new Application();
-
-    app.init(app);
     SpringApplication.run(app.getClass(), args);
   }
 
-  void init(Application app) {
-    // TODO: Get this from a website form
-    final String initUrl = "http://www.vecka.nu";
-
+  public void init(String url) {
     final Config conf = ConfigFactory.load();
     final Persister persister = getPersister(conf);
 
@@ -64,16 +59,16 @@ public class Application {
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
-    app.start(initUrl, supervisor, executor, parser, requester);
+    start(url, supervisor, executor, parser, requester);
   }
 
-  void start(
-      String initUrl,
+  private void start(
+      String url,
       QueueSupervisor supervisor,
       ExecutorService executor,
       Parser parser,
       Requester requester) {
-    supervisor.get(QueueId.TO_BE_CRAWLED).add(initUrl);
+    supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
     submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED), (String urlToCrawl) -> {
       LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
