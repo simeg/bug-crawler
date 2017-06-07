@@ -10,8 +10,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @EnableAutoConfiguration
@@ -24,13 +26,28 @@ public class ViewController {
     api = context.getBean(API.class);
   }
 
-  @RequestMapping("/")
-  public String indexAction(ModelMap model) {
-//     model.addAttribute("subLinkQueueSize", supervisor.get(QueueId.TO_BE_CRAWLED).size());
-    // model.addAttribute("urlQueueSize", supervisor.get(QueueId.TO_BE_ANALYZED).size());
-    // model.addAttribute("bugQueueSize", supervisor.get(QueueId.TO_BE_STORED_AS_BUG).size());
-
+  @RequestMapping(value = "/", method = RequestMethod.GET)
+  public String indexForm(Model model) {
+    model.addAttribute("options", new Options());
     return "index";
+  }
+
+  @RequestMapping(value = "/", method = RequestMethod.POST)
+  public String formSubmit(@ModelAttribute Options options) {
+    return "running";
+  }
+
+  public static class Options {
+
+    private String website;
+
+    public String getWebsite() {
+      return website;
+    }
+
+    public void setWebsite(String website) {
+      this.website = website;
+    }
   }
 
   @Configuration

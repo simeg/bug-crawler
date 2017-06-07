@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 
 import static app.util.Utilities.isBlacklisted;
 
-@SpringBootApplication(scanBasePackages = {"app"})
+@SpringBootApplication
 public class Application {
 
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
