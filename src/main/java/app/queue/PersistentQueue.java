@@ -15,7 +15,7 @@ public class PersistentQueue<T> implements SimpleQueue<T> {
 
   @Override
   public void add(T item) {
-    persister.store(item);
+    persister.storeQueueItem(item);
     queue.add(item);
   }
 

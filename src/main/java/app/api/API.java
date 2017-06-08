@@ -1,41 +1,35 @@
 package app.api;
 
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
+
 import app.Application;
 import app.analyze.Bug;
 import app.analyze.Bug.BugType;
+import java.util.List;
+import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-
-import static app.db.PsqlContextHandler.getContext;
-import static org.jooq.util.maven.web_crawler.Tables.BUG;
-
+@Component
 public class API {
 
   private static final Logger LOG = LoggerFactory.getLogger(API.class);
 
+  private final Application app;
   private final DSLContext context;
 
-  public API(DSLContext context) {
+  @Autowired
+  public API(DSLContext context, Application app) {
+    this.app = app;
     this.context = context;
   }
 
-  public static API create(
-      String driverClass,
-      String host,
-      int port,
-      String dbName,
-      String username,
-      String password) {
-    return new API(getContext(driverClass, host, port, dbName, username, password));
-  }
-
   public void runApp(String url) {
-    new Application().init(url);
+    app.init(url);
   }
 
   public List<Bug> getAllBugs() {

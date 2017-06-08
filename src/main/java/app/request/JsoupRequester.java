@@ -16,7 +16,7 @@ public class JsoupRequester implements Requester {
   private static final int TIMEOUT = 10000;
   private static final String USER_AGENT =
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
-          "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+      "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final SimpleQueue<UrlRequest> queue;
   private final HashMap<String, Document> cache;
@@ -41,9 +41,7 @@ public class JsoupRequester implements Requester {
     }
 
     final Document result = this.makeRequest(url);
-    if (result != null) {
-      cache.put(url, result);
-    }
+    cache.put(url, result);
 
     return result;
   }
@@ -55,16 +53,10 @@ public class JsoupRequester implements Requester {
     }
 
     final Document result = this.makeRequest(url);
+    cache.put(url, result);
 
-    if (result != null) {
-      cache.put(url, result);
-      // Only hash the content of the <body> element
-      return result.body().html().hashCode();
-    }
-
-    // QUESTION:
-    // Throw exception here instead?
-    return null;
+    // Only hash the content of the <body> element
+    return result.body().html().hashCode();
   }
 
   private Document makeRequest(String url) {
@@ -74,12 +66,8 @@ public class JsoupRequester implements Requester {
           .userAgent(USER_AGENT)
           .get();
     } catch (IOException e) {
-      LOG.warn("Unable to get requested URL=[{}] with error=[{}]", url, e.toString());
+      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
     }
-
-    // QUESTION:
-    // Throw exception here instead?
-    return null;
   }
 
   @Override
@@ -91,11 +79,7 @@ public class JsoupRequester implements Requester {
           .execute()
           .statusCode();
     } catch (IOException e) {
-      LOG.warn("Unable to get requested URL=[{}] with error=[{}]", url, e.toString());
+      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
     }
-
-    // QUESTION:
-    // Throw exception here instead?
-    return -1;
   }
 }
