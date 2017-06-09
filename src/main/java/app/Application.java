@@ -41,7 +41,7 @@ public class Application {
 
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
-  private boolean isRunning = false;
+  public boolean isRunning = false;
 
   public void init(String url) {
     isRunning = true;

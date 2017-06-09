@@ -1,18 +1,19 @@
 package app.api;
 
-import static org.jooq.util.maven.web_crawler.Tables.BUG;
-
 import app.Application;
 import app.analyze.Bug;
 import app.analyze.Bug.BugType;
-import java.util.List;
-import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
 
 @Component
 public class API {
@@ -30,6 +31,10 @@ public class API {
 
   public void runApp(String url) {
     app.init(url);
+  }
+
+  public boolean isRunning() {
+    return app.isRunning;
   }
 
   public List<Bug> getAllBugs() {

@@ -1,6 +1,8 @@
 package app.ui;
 
 import app.api.API;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @EnableAutoConfiguration
 public class ViewController {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ViewController.class);
 
   private final API api;
 
@@ -28,6 +32,12 @@ public class ViewController {
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public String formSubmit(@ModelAttribute Options options) {
+    if (api.isRunning()) {
+      LOG.warn("URL is already being worked on - will not start working on [{}]", options.getUrl());
+      // TODO: Warn user via an JS alert or something
+      return "index";
+    }
+
     api.runApp(options.getUrl());
     return "running";
   }
