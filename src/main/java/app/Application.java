@@ -44,6 +44,8 @@ public class Application {
   private boolean isRunning = false;
 
   public void init(String url) {
+    isRunning = true;
+
     final Config conf = ConfigFactory.load();
     final Persister persister = getPersister(conf);
 
