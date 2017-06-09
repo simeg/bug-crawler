@@ -1,7 +1,5 @@
 package app;
 
-import static app.util.Utilities.isBlacklisted;
-
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
@@ -22,6 +20,11 @@ import app.util.Utilities;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -30,17 +33,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+
+import static app.util.Utilities.isBlacklisted;
 
 @Component
 public class Application {
 
   private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
-  // TODO
   private boolean isRunning = false;
 
   public void init(String url) {
@@ -67,7 +67,7 @@ public class Application {
       Persister persister) {
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
-    submitWorkerNTimes(10, "Crawler", persister, executor, supervisor.get(QueueId.TO_BE_CRAWLED),
+    submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
         (String urlToCrawl) -> {
           LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
@@ -96,7 +96,7 @@ public class Application {
           }
         });
 
-    submitWorkerNTimes(10, "Analyzer", persister, executor, supervisor.get(QueueId.TO_BE_ANALYZED),
+    submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
           if (urlToAnalyze != null) {
             LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
@@ -114,14 +114,13 @@ public class Application {
           }
         });
 
-    submitWorkerNTimes(10, "Persister", persister, executor,
-        supervisor.get(QueueId.TO_BE_STORED_AS_BUG), (Bug bug) -> {
-          if (bug != null) {
-            LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
+    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG), (Bug bug) -> {
+      if (bug != null) {
+        LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
 
-            persister.storeBug(bug);
-          }
-        });
+        persister.storeBug(bug);
+      }
+    });
 
     submitRequestWorkers(10, executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
   }
@@ -174,7 +173,6 @@ public class Application {
   private <T> void submitWorkerNTimes(
       final int times,
       String threadName,
-      Persister persister,
       ExecutorService executor,
       SimpleQueue<T> queue,
       Consumer<T> jobToDo) {
