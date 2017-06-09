@@ -11,9 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static app.util.Utilities.getFutureResult;
@@ -24,8 +21,6 @@ public class Crawler {
    */
 
   private static final Logger LOG = LoggerFactory.getLogger(Crawler.class);
-
-  private static final int FUTURE_TIMEOUT = 10;
 
   private final Requester requester;
   private final Parser parser;
@@ -39,12 +34,12 @@ public class Crawler {
     final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
 
     if (!Utilities.isValidUrl(fixedUrl)) {
-      LOG.info("URL not valid, will not crawl: {}", fixedUrl);
+      LOG.info("URL not valid, will not crawl [{}]", fixedUrl);
       return Collections.emptySet();
     }
 
-    LOG.info("Getting sub-links for URL: {}", fixedUrl);
-    final CompletableFuture future = this.requester.get(url, UrlRequest.RequestType.HTML);
+    LOG.info("Getting sub-links for URL [{}]", fixedUrl);
+    final CompletableFuture future = this.requester.get(fixedUrl, UrlRequest.RequestType.HTML);
     final String html = String.valueOf(getFutureResult(future));
 
     // Select all <a> elements with an href attribute and return their href values
@@ -61,23 +56,6 @@ public class Crawler {
     }
 
     return Collections.emptySet();
-  }
-
-  private static String getHtml(CompletableFuture future) {
-    while (!future.isDone()) {
-      try {
-        return String.valueOf(future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS));
-
-      } catch (InterruptedException e) {
-        LOG.error("Error when handling future. Thread was interrupted {}", e.toString());
-      } catch (ExecutionException e) {
-        LOG.error("Error when handling future. Future was completed exceptionally {}", e.toString());
-      } catch (TimeoutException e) {
-        LOG.error("Error when handling future. Future took too long time to finish {}", e.toString());
-      }
-    }
-
-    return null;
   }
 
   boolean isValidLink(String receivedLink) {
