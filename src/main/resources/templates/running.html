@@ -14,6 +14,10 @@
 
     <script th:inline="javascript">
 
+        const init = () => {
+            document.getElementById('noOfBugsFound').innerHTML = 'I found 0 bugs';
+        };
+
         const setBugsFoundInDom = (noOfBugs) => {
             const node = document.getElementById('noOfBugsFound');
             node.innerHTML = `I have found ${noOfBugs} bugs`;
@@ -30,6 +34,7 @@
             }).catch((err) => console.error(err));
         };
 
+        init();
         const intervalID = setInterval(fetchNoOfBugs, 1000);
 
     </script>
@@ -41,7 +46,7 @@
     <a href="/">Go back</a>
     <br/>
     <h3>Results</h3>
-    <p id="noOfBugsFound">I found 0 bugs</p>
+    <span id="noOfBugsFound"></span>
 </section>
 </body>
 </html>
