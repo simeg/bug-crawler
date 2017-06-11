@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @EnableAutoConfiguration
@@ -42,6 +43,12 @@ public class ViewController {
     return "running";
   }
 
+  @ResponseBody
+  @RequestMapping(value = "/bugs", method = RequestMethod.GET)
+  public Response getBugs(Model model) {
+    return new Response(api.getAllBugs().size());
+  }
+
   private static class Options {
 
     private String url;
@@ -54,4 +61,22 @@ public class ViewController {
       this.url = url;
     }
   }
+
+  private static class Response {
+
+    private int noOfBugs;
+
+    public Response(int noOfBugs) {
+      this.noOfBugs = noOfBugs;
+    }
+
+    public int getNoOfBugs() {
+      return noOfBugs;
+    }
+
+    public void setNoOfBugs(int noOfBugs) {
+      this.noOfBugs = noOfBugs;
+    }
+  }
+
 }
