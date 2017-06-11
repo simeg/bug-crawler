@@ -21,19 +21,18 @@ public final class Utilities {
   private static final int FUTURE_TIMEOUT = 10;
 
   public static boolean isValidUrl(String url) {
-    final String[] schemes = {"http", "https"};
-    final UrlValidator urlValidator = new UrlValidator(schemes, 2L);
-    return urlValidator.isValid(url);
+    final String[] validSchemas = {"http", "https"};
+    return new UrlValidator(validSchemas, 2L).isValid(url);
   }
 
   public static String getDomain(String url) {
     // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
     try {
-      final URI uri = new URI(url);
-      final String domain = uri.getHost();
+      final String domain = new URI(url).getHost();
       return domain.startsWith("www.") ? domain.substring(4) : domain;
     } catch (URISyntaxException e) {
-      LOG.warn("Unable to parse URL: {}", url);
+      // TODO: Propagate exception, do not return null
+      LOG.warn("Unable to parse URL: [{}]", url);
     }
 
     return null;

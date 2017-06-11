@@ -1,7 +1,8 @@
 package app.util;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class UtilitiesTest {
 
@@ -12,37 +13,37 @@ public class UtilitiesTest {
     final String validNoWww = "http://arb-domain.com";
     final String validHttpWww = "http://www.arb-domain.com";
 
-    Assert.assertTrue(Utilities.isValidUrl(validHttp));
-    Assert.assertTrue(Utilities.isValidUrl(validHttpTwoSlashes));
-    Assert.assertTrue(Utilities.isValidUrl(validNoWww));
-    Assert.assertTrue(Utilities.isValidUrl(validHttpWww));
+    assertTrue(Utilities.isValidUrl(validHttp));
+    assertTrue(Utilities.isValidUrl(validHttpTwoSlashes));
+    assertTrue(Utilities.isValidUrl(validNoWww));
+    assertTrue(Utilities.isValidUrl(validHttpWww));
 
     final String missingDomain = "http://.com";
-    Assert.assertFalse(Utilities.isValidUrl(missingDomain));
+    assertFalse(Utilities.isValidUrl(missingDomain));
 
     final String malformedUrl1 = "http:/www.arb-domain.com";
     final String malformedUrl2 = "http:www.arb-domain.com";
     final String malformedUrl3 = "httpwww.arb-domain.com";
     final String malformedUrl4 = "http:///www.arb-domain.com";
 
-    Assert.assertFalse(Utilities.isValidUrl(malformedUrl1));
-    Assert.assertFalse(Utilities.isValidUrl(malformedUrl2));
-    Assert.assertFalse(Utilities.isValidUrl(malformedUrl3));
-    Assert.assertFalse(Utilities.isValidUrl(malformedUrl4));
+    assertFalse(Utilities.isValidUrl(malformedUrl1));
+    assertFalse(Utilities.isValidUrl(malformedUrl2));
+    assertFalse(Utilities.isValidUrl(malformedUrl3));
+    assertFalse(Utilities.isValidUrl(malformedUrl4));
   }
 
   @Test
   public void testIsValidUrlProtocols() throws Exception {
     final String validHttpUrl = "http://www.arb-domain.com";
     final String validHttpsUrl = "https://www.arb-domain.com";
-    Assert.assertTrue(Utilities.isValidUrl(validHttpUrl));
-    Assert.assertTrue(Utilities.isValidUrl(validHttpsUrl));
+    assertTrue(Utilities.isValidUrl(validHttpUrl));
+    assertTrue(Utilities.isValidUrl(validHttpsUrl));
 
     final String invalidProtocol1 = "ftp://www.arb-domain.com";
     final String invalidProtocol2 = "pop://www.arb-domain.com";
 
-    Assert.assertFalse(Utilities.isValidUrl(invalidProtocol1));
-    Assert.assertFalse(Utilities.isValidUrl(invalidProtocol2));
+    assertFalse(Utilities.isValidUrl(invalidProtocol1));
+    assertFalse(Utilities.isValidUrl(invalidProtocol2));
   }
 
   @Test
@@ -52,10 +53,10 @@ public class UtilitiesTest {
     final String domainHttp = "http://www.arb-domain.com";
     final String domainHttps = "https://www.arb-domain.com";
 
-    Assert.assertEquals(Utilities.normalizeProtocol(slimDomain), "http://arb-domain.com");
-    Assert.assertEquals(Utilities.normalizeProtocol(domain), "http://www.arb-domain.com");
-    Assert.assertEquals(Utilities.normalizeProtocol(domainHttp), "http://www.arb-domain.com");
-    Assert.assertEquals(Utilities.normalizeProtocol(domainHttps), "https://www.arb-domain.com");
+    assertEquals("http://www.arb-domain.com", Utilities.normalizeProtocol(domain));
+    assertEquals("http://arb-domain.com", Utilities.normalizeProtocol(slimDomain));
+    assertEquals("http://www.arb-domain.com", Utilities.normalizeProtocol(domainHttp));
+    assertEquals("https://www.arb-domain.com", Utilities.normalizeProtocol(domainHttps));
   }
 
   @Test
@@ -71,12 +72,12 @@ public class UtilitiesTest {
     final String domainWithNestedTrailAndParams =
         "http://www.specific-domain.com/arb-value?arbParam=arbValue/arb-value?arbParam1=arbValue1&arbParam2=arbValue2";
 
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domain));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWww));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWwwSlashEnd));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithTrail));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithParams));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithTrailAndParams));
-    Assert.assertEquals("specific-domain.com", Utilities.getDomain(domainWithNestedTrailAndParams));
+    assertEquals("specific-domain.com", Utilities.getDomain(domain));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWww));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWwwSlashEnd));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWithTrail));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWithParams));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWithTrailAndParams));
+    assertEquals("specific-domain.com", Utilities.getDomain(domainWithNestedTrailAndParams));
   }
 }
