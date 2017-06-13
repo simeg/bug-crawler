@@ -1,13 +1,14 @@
 package app.request;
 
 import app.queue.SimpleQueue;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 public class JsoupRequester implements Requester {
 
@@ -16,7 +17,7 @@ public class JsoupRequester implements Requester {
   private static final int TIMEOUT = 10000;
   private static final String USER_AGENT =
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
-      "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+          "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final SimpleQueue<UrlRequest> queue;
   private final HashMap<String, Document> cache;

@@ -1,14 +1,15 @@
 package app.persist;
 
-import static app.db.PsqlContextHandler.getContext;
-import static org.jooq.util.maven.web_crawler.Tables.BUG;
-
 import app.analyze.Bug;
-import java.sql.Timestamp;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Timestamp;
+
+import static app.db.PsqlContextHandler.getContext;
+import static org.jooq.util.maven.web_crawler.Tables.BUG;
 
 public class Persister {
 

@@ -4,6 +4,7 @@ import app.analyze.Bug;
 import app.request.UrlRequest;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+
 import java.util.Set;
 
 public interface QueueId<T> {
