@@ -7,8 +7,8 @@ import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
 import app.plugin.HtmlComments;
-import app.plugin.PageFinder;
 import app.plugin.Plugin;
+import app.plugin.SubPageFinder;
 import app.plugin.Wordpress;
 import app.queue.QueueId;
 import app.queue.QueueSupervisor;
@@ -106,7 +106,7 @@ public class Application {
             final List<Plugin> plugins = Arrays.asList(
                 new HtmlComments(requester, parser),
                 new Wordpress(requester),
-                new PageFinder(requester)
+                new SubPageFinder(requester)
             );
 
             final Analyzer analyzer = new Analyzer(plugins);

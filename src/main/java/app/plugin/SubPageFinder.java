@@ -16,9 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import static app.util.Utilities.getFutureResult;
 import static app.util.Utilities.isMatching;
 
-public class PageFinder implements Plugin {
+public class SubPageFinder implements Plugin {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PageFinder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SubPageFinder.class);
 
   private static final List<String> pagePaths =
       Arrays.asList(
@@ -33,7 +33,7 @@ public class PageFinder implements Plugin {
 
   private final Requester requester;
 
-  public PageFinder(Requester requester) {
+  public SubPageFinder(Requester requester) {
     this.requester = requester;
   }
 

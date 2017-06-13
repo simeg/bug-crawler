@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class PageFinderTest {
+public class SubPageFinderTest {
 
-  private PageFinder plugin;
+  private SubPageFinder plugin;
   private Parser parser;
   private Requester requester;
 
@@ -16,7 +16,7 @@ public class PageFinderTest {
   public void setUp() throws Exception {
     parser = Mockito.mock(Parser.class);
     requester = Mockito.mock(Requester.class);
-    plugin = new PageFinder(requester);
+    plugin = new SubPageFinder(requester);
   }
 
   @Test
