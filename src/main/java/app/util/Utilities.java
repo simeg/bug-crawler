@@ -31,11 +31,8 @@ public final class Utilities {
       final String domain = new URI(url).getHost();
       return domain.startsWith("www.") ? domain.substring(4) : domain;
     } catch (URISyntaxException e) {
-      // TODO: Propagate exception, do not return null
-      LOG.warn("Unable to parse URL: [{}]", url);
+      throw new RuntimeException(String.format("Unable to parse url [%s]", url), e);
     }
-
-    return null;
   }
 
   public static String normalizeProtocol(String url) {
