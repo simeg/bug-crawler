@@ -117,6 +117,6 @@ public class UrlNumberIncrementerTest {
 
   @Test
   public void test() throws Exception {
-    this.urlNumberIncrement.inspect("http://www.domain.com/subPage1.html");
+//    this.urlNumberIncrement.inspect("http://www.domain.com/subPage1.html");
   }
 }
