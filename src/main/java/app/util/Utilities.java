@@ -18,7 +18,7 @@ public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
 
-  private static final int FUTURE_TIMEOUT = 10;
+  private static final int FUTURE_TIMEOUT_SEC = 10;
 
   public static boolean isValidUrl(String url) {
     final String[] validSchemas = {"http", "https"};
@@ -76,14 +76,14 @@ public final class Utilities {
   public static Object getFutureResult(CompletableFuture future) {
     while (!future.isDone()) {
       try {
-        return future.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
+        return future.get(FUTURE_TIMEOUT_SEC, TimeUnit.SECONDS);
 
       } catch (InterruptedException e) {
-        LOG.error("Thread was interrupted {}", e.toString());
+        LOG.error("Thread was interrupted", e);
       } catch (ExecutionException e) {
-        LOG.error("Future was interrupted {}", e.toString());
+        LOG.error("Future was interrupted", e);
       } catch (TimeoutException e) {
-        LOG.error("Future took too long time to finish {}", e.toString());
+        LOG.error("Future took too long time to finish", e);
       }
     }
 

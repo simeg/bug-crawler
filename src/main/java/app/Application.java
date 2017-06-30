@@ -20,6 +20,7 @@ import app.util.Utilities;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.net.URI;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,22 +137,26 @@ public class Application {
     for (int i = 0; i < times; i++) {
       final int number = i;
       executor.submit(() -> {
-        final String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName("Requester" + "-" + number);
+        try {
+          final String oldName = Thread.currentThread().getName();
+          Thread.currentThread().setName("Requester" + "-" + number);
 
-        while (true) {
-          try {
-            final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
-            urlRequest.future.complete(requestType(requester, urlRequest));
+          while (true) {
+            try {
+              final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
+              urlRequest.future.complete(requestType(requester, urlRequest));
 
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Polling was interrupted: {}", e.toString());
-            break;
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              LOG.warn("Polling was interrupted: {}", e.toString());
+              break;
+            }
           }
-        }
 
-        Thread.currentThread().setName(oldName);
+          Thread.currentThread().setName(oldName);
+        } catch (Throwable e) {
+          LOG.error("Worker failed", e);
+        }
       });
     }
   }

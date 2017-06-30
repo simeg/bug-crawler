@@ -14,7 +14,7 @@ public class JsoupRequester implements Requester {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsoupRequester.class);
 
-  private static final int TIMEOUT = 10000;
+  private static final int TIMEOUT_MS = 3000;
   private static final String USER_AGENT =
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
           "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
@@ -62,12 +62,20 @@ public class JsoupRequester implements Requester {
 
   private Document makeRequest(String url) {
     try {
-      return Jsoup.connect(url)
-          .timeout(TIMEOUT)
+      LOG.info("Requester START: " + url);
+      final Document document = Jsoup.connect(url)
+          .timeout(TIMEOUT_MS)
           .userAgent(USER_AGENT)
           .get();
+      LOG.info("Requester OK: " + url);
+
+      return document;
     } catch (IOException e) {
+      LOG.info("FAILED {}", url, e);
       throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+    } catch (Throwable e) {
+      LOG.info("Oh god", e);
+      throw e;
     }
   }
 
@@ -75,7 +83,7 @@ public class JsoupRequester implements Requester {
   public int requestStatusCode(String url) {
     try {
       return Jsoup.connect(url)
-          .timeout(TIMEOUT)
+          .timeout(TIMEOUT_MS)
           .userAgent(USER_AGENT)
           .execute()
           .statusCode();
