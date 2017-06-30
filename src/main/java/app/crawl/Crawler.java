@@ -31,7 +31,7 @@ public class Crawler {
   }
 
   public Set<String> getSubLinks(String url) {
-    final String fixedUrl = Utilities.normalizeProtocol(url.toLowerCase());
+    final String fixedUrl = Utilities.normalizeProtocol(url);
 
     if (!Utilities.isValidUrl(fixedUrl)) {
       LOG.info("URL not valid, will not crawl [{}]", fixedUrl);

@@ -36,23 +36,21 @@ public final class Utilities {
   }
 
   public static String normalizeProtocol(String url) {
-    // https://jsoup.org/cookbook/extracting-data/working-with-urls
+    final String lowercaseUrl = url.toLowerCase();
+    /*if (url == relative url) { // TODO
+      // https://jsoup.org/cookbook/extracting-data/working-with-urls
+    }*/
 
-    /*
-     * TODO:
-     * - Fix anchor links
-    */
-
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
+    if (lowercaseUrl.startsWith("http://") || lowercaseUrl.startsWith("https://")) {
+      return lowercaseUrl;
     }
 
     // TODO: Consider using regexp for this
-    if (url.startsWith("/")) {
-      return "http:/" + url;
+    if (lowercaseUrl.startsWith("/")) {
+      return "http:/" + lowercaseUrl;
     }
 
-    return "http://" + url;
+    return "http://" + lowercaseUrl;
   }
 
   public static boolean isBlacklisted(String domain) {

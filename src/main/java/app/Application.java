@@ -74,7 +74,7 @@ public class Application {
         (String urlToCrawl) -> {
           LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
 
-          final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl.toLowerCase());
+          final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl);
 
           if (!Utilities.isValidUrl(fixedUrl)) {
             LOG.info("Consumed URL is invalid - skipping: {}", fixedUrl);
