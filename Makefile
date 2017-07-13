@@ -36,7 +36,7 @@ clean:
 kill:
 	docker-compose kill
 
-db-connect:
+connect-db:
 	psql \
 	--host localhost \
 	--port 5432 \
