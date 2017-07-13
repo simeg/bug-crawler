@@ -1,6 +1,7 @@
 package app.request;
 
 import app.queue.SimpleQueue;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class JsoupRequester implements Requester {
   }
 
   private Document makeRequest(String url) {
+    // Return empty optional if 404?
     try {
       LOG.info("Requester START: " + url);
       final Document document = Jsoup.connect(url)
@@ -70,6 +72,8 @@ public class JsoupRequester implements Requester {
       LOG.info("Requester OK: " + url);
 
       return document;
+    } catch (HttpStatusException e) {
+      return new Document(e.getUrl());
     } catch (IOException e) {
       LOG.info("FAILED {}", url, e);
       throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
@@ -81,14 +85,21 @@ public class JsoupRequester implements Requester {
 
   @Override
   public int requestStatusCode(String url) {
+    // Always return status code?
     try {
       return Jsoup.connect(url)
           .timeout(TIMEOUT_MS)
           .userAgent(USER_AGENT)
           .execute()
           .statusCode();
+    } catch (HttpStatusException e) {
+      return e.getStatusCode();
     } catch (IOException e) {
+      LOG.info("FAILED {}", url, e);
       throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+    } catch (Throwable e) {
+      LOG.info("Oh god", e);
+      throw e;
     }
   }
 }
