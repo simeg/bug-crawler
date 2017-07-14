@@ -40,7 +40,7 @@ public class Persister {
 
   public boolean storeBug(Bug bug) {
     try {
-      LOG.info("Storing bug: {}", bug.baseUrl);
+      LOG.info("Storing bug type [{}] for url: {}", bug.type.toString(), bug.baseUrl);
 
       this.context.insertInto(
           BUG,
