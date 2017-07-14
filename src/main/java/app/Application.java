@@ -72,7 +72,7 @@ public class Application {
 
     submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
         (String urlToCrawl) -> {
-          LOG.info("Starting crawl thread with name: {}", Thread.currentThread().getName());
+          LOG.info("Started crawl thread with name: {}", Thread.currentThread().getName());
 
           final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl);
 
@@ -102,7 +102,7 @@ public class Application {
     submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
           if (urlToAnalyze != null) {
-            LOG.info("Starting analyze thread with name: {}", Thread.currentThread().getName());
+            LOG.info("Started analyze thread with name: {}", Thread.currentThread().getName());
 
             final List<Plugin> plugins = Arrays.asList(
                 new HtmlComments(requester, parser),
@@ -119,7 +119,7 @@ public class Application {
 
     submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG), (Bug bug) -> {
       if (bug != null) {
-        LOG.info("Starting persister thread with name: {}", Thread.currentThread().getName());
+        LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
 
         persister.storeBug(bug);
       }
