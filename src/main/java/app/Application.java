@@ -197,7 +197,7 @@ public class Application {
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.warn("Polling was interrupted: {}", e.toString());
+            LOG.warn("Polling was interrupted: {}", e);
             break;
           }
         }
