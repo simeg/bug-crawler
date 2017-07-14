@@ -18,7 +18,7 @@ public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
 
-  private static final int FUTURE_TIMEOUT_SEC = 10;
+  private static final int FUTURE_TIMEOUT_SEC = 15;
 
   public static boolean isValidUrl(String url) {
     final String[] validSchemas = {"http", "https"};
@@ -31,21 +31,19 @@ public final class Utilities {
       final String domain = new URI(url).getHost();
       return domain.startsWith("www.") ? domain.substring(4) : domain;
     } catch (URISyntaxException e) {
+      // TODO: Return empty optional? Thread should continue even if parsing of url fails
       throw new RuntimeException(String.format("Unable to parse url [%s]", url), e);
     }
   }
 
   public static String normalizeProtocol(String url) {
     final String lowercaseUrl = url.toLowerCase();
-    /*if (url == relative url) { // TODO
-      // https://jsoup.org/cookbook/extracting-data/working-with-urls
-    }*/
 
+    // All is good
     if (lowercaseUrl.startsWith("http://") || lowercaseUrl.startsWith("https://")) {
       return lowercaseUrl;
     }
 
-    // TODO: Consider using regexp for this
     if (lowercaseUrl.startsWith("/")) {
       return "http:/" + lowercaseUrl;
     }
