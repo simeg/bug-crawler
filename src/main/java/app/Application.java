@@ -20,16 +20,12 @@ import app.util.Utilities;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.net.URI;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -144,11 +140,17 @@ public class Application {
           while (true) {
             try {
               final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
-              urlRequest.future.complete(requestType(requester, urlRequest));
+              final Optional<?> requestValue = requestType(requester, urlRequest);
+
+              if (requestValue.isPresent()) {
+                urlRequest.future.complete(requestValue.get());
+              } else {
+                urlRequest.future.complete(requestValue);
+              }
 
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();
-              LOG.warn("Polling was interrupted: {}", e.toString());
+              LOG.warn("Polling was interrupted: {}", e);
               break;
             }
           }
@@ -161,12 +163,12 @@ public class Application {
     }
   }
 
-  private Object requestType(Requester requester, UrlRequest request) {
+  private Optional<?> requestType(Requester requester, UrlRequest request) {
     switch (request.type) {
       case HTML:
         return requester.requestHtml(request.url);
       case HTML_HASH:
-        return requester.requestHtmlHash(request.url);
+        return requester.requestHtmlHashCode(request.url);
       case STATUS_CODE:
         return requester.requestStatusCode(request.url);
       default:
@@ -174,7 +176,7 @@ public class Application {
         break;
     }
 
-    return null;
+    return Optional.empty();
   }
 
   private <T> void submitWorkerNTimes(

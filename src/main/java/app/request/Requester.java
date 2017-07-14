@@ -1,14 +1,17 @@
 package app.request;
 
+import org.jsoup.nodes.Document;
+
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface Requester {
 
   CompletableFuture get(String url, UrlRequest.RequestType type);
 
-  Object requestHtml(String url);
+  Optional<Document> requestHtml(String url);
 
-  Object requestHtmlHash(String url);
+  Optional<Integer> requestHtmlHashCode(String url);
 
-  int requestStatusCode(String url);
+  Optional<Integer> requestStatusCode(String url);
 }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class JsoupRequester implements Requester {
@@ -37,69 +38,73 @@ public class JsoupRequester implements Requester {
   }
 
   @Override
-  public Object requestHtml(String url) {
+  public Optional<Document> requestHtml(String url) {
     if (cache.containsKey(url)) {
-      return cache.get(url);
+      return Optional.of(cache.get(url));
     }
 
-    final Document result = this.makeRequest(url);
-    cache.put(url, result);
+    final Optional<Document> result = this.makeRequest(url);
+    result.ifPresent(html -> cache.put(url, html));
 
     return result;
   }
 
   @Override
-  public Object requestHtmlHash(String url) {
+  public Optional<Integer> requestHtmlHashCode(String url) {
     if (cache.containsKey(url)) {
-      return cache.get(url).body().html().hashCode();
+      return Optional.of(cache.get(url).body().html().hashCode());
     }
 
-    final Document result = this.makeRequest(url);
-    cache.put(url, result);
+    final Optional<Document> result = this.makeRequest(url);
+    if (result.isPresent()) {
+      cache.put(url, result.get());
 
-    // Only hash the content of the <body> element
-    return result.body().html().hashCode();
-  }
-
-  private Document makeRequest(String url) {
-    // Return empty optional if 404?
-    try {
-      LOG.info("Requester START: " + url);
-      final Document document = Jsoup.connect(url)
-          .timeout(TIMEOUT_MS)
-          .userAgent(USER_AGENT)
-          .get();
-      LOG.info("Requester OK: " + url);
-
-      return document;
-    } catch (HttpStatusException e) {
-      return new Document(e.getUrl());
-    } catch (IOException e) {
-      LOG.info("FAILED {}", url, e);
-      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
-    } catch (Throwable e) {
-      LOG.info("Oh god", e);
-      throw e;
+      // Only hash the content of the <body> element
+      return Optional.of(result.get().body().html().hashCode());
     }
+
+    return Optional.empty();
   }
 
   @Override
-  public int requestStatusCode(String url) {
-    // Always return status code?
+  public Optional<Integer> requestStatusCode(String url) {
     try {
-      return Jsoup.connect(url)
-          .timeout(TIMEOUT_MS)
-          .userAgent(USER_AGENT)
-          .execute()
-          .statusCode();
+      return Optional.of(
+          Jsoup.connect(url)
+              .timeout(TIMEOUT_MS)
+              .userAgent(USER_AGENT)
+              .execute()
+              .statusCode());
+
     } catch (HttpStatusException e) {
-      return e.getStatusCode();
+      // If status code != 200
+      return Optional.of(e.getStatusCode());
+
     } catch (IOException e) {
-      LOG.info("FAILED {}", url, e);
-      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+      return Optional.of(404);
+
     } catch (Throwable e) {
-      LOG.info("Oh god", e);
-      throw e;
+      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+    }
+  }
+
+  private Optional<Document> makeRequest(String url) {
+    try {
+      return Optional.of(
+          Jsoup.connect(url)
+              .timeout(TIMEOUT_MS)
+              .userAgent(USER_AGENT)
+              .get());
+
+    } catch (IllegalArgumentException e) {
+      LOG.error("Malformed URL: {}", url);
+      return Optional.empty();
+
+    } catch (IOException e) {
+      return Optional.empty();
+
+    } catch (Throwable e) {
+      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
     }
   }
 }
