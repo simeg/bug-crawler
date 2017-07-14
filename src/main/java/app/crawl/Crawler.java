@@ -43,7 +43,7 @@ public class Crawler {
     final String html = String.valueOf(getFutureResult(future));
 
     // Select all <a> elements with an href attribute and return their href values
-    final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "href");
+    final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
 
     final String domain = Utilities.getDomain(fixedUrl);
 
