@@ -53,7 +53,7 @@ public class Persister {
               new Timestamp(System.currentTimeMillis()) // Time inserted
           ).execute();
     } catch (DataAccessException e) {
-      LOG.error("Error storing {} in DB: {}", bug.toString(), e.toString());
+      LOG.error("Error storing {} in DB: {}", bug.toString(), e);
       return false;
     }
 
