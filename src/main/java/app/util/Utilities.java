@@ -52,8 +52,6 @@ public final class Utilities {
   }
 
   public static boolean isBlacklisted(String domain) {
-    // TODO: Add github to list when vecka.nu is not used as
-    // test website anymore
     return Sets.newHashSet(
         "google.com",
         "youtube.com",
@@ -65,7 +63,8 @@ public final class Utilities {
         "amazon.com",
         "twitter.com",
         "instagram.com",
-        "linkedin.com"
+        "linkedin.com",
+        "github.com"
     ).contains(domain);
   }
 
