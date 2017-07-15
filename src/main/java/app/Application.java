@@ -163,22 +163,6 @@ public class Application {
     }
   }
 
-  private Optional<?> requestType(Requester requester, UrlRequest request) {
-    switch (request.type) {
-      case HTML:
-        return requester.requestHtml(request.url);
-      case HTML_HASH:
-        return requester.requestHtmlHashCode(request.url);
-      case STATUS_CODE:
-        return requester.requestStatusCode(request.url);
-      default:
-        LOG.warn("Unknown request type=[{}]", request.type);
-        break;
-    }
-
-    return Optional.empty();
-  }
-
   private <T> void submitWorkerNTimes(
       final int times,
       String threadName,
@@ -207,6 +191,22 @@ public class Application {
         Thread.currentThread().setName(oldName);
       });
     }
+  }
+
+  private Optional<?> requestType(Requester requester, UrlRequest request) {
+    switch (request.type) {
+      case HTML:
+        return requester.requestHtml(request.url);
+      case HTML_HASH:
+        return requester.requestHtmlHashCode(request.url);
+      case STATUS_CODE:
+        return requester.requestStatusCode(request.url);
+      default:
+        LOG.warn("Unknown request type=[{}]", request.type);
+        break;
+    }
+
+    return Optional.empty();
   }
 
   private Persister getPersister(Config conf) {

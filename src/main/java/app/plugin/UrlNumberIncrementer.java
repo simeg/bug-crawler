@@ -3,7 +3,6 @@ package app.plugin;
 import app.analyze.Bug;
 import app.request.Requester;
 import app.request.UrlRequest;
-import app.util.Utilities;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.util.Utilities.*;
+import static app.util.Utilities.getDomain;
+import static app.util.Utilities.isMatching;
+import static app.util.Utilities.getFutureResult;
+
 
 public class UrlNumberIncrementer implements Plugin {
 
@@ -32,11 +34,11 @@ public class UrlNumberIncrementer implements Plugin {
   @Override
   public String getDescription() {
     return
-        "If url has sub-page that contains a " +
-            "number, this plugin will increment " +
-            "that number and request that page. " +
-            "If the requested page is not a 404 it's " +
-            "saved as a vulnerability.";
+        "If url has sub-page that contains a "
+            + "number, this plugin will increment "
+            + "that number and request that page. "
+            + "If the requested page is not a 404 it's "
+            + "saved as a vulnerability.";
   }
 
   @Override
@@ -84,12 +86,12 @@ public class UrlNumberIncrementer implements Plugin {
   public static String getIncrementedUrl(String url) {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
-    final String domain = Utilities.getDomain(url);
+    final String domain = getDomain(url);
     return String.format("http://www.%s%s", domain, incrementedSubPage);
   }
 
   public static boolean hasSubPage(String url) {
-    final String domain = Utilities.getDomain(url);
+    final String domain = getDomain(url);
 
     if (domain == null) {
       LOG.warn("Parsing domain from URL=[{}] gave a null response", url);

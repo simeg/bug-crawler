@@ -86,8 +86,10 @@ public final class Utilities {
   }
 
   public static boolean isMatching(Requester requester, String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture = requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
-    final CompletableFuture otherUrlFuture = requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
+    final CompletableFuture baseUrlFuture =
+        requester.get(baseUrl, UrlRequest.RequestType.HTML_HASH);
+    final CompletableFuture otherUrlFuture =
+        requester.get(otherUrl, UrlRequest.RequestType.HTML_HASH);
     final String baseUrlHtml = String.valueOf(getFutureResult(baseUrlFuture));
     final String otherUrlHtml = String.valueOf(getFutureResult(otherUrlFuture));
     return baseUrlHtml.equals(otherUrlHtml);

@@ -46,12 +46,12 @@ public class Persister {
           BUG,
           BUG.TYPE, BUG.BASE_URL, BUG.PATH, BUG.DESCRIPTION, BUG.TIME_INSERTED)
           .values(
-              bug.type.name(),                          // Type
-              bug.baseUrl,                              // Base URL
-              bug.path.orElse(null),                    // Path
-              bug.description,                          // Description
-              new Timestamp(System.currentTimeMillis()) // Time inserted
-          ).execute();
+              bug.type.name(),                           // Type
+              bug.baseUrl,                               // Base URL
+              bug.path.orElse(null),                     // Path
+              bug.description,                           // Description
+              new Timestamp(System.currentTimeMillis())) // Time inserted
+          .execute();
     } catch (DataAccessException e) {
       LOG.error("Error storing {} in DB: {}", bug.toString(), e);
       return false;

@@ -55,7 +55,8 @@ public class Wordpress implements Plugin {
     final CompletableFuture future = requester.get(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
     final int statusCode = (int) getFutureResult(future);
 
-    final boolean isWordpressInstance = (statusCode == 200 && !isMatching(requester, url, wpLoginUrl));
+    final boolean isWordpressInstance =
+        (statusCode == 200 && !isMatching(requester, url, wpLoginUrl));
     return isWordpressInstance;
   }
 
