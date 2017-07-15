@@ -39,7 +39,7 @@ public class Crawler {
     }
 
     LOG.info("Getting sub-links for URL [{}]", fixedUrl);
-    final CompletableFuture future = this.requester.get(fixedUrl, UrlRequest.RequestType.HTML);
+    final CompletableFuture future = this.requester.init(fixedUrl, UrlRequest.RequestType.HTML);
     final String html = String.valueOf(getFutureResult(future));
 
     // Select all <a> elements with an href attribute and return their href values

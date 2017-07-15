@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Requester {
 
-  CompletableFuture get(String url, UrlRequest.RequestType type);
+  CompletableFuture init(String url, UrlRequest.RequestType type);
 
   Optional<Document> requestHtml(String url);
 

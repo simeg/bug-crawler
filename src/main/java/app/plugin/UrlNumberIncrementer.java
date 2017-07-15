@@ -52,7 +52,7 @@ public class UrlNumberIncrementer implements Plugin {
         final String subPageWithZero = replaceDigitsWith(subPage, String.valueOf(i));
         final String fullUrl = getFullUrl(url, subPageWithZero);
 
-        final CompletableFuture future = requester.get(fullUrl, UrlRequest.RequestType.STATUS_CODE);
+        final CompletableFuture future = requester.init(fullUrl, UrlRequest.RequestType.STATUS_CODE);
         final int statusCode = (int) getFutureResult(future);
 
         // If the url + path has exactly the same HTML content as the url,

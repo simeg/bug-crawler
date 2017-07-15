@@ -30,7 +30,7 @@ public class JsoupRequester implements Requester {
   }
 
   @Override
-  public CompletableFuture get(String url, UrlRequest.RequestType type) {
+  public CompletableFuture init(String url, UrlRequest.RequestType type) {
     final CompletableFuture future = new CompletableFuture();
     queue.add(new UrlRequest(url, future, type));
 

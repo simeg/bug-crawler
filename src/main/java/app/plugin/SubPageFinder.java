@@ -53,7 +53,7 @@ public class SubPageFinder implements Plugin {
     pagePaths.forEach(path -> {
       final String fullUrlPath = url + "/" + path;
 
-      final CompletableFuture future = requester.get(url, UrlRequest.RequestType.STATUS_CODE);
+      final CompletableFuture future = requester.init(url, UrlRequest.RequestType.STATUS_CODE);
       final int statusCode = (int) getFutureResult(future);
 
       // If the url + path has exactly the same HTML content as the url,

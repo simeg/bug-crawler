@@ -43,7 +43,7 @@ public class HtmlComments implements Plugin {
   }
 
   private Set<Bug> queryForString(String url, String query) {
-    final CompletableFuture future = requester.get(url, UrlRequest.RequestType.HTML);
+    final CompletableFuture future = requester.init(url, UrlRequest.RequestType.HTML);
     final String html = String.valueOf(getFutureResult(future));
 
     return parser.query(html, query)
