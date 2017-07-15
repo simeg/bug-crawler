@@ -14,7 +14,16 @@ package app;
  * TODOs
  * - Use this type instead of String for url everywhere, just make it work. No more.
  * - On creation of this class, create field for root domain etc. and fill them
+ *    - Root domain (domain.com)
+ *    - Directories e.g. (domain.com/directory/directory/file.php)
+ *    - File name (domain.com/file.php)
+ *    - File extension (domain.com/file.php)
  * - On creating of this class, add more metadata such as isValid
+ *
+ * BEFORE STARTING!
+ * Look at what other people have done first, this one sounds promising:
+ * https://medium.com/square-corner-blog/okhttps-new-url-class-515460eea661
+ * https://github.com/square/okhttp
  */
 public final class Url {
 
