@@ -5,6 +5,9 @@
 
 all: build build-db
 
+#
+# BUILD
+#
 
 build:
 	mvn \
@@ -16,6 +19,9 @@ build:
 build-db:
 	docker-compose build db
 
+#
+# START
+#
 
 start:
 	docker-compose up
@@ -26,6 +32,9 @@ start-crawler:
 start-db:
 	docker-compose up db
 
+#
+# MORE
+#
 
 stop:
 	docker-compose stop
@@ -43,4 +52,3 @@ connect-db:
 	--username postgres \
 	--no-password \
 	--dbname=web_crawler
-
