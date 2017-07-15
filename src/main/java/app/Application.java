@@ -140,12 +140,14 @@ public class Application {
           while (true) {
             try {
               final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
-              final Optional<?> requestValue = requestType(requester, urlRequest);
+              if (urlRequest != null) {
+                final Optional<?> requestValue = requestType(requester, urlRequest);
 
-              if (requestValue.isPresent()) {
-                urlRequest.future.complete(requestValue.get());
-              } else {
-                urlRequest.future.complete(requestValue);
+                if (requestValue.isPresent()) {
+                  urlRequest.future.complete(requestValue.get());
+                } else {
+                  urlRequest.future.complete(requestValue);
+                }
               }
 
             } catch (InterruptedException e) {
