@@ -113,13 +113,14 @@ public class Application {
           }
         });
 
-    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG), (Bug bug) -> {
-      if (bug != null) {
-        LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
+    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
+        (Bug bug) -> {
+          if (bug != null) {
+            LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
 
-        persister.storeBug(bug);
-      }
-    });
+            persister.storeBug(bug);
+          }
+        });
 
     submitRequestWorkers(10, executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
   }
@@ -136,6 +137,7 @@ public class Application {
         try {
           final String oldName = Thread.currentThread().getName();
           Thread.currentThread().setName("Requester" + "-" + number);
+          LOG.info("Started requester thread with name: {}", Thread.currentThread().getName());
 
           while (true) {
             try {
