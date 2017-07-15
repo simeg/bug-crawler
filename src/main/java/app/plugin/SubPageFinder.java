@@ -40,10 +40,10 @@ public class SubPageFinder implements Plugin {
   @Override
   public String getDescription() {
     return
-        "Looks for pages known for being used " +
-            "for sensitive access, configuration etc.\n\n" +
-            "If a page is found and it differs from the " +
-            "root domain it's marked as a bug.";
+        "Looks for pages known for being used "
+            + "for sensitive access, configuration etc.\n\n"
+            + "If a page is found and it differs from the "
+            + "root domain it's marked as a bug.";
   }
 
   @Override

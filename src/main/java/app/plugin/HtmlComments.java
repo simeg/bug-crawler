@@ -30,8 +30,8 @@ public class HtmlComments implements Plugin {
   @Override
   public String getDescription() {
     return
-        "Looks for comments in the HTML " +
-            "containing the words 'password' and 'admin'";
+        "Looks for comments in the HTML "
+            + "containing the words 'password' and 'admin'";
   }
 
   @Override
