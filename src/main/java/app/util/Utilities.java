@@ -5,11 +5,15 @@ import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.jsoup.Connection;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -99,6 +103,17 @@ public final class Utilities {
     } catch (BadFutureException e) {
       return false;
     }
+  }
+
+  public static Optional<Document> parse(Connection.Response response) {
+    try {
+      return Optional.of(response.parse());
+
+    } catch (IOException e) {
+      LOG.warn("Unable to parse response from URL: [{}]", response.url());
+    }
+
+    return Optional.empty();
   }
 
 }
