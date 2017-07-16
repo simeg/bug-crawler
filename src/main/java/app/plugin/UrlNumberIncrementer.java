@@ -1,6 +1,7 @@
 package app.plugin;
 
 import app.analyze.Bug;
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
@@ -16,9 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.util.Utilities.getDomain;
-import static app.util.Utilities.isMatching;
-import static app.util.Utilities.getFutureResult;
+import static app.util.Utilities.*;
 
 
 public class UrlNumberIncrementer implements Plugin {
@@ -43,40 +42,45 @@ public class UrlNumberIncrementer implements Plugin {
 
   @Override
   public Set<Bug> inspect(String url) {
-    if (hasSubPage(url) && hasNumber(getSubPage(url))) {
-      final Set<Bug> result = Sets.newHashSet();
+    try {
+      if (hasSubPage(url) && hasNumber(getSubPage(url))) {
+        final Set<Bug> result = Sets.newHashSet();
 
-      // Go from 0 - 10
-      for (int i = 0; i < 10; i++) {
-        final String subPage = getSubPage(url);
-        final String subPageWithZero = replaceDigitsWith(subPage, String.valueOf(i));
-        final String fullUrl = getFullUrl(url, subPageWithZero);
+        // Go from 0 - 10
+        for (int i = 0; i < 10; i++) {
+          final String subPage = getSubPage(url);
+          final String subPageWithZero = replaceDigitsWith(subPage, String.valueOf(i));
+          final String fullUrl = getFullUrl(url, subPageWithZero);
 
-        final CompletableFuture future = requester.init(fullUrl, UrlRequest.RequestType.STATUS_CODE);
-        final int statusCode = (int) getFutureResult(future);
+          final CompletableFuture future = requester.init(fullUrl, UrlRequest.RequestType.STATUS_CODE);
+          final int statusCode = (int) getFutureResult(future);
 
-        // If the url + path has exactly the same HTML content as the url,
-        // it's a false-positive and should not be reported as a potential bug.
-        // Therefore we're checking here to see if they are matching.
-        final boolean isMatching = isMatching(requester, url, fullUrl);
+          // If the url + path has exactly the same HTML content as the url,
+          // it's a false-positive and should not be reported as a potential bug.
+          // Therefore we're checking here to see if they are matching.
+          final boolean isMatching = isMatching(requester, url, fullUrl);
 
-        if (statusCode == 200 && !isMatching) {
-          LOG.info("Found file {} on URL: {}", fullUrl, url);
-          result.add(
-              new Bug(
-                  Bug.BugType.FILE_ACCESS,
-                  url,
-                  "Access to " + fullUrl,
-                  Optional.of(fullUrl)
-              )
-          );
+          if (statusCode == 200 && !isMatching) {
+            LOG.info("Found file {} on URL: {}", fullUrl, url);
+            result.add(
+                new Bug(
+                    Bug.BugType.FILE_ACCESS,
+                    url,
+                    "Access to " + fullUrl,
+                    Optional.of(fullUrl)
+                )
+            );
+          }
         }
       }
+
+      // TODO: Test this method
+
+      return Collections.emptySet();
+
+    } catch (BadFutureException e) {
+      return Collections.emptySet();
     }
-
-    // TODO: Test this method
-
-    return Collections.emptySet();
   }
 
   private static String getFullUrl(String url, String subPageWithZero) {

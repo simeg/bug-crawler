@@ -1,6 +1,7 @@
 package app.crawl;
 
 import app.parse.Parser;
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
@@ -31,31 +32,36 @@ public class Crawler {
   }
 
   public Set<String> getSubLinks(String url) {
-    final String fixedUrl = Utilities.normalizeProtocol(url);
+    try {
+      final String fixedUrl = Utilities.normalizeProtocol(url);
 
-    if (!Utilities.isValidUrl(fixedUrl)) {
-      LOG.info("URL not valid, will not crawl [{}]", fixedUrl);
+      if (!Utilities.isValidUrl(fixedUrl)) {
+        LOG.info("URL not valid, will not crawl [{}]", fixedUrl);
+        return Collections.emptySet();
+      }
+
+      LOG.info("Getting sub-links for URL [{}]", fixedUrl);
+      final CompletableFuture future = this.requester.init(fixedUrl, UrlRequest.RequestType.HTML);
+      final String html = String.valueOf(getFutureResult(future));
+
+      // Select all <a> elements with an href attribute and return their href values
+      final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
+
+      final String domain = Utilities.getDomain(fixedUrl);
+
+      if (domain != null) {
+        return subLinks.stream()
+            .distinct()
+            .filter(this::isValidLink)
+            .map(link -> normalize(domain, link))
+            .collect(Collectors.toSet());
+      }
+
+      return Collections.emptySet();
+
+    } catch (BadFutureException e) {
       return Collections.emptySet();
     }
-
-    LOG.info("Getting sub-links for URL [{}]", fixedUrl);
-    final CompletableFuture future = this.requester.init(fixedUrl, UrlRequest.RequestType.HTML);
-    final String html = String.valueOf(getFutureResult(future));
-
-    // Select all <a> elements with an href attribute and return their href values
-    final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
-
-    final String domain = Utilities.getDomain(fixedUrl);
-
-    if (domain != null) {
-      return subLinks.stream()
-          .distinct()
-          .filter(this::isValidLink)
-          .map(link -> normalize(domain, link))
-          .collect(Collectors.toSet());
-    }
-
-    return Collections.emptySet();
   }
 
   boolean isValidLink(String receivedLink) {

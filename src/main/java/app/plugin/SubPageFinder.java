@@ -1,14 +1,14 @@
 package app.plugin;
 
 import app.analyze.Bug;
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -51,26 +51,30 @@ public class SubPageFinder implements Plugin {
     final Set<Bug> result = Sets.newHashSet();
 
     pagePaths.forEach(path -> {
-      final String fullUrlPath = url + "/" + path;
+      try {
+        final String fullUrlPath = url + "/" + path;
 
-      final CompletableFuture future = requester.init(url, UrlRequest.RequestType.STATUS_CODE);
-      final int statusCode = (int) getFutureResult(future);
+        final CompletableFuture future = requester.init(url, UrlRequest.RequestType.STATUS_CODE);
+        final int statusCode = (int) getFutureResult(future);
 
-      // If the url + path has exactly the same HTML content as the url,
-      // it's a false-positive and should not be reported as a potential bug.
-      // Therefore we're checking here to see if they are matching.
-      final boolean isMatching = isMatching(requester, url, fullUrlPath);
+        // If the url + path has exactly the same HTML content as the url,
+        // it's a false-positive and should not be reported as a potential bug.
+        // Therefore we're checking here to see if they are matching.
+        final boolean isMatching = isMatching(requester, url, fullUrlPath);
 
-      if (statusCode == 200 && !isMatching) {
-        LOG.info("Found file {} on URL: {}", path, url);
-        result.add(
-            new Bug(
-                Bug.BugType.FILE_ACCESS,
-                url,
-                "Access to " + path,
-                Optional.of(fullUrlPath)
-            )
-        );
+        if (statusCode == 200 && !isMatching) {
+          LOG.info("Found file {} on URL: {}", path, url);
+          result.add(
+              new Bug(
+                  Bug.BugType.FILE_ACCESS,
+                  url,
+                  "Access to " + path,
+                  Optional.of(fullUrlPath)
+              )
+          );
+        }
+      } catch (BadFutureException e) {
+        // Continue
       }
     });
 

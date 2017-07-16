@@ -20,7 +20,7 @@ import app.util.Utilities;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.jsoup.nodes.Document;
+import org.jsoup.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -48,7 +48,7 @@ public class Application {
 
     final QueueSupervisor supervisor = QueueSupervisor.create(persister);
 
-    final HashMap<String, Document> requestCache = Maps.newHashMap();
+    final HashMap<String, Connection.Response> requestCache = Maps.newHashMap();
     final Requester requester =
         new JsoupRequester(supervisor.get(QueueId.TO_BE_REQUESTED), requestCache);
 
@@ -136,7 +136,7 @@ public class Application {
       executor.submit(() -> {
         try {
           final String oldName = Thread.currentThread().getName();
-          Thread.currentThread().setName("Requester" + "-" + number);
+          Thread.currentThread().setName("Requester-" + number);
           LOG.info("Started requester thread with name: {}", Thread.currentThread().getName());
 
           while (true) {
@@ -148,7 +148,8 @@ public class Application {
                 if (requestValue.isPresent()) {
                   urlRequest.future.complete(requestValue.get());
                 } else {
-                  urlRequest.future.complete(requestValue);
+                  urlRequest.future.completeExceptionally(
+                      new RuntimeException("Future did not succeed, most likely because the request returned a 404"));
                 }
               }
 

@@ -1,6 +1,7 @@
 package app.plugin;
 
 import app.analyze.Bug;
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
@@ -50,14 +51,19 @@ public class Wordpress implements Plugin {
   }
 
   boolean isWordpress(String url) {
-    final String wpLoginUrl = url + "/wp-login.php";
+    try {
+      final String wpLoginUrl = url + "/wp-login.php";
 
-    final CompletableFuture future = requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
-    final int statusCode = (int) getFutureResult(future);
+      final CompletableFuture future = requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
+      final int statusCode = (int) getFutureResult(future);
 
-    final boolean isWordpressInstance =
-        (statusCode == 200 && !isMatching(requester, url, wpLoginUrl));
-    return isWordpressInstance;
+      final boolean isWordpressInstance =
+          (statusCode == 200 && !isMatching(requester, url, wpLoginUrl));
+      return isWordpressInstance;
+
+    } catch (BadFutureException e) {
+      return false;
+    }
   }
 
 }

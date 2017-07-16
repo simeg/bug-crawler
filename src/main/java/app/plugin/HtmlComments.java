@@ -2,12 +2,14 @@ package app.plugin;
 
 import app.analyze.Bug;
 import app.parse.Parser;
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -43,18 +45,23 @@ public class HtmlComments implements Plugin {
   }
 
   private Set<Bug> queryForString(String url, String query) {
-    final CompletableFuture future = requester.init(url, UrlRequest.RequestType.HTML);
-    final String html = String.valueOf(getFutureResult(future));
+    try {
+      final CompletableFuture future = requester.init(url, UrlRequest.RequestType.HTML);
+      final String html = String.valueOf(getFutureResult(future));
 
-    return parser.query(html, query)
-        .stream()
-        .map((element) ->
-            new Bug(
-                Bug.BugType.HTML,
-                url,
-                "String \"" + query + "\" found in HTML",
-                Optional.of(url)))
-        .collect(Collectors.toSet());
+      return parser.query(html, query)
+          .stream()
+          .map((element) ->
+              new Bug(
+                  Bug.BugType.HTML,
+                  url,
+                  "String \"" + query + "\" found in HTML",
+                  Optional.of(url)))
+          .collect(Collectors.toSet());
+
+    } catch (BadFutureException e) {
+      return Collections.emptySet();
+    }
   }
 
   private Set<Bug> queryPasswordForms(String url) {

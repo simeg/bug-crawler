@@ -1,5 +1,6 @@
 package app.util;
 
+import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
@@ -68,17 +69,17 @@ public final class Utilities {
     ).contains(domain);
   }
 
-  public static Object getFutureResult(CompletableFuture future) {
+  public static Object getFutureResult(CompletableFuture future) throws BadFutureException {
     while (!future.isDone()) {
       try {
         return future.get(FUTURE_TIMEOUT_SEC, TimeUnit.SECONDS);
 
       } catch (InterruptedException e) {
-        LOG.error("Thread was interrupted", e);
+        throw new BadFutureException("Thread was interrupted", e);
       } catch (ExecutionException e) {
-        LOG.error("Future was interrupted", e);
+        throw new BadFutureException("Future was interrupted. A bad response may have caused this.", e);
       } catch (TimeoutException e) {
-        LOG.error("Future took too long time to finish", e);
+        throw new BadFutureException("Future took too long to finish", e);
       }
     }
 
@@ -86,13 +87,18 @@ public final class Utilities {
   }
 
   public static boolean isMatching(Requester requester, String baseUrl, String otherUrl) {
-    final CompletableFuture baseUrlFuture =
-        requester.init(baseUrl, UrlRequest.RequestType.HTML_HASH);
-    final CompletableFuture otherUrlFuture =
-        requester.init(otherUrl, UrlRequest.RequestType.HTML_HASH);
-    final String baseUrlHtml = String.valueOf(getFutureResult(baseUrlFuture));
-    final String otherUrlHtml = String.valueOf(getFutureResult(otherUrlFuture));
-    return baseUrlHtml.equals(otherUrlHtml);
+    try {
+      final CompletableFuture baseUrlFuture =
+          requester.init(baseUrl, UrlRequest.RequestType.HTML_HASH);
+      final CompletableFuture otherUrlFuture =
+          requester.init(otherUrl, UrlRequest.RequestType.HTML_HASH);
+      final String baseUrlHtml = String.valueOf(getFutureResult(baseUrlFuture));
+      final String otherUrlHtml = String.valueOf(getFutureResult(otherUrlFuture));
+      return baseUrlHtml.equals(otherUrlHtml);
+
+    } catch (BadFutureException e) {
+      return false;
+    }
   }
 
 }
