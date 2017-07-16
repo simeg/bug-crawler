@@ -19,9 +19,8 @@ import static app.util.Utilities.isMatching;
 public class SubPageFinder implements Plugin {
 
   private static final Logger LOG = LoggerFactory.getLogger(SubPageFinder.class);
-
-  private static final List<String> pagePaths =
-      Arrays.asList(
+  private static final ImmutableSet<String> pagePaths =
+      ImmutableSet.of(
           "phpinfo.php",
           "phpmyadmin",
           "test.php?mode=phpinfo",
