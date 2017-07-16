@@ -1,13 +1,14 @@
 package app.request;
 
 import app.queue.SimpleQueue;
-import org.jsoup.HttpStatusException;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -22,9 +23,9 @@ public class JsoupRequester implements Requester {
           "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final SimpleQueue<UrlRequest> queue;
-  private final HashMap<String, Document> cache;
+  private final HashMap<String, Connection.Response> cache;
 
-  public JsoupRequester(SimpleQueue<UrlRequest> queue, HashMap<String, Document> requestCache) {
+  public JsoupRequester(SimpleQueue<UrlRequest> queue, HashMap<String, Connection.Response> requestCache) {
     this.queue = queue;
     this.cache = requestCache;
   }
@@ -39,72 +40,64 @@ public class JsoupRequester implements Requester {
 
   @Override
   public Optional<Document> requestHtml(String url) {
-    if (cache.containsKey(url)) {
-      return Optional.of(cache.get(url));
-    }
-
-    final Optional<Document> result = this.makeRequest(url);
-    result.ifPresent(html -> cache.put(url, html));
-
-    return result;
+    return getParsedResponse(url);
   }
 
   @Override
   public Optional<Integer> requestHtmlHashCode(String url) {
-    if (cache.containsKey(url)) {
-      return Optional.of(cache.get(url).body().html().hashCode());
-    }
+    Optional<Document> response = getParsedResponse(url);
 
-    final Optional<Document> result = this.makeRequest(url);
-    if (result.isPresent()) {
-      cache.put(url, result.get());
-
-      // Only hash the content of the <body> element
-      return Optional.of(result.get().body().html().hashCode());
-    }
-
-    return Optional.empty();
+    // Only hash the content of the <body> element
+    return response.map(document -> document.body().html().hashCode());
   }
 
   @Override
   public Optional<Integer> requestStatusCode(String url) {
+    Optional<Connection.Response> response = makeRequest(url);
+
+    // Fallback to 404 if any exception upstream was thrown,
+    // it might not always be the correct status code but it works for now
+    return response
+        .map(response1 -> Optional.of(response1.statusCode()))
+        .orElseGet(() -> Optional.of(404));
+  }
+
+  private Optional<Connection.Response> makeRequest(String url) {
     try {
+      if (cache.containsKey(url)) {
+        return Optional.of(cache.get(url));
+      }
+
       return Optional.of(
           Jsoup.connect(url)
               .timeout(TIMEOUT_MS)
               .userAgent(USER_AGENT)
-              .execute()
-              .statusCode());
+              .execute());
 
-    } catch (HttpStatusException e) {
-      // If status code != 200
-      return Optional.of(e.getStatusCode());
+    } catch (MalformedURLException e) {
+      LOG.warn("Malformed URL: {}", url);
+      return Optional.empty();
 
     } catch (IOException e) {
-      return Optional.of(404);
+      return Optional.empty();
 
     } catch (Throwable e) {
-      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+      throw new RuntimeException(String.format("Unable to get requested URL: [%s]", url), e);
     }
   }
 
-  private Optional<Document> makeRequest(String url) {
-    try {
-      return Optional.of(
-          Jsoup.connect(url)
-              .timeout(TIMEOUT_MS)
-              .userAgent(USER_AGENT)
-              .get());
+  private Optional<Document> getParsedResponse(String url) {
+    Optional<Connection.Response> response = this.makeRequest(url);
 
-    } catch (IllegalArgumentException e) {
-      LOG.error("Malformed URL: {}", url);
-      return Optional.empty();
+    if (response.isPresent()) {
+      try {
+        return Optional.of(response.get().parse());
 
-    } catch (IOException e) {
-      return Optional.empty();
-
-    } catch (Throwable e) {
-      throw new RuntimeException(String.format("Unable to get requested URL=[%s]", url), e);
+      } catch (IOException e) {
+        LOG.warn("Unable to parse response from URL: [{}]", url);
+      }
     }
+
+    return Optional.empty();
   }
 }
