@@ -58,6 +58,8 @@ public final class Utilities {
 
   public static boolean isBlacklisted(String domain) {
     return Sets.newHashSet(
+        "localhost",
+        "127.0.0.1",
         "google.com",
         "youtube.com",
         "facebook.com",
