@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Timestamp;
 
 import static app.db.PsqlContextHandler.getContext;
-import static org.jooq.util.maven.web_crawler.Tables.BUG;
+import static org.simeg.jooq.web_crawler.Tables.BUG;
 
 public class Persister {
 
