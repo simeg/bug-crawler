@@ -6,10 +6,7 @@ import app.crawl.Crawler;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
-import app.plugin.HtmlComments;
-import app.plugin.Plugin;
-import app.plugin.SubPageFinder;
-import app.plugin.Wordpress;
+import app.plugin.*;
 import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.queue.SimpleQueue;
@@ -64,6 +61,8 @@ public class Application {
       Parser parser,
       Requester requester,
       Persister persister) {
+
+    // Add initial URL
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
     submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
@@ -103,7 +102,8 @@ public class Application {
             final List<Plugin> plugins = Arrays.asList(
                 new HtmlComments(requester, parser),
                 new Wordpress(requester),
-                new SubPageFinder(requester)
+                new SubPageFinder(requester),
+                new PhpInfo(requester)
             );
 
             final Analyzer analyzer = new Analyzer(plugins);
@@ -149,7 +149,9 @@ public class Application {
                   urlRequest.future.complete(requestValue.get());
                 } else {
                   urlRequest.future.completeExceptionally(
-                      new RuntimeException("Future did not succeed, most likely because the request returned a 404"));
+                      new RuntimeException(
+                          "Future did not succeed, most likely"
+                              + "because the response was a 404"));
                 }
               }
 
@@ -200,6 +202,8 @@ public class Application {
 
   private Optional<?> requestType(Requester requester, UrlRequest request) {
     switch (request.type) {
+      case RAW:
+        return requester.request(request.url);
       case HTML:
         return requester.requestHtml(request.url);
       case HTML_HASH:

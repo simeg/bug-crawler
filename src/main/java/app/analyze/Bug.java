@@ -10,7 +10,7 @@ public class Bug {
   private static final Logger LOG = LoggerFactory.getLogger(Bug.class);
 
   public enum BugType {
-    FILE_ACCESS, XSS, HTML
+    FILE_ACCESS, XSS, HTML, PHP_INFO_FILE_ACCESS
   }
 
   public final BugType type;

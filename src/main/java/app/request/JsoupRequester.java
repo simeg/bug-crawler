@@ -1,6 +1,7 @@
 package app.request;
 
 import app.queue.SimpleQueue;
+import app.util.Utilities;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,6 +37,11 @@ public class JsoupRequester implements Requester {
     queue.add(new UrlRequest(url, future, type));
 
     return future;
+  }
+
+  @Override
+  public Optional<Connection.Response> request(String url) {
+    return makeRequest(url);
   }
 
   @Override
@@ -79,6 +85,7 @@ public class JsoupRequester implements Requester {
       return Optional.empty();
 
     } catch (IOException e) {
+      // If status != 200 then HttpStatusException will be thrown and caught here
       return Optional.empty();
 
     } catch (Throwable e) {
@@ -88,16 +95,6 @@ public class JsoupRequester implements Requester {
 
   private Optional<Document> getParsedResponse(String url) {
     Optional<Connection.Response> response = this.makeRequest(url);
-
-    if (response.isPresent()) {
-      try {
-        return Optional.of(response.get().parse());
-
-      } catch (IOException e) {
-        LOG.warn("Unable to parse response from URL: [{}]", url);
-      }
-    }
-
-    return Optional.empty();
+    return response.flatMap(Utilities::parse);
   }
 }
