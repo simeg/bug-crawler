@@ -98,13 +98,6 @@ public class UrlNumberIncrementer implements Plugin {
   }
 
   public static boolean hasSubPage(String url) throws URISyntaxException {
-    final String domain = getDomain(url);
-
-    if (domain == null) {
-      LOG.warn("Parsing domain from URL=[{}] gave a null response", url);
-      return false;
-    }
-
     final String subPage = getSubPage(url);
 
     if (subPage.length() <= 1) {
