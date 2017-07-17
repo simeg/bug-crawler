@@ -57,7 +57,8 @@ public class PhpInfo implements Plugin {
     StringBuilder pathToQuery = new StringBuilder(url.getFullHost());
 
     // Run it once on the root domain as this case will not be run by the forEach below
-    analyzeForBug(url.url, pathToQuery).map(result::add).isPresent();
+    final Optional<Bug> rootDomainBug = analyzeForBug(url.url, pathToQuery);
+    rootDomainBug.ifPresent(result::add);
 
     // Filter to remove empty strings
     ImmutableList<String> pathSegments = ImmutableList.copyOf(
@@ -74,7 +75,8 @@ public class PhpInfo implements Plugin {
 
       pathToQuery.append("/").append(pathSegment);
 
-      analyzeForBug(url.url, pathToQuery).map(result::add).isPresent();
+      final Optional<Bug> bug = analyzeForBug(url.url, pathToQuery);
+      bug.ifPresent(result::add);
     }
 
     return result;
