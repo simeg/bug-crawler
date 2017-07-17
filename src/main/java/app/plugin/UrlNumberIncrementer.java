@@ -80,21 +80,24 @@ public class UrlNumberIncrementer implements Plugin {
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
+    } catch (URISyntaxException e) {
+      LOG.error(String.format("Unable to parse url [%s]", url), e);
+      return Collections.emptySet();
     }
   }
 
-  private static String getFullUrl(String url, String subPageWithZero) {
+  private static String getFullUrl(String url, String subPageWithZero) throws URISyntaxException {
     return String.format("http://www.%s%s", getDomain(url), subPageWithZero);
   }
 
-  public static String getIncrementedUrl(String url) {
+  public static String getIncrementedUrl(String url) throws URISyntaxException {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
     final String domain = getDomain(url);
     return String.format("http://www.%s%s", domain, incrementedSubPage);
   }
 
-  public static boolean hasSubPage(String url) {
+  public static boolean hasSubPage(String url) throws URISyntaxException {
     final String domain = getDomain(url);
 
     if (domain == null) {

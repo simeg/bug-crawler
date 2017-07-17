@@ -30,15 +30,10 @@ public final class Utilities {
     return new UrlValidator(validSchemas, 2L).isValid(url);
   }
 
-  public static String getDomain(String url) {
+  public static String getDomain(String url) throws URISyntaxException {
     // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
-    try {
-      final String domain = new URI(url).getHost();
-      return domain.startsWith("www.") ? domain.substring(4) : domain;
-    } catch (URISyntaxException e) {
-      // TODO: Return empty optional? Thread should continue even if parsing of url fails
-      throw new RuntimeException(String.format("Unable to parse url [%s]", url), e);
-    }
+    final String domain = new URI(url).getHost();
+    return domain.startsWith("www.") ? domain.substring(4) : domain;
   }
 
   public static String normalizeProtocol(String url) {

@@ -8,6 +8,7 @@ import app.util.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -49,17 +50,16 @@ public class Crawler {
 
       final String domain = Utilities.getDomain(fixedUrl);
 
-      if (domain != null) {
-        return subLinks.stream()
-            .distinct()
-            .filter(this::isValidLink)
-            .map(link -> normalize(domain, link))
-            .collect(Collectors.toSet());
-      }
-
-      return Collections.emptySet();
+      return subLinks.stream()
+          .distinct()
+          .filter(this::isValidLink)
+          .map(link -> normalize(domain, link))
+          .collect(Collectors.toSet());
 
     } catch (BadFutureException e) {
+      return Collections.emptySet();
+    } catch (URISyntaxException e) {
+      LOG.error(String.format("Unable to parse url [%s]", url), e);
       return Collections.emptySet();
     }
   }

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,8 +75,13 @@ public class Application {
           if (!Utilities.isValidUrl(fixedUrl)) {
             LOG.info("Consumed URL is invalid - skipping: {}", fixedUrl);
             return;
-          } else if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
-            LOG.info("URL is blacklisted - skipping: {}", fixedUrl);
+          } else try {
+            if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
+              LOG.info("URL is blacklisted - skipping: {}", fixedUrl);
+              return;
+            }
+          } catch (URISyntaxException e) {
+            LOG.error(String.format("Unable to parse url [%s]", fixedUrl), e);
             return;
           }
 
