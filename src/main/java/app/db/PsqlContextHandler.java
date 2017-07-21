@@ -2,6 +2,7 @@ package app.db;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,10 @@ public class PsqlContextHandler {
         }
       }
 */
-
-      DSLContext context = DSL.using(connection, SQLDialect.POSTGRES);
+      Settings settings = new Settings()
+          .withRenderFormatted(false) // Pretty print
+          .withExecuteLogging(false); // Disable default logging by jOOQ
+      DSLContext context = DSL.using(connection, SQLDialect.POSTGRES, settings);
 
       LOG.info("Established connection to DB");
 
