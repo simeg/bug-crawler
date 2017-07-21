@@ -2,11 +2,23 @@ package app.util;
 
 import org.junit.Test;
 
-import static app.util.UrlUtils.getHost;
-import static app.util.UrlUtils.normalizeProtocol;
+import static app.util.UrlUtils.*;
 import static org.junit.Assert.assertEquals;
 
 public class UrlUtilsTest {
+
+  @Test
+  public void testValidateUrl() throws Exception {
+    String url = "http://specific-host.com";
+    String urlWww = "http://www.specific-host.com";
+    String urlWwwSlashEnd = "http://www.specific-host.com/";
+    String urlHttps = "https://www.specific-host.com/";
+
+    assertEquals("http://specific-host.com/", validateUrl(url));
+    assertEquals("http://www.specific-host.com/", validateUrl(urlWww));
+    assertEquals("http://www.specific-host.com/", validateUrl(urlWwwSlashEnd));
+    assertEquals("https://www.specific-host.com/", validateUrl(urlHttps));
+  }
 
   @Test
   public void testNormalizeProtocol() throws Exception {
