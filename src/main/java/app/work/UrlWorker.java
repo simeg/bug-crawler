@@ -35,6 +35,9 @@ public final class UrlWorker<T> implements Worker {
         try {
           final String oldName = Thread.currentThread().getName();
           Thread.currentThread().setName(name + "-" + number);
+          LOG.info("Started {} thread with name: {}",
+              name.toLowerCase(),
+              Thread.currentThread().getName());
 
           while (true) {
             try {

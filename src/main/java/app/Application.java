@@ -99,8 +99,6 @@ public class Application {
       Parser parser) {
     new UrlWorker<>("Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
         (String urlToCrawl) -> {
-          LOG.info("Started crawl thread with name: {}", Thread.currentThread().getName());
-
           final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl);
 
           if (!Utilities.isValidUrl(fixedUrl)) {
@@ -140,8 +138,6 @@ public class Application {
       Parser parser) {
     new UrlWorker<>("Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
-          LOG.info("Started analyze thread with name: {}", Thread.currentThread().getName());
-
           final List<Plugin> plugins = Arrays.asList(
               new HtmlComments(requester, parser),
               new Wordpress(requester),
@@ -161,12 +157,11 @@ public class Application {
       ExecutorService executor,
       QueueSupervisor supervisor,
       Persister persister) {
-    new UrlWorker<>("Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
-        (Bug bug) -> {
-          LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
-
-          persister.storeBug(bug);
-        }
+    new UrlWorker<>(
+        "Persister",
+        executor,
+        supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
+        persister::storeBug
     ).start(10);
   }
 
