@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 public final class UrlWorker<T> implements Worker {
 
@@ -29,40 +30,41 @@ public final class UrlWorker<T> implements Worker {
   }
 
   public void start(int threadCount) {
-    for (int i = 0; i < threadCount; i++) {
-      final int number = i;
-      executor.submit(() -> {
-        try {
-          final String oldName = Thread.currentThread().getName();
-          Thread.currentThread().setName(name + "-" + number);
-          LOG.info("Started {} thread with name: {}",
-              name.toLowerCase(),
-              Thread.currentThread().getName());
+    IntStream.range(0, threadCount).forEach(this::pollQueue);
+  }
 
-          while (true) {
-            try {
-              final T url = queue.poll(10, TimeUnit.SECONDS);
+  private void pollQueue(int threadNumber) {
+    executor.submit(() -> {
+      try {
+        final String oldName = Thread.currentThread().getName();
+        Thread.currentThread().setName(name + "-" + threadNumber);
+        LOG.info("Started {} thread with name: {}",
+            name.toLowerCase(),
+            Thread.currentThread().getName());
 
-              if (url == null) {
-                // If there's nothing on the queue ignore it
-                continue;
-              }
+        while (true) {
+          try {
+            final T url = queue.poll(10, TimeUnit.SECONDS);
 
-              jobToDo.accept(url);
-
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              LOG.warn("Polling was interrupted: {}", e);
-              break;
+            if (url == null) {
+              // If there's nothing on the queue ignore it
+              continue;
             }
-          }
 
-          Thread.currentThread().setName(oldName);
-        } catch (Throwable e) {
-          LOG.error("UrlWorker failed", e);
+            jobToDo.accept(url);
+
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.warn("Polling was interrupted: {}", e);
+            break;
+          }
         }
-      });
-    }
+
+        Thread.currentThread().setName(oldName);
+      } catch (Throwable e) {
+        LOG.error("UrlWorker failed", e);
+      }
+    });
   }
 
 }
