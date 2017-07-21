@@ -11,13 +11,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import static app.util.UrlUtils.getDomain;
+import static app.util.UrlUtils.getHost;
 
 public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
 
-  public static boolean isBlacklisted(String domain)
+  public static boolean isBlacklisted(String url)
       throws URISyntaxException, GalimatiasParseException {
     return Sets.newHashSet(
         "localhost",
@@ -34,7 +34,7 @@ public final class Utilities {
         "instagram.com",
         "linkedin.com",
         "github.com"
-    ).contains(getDomain(domain));
+    ).contains(getHost(url));
   }
 
   public static Optional<Document> parse(Connection.Response response) {

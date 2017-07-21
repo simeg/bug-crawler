@@ -2,7 +2,7 @@ package app.util;
 
 import org.junit.Test;
 
-import static app.util.UrlUtils.getDomain;
+import static app.util.UrlUtils.getHost;
 import static org.junit.Assert.assertEquals;
 
 public class UrlUtilsTest {
@@ -60,24 +60,24 @@ public class UrlUtilsTest {
   }*/
 
   @Test
-  public void testGetDomain() throws Exception {
-    final String domain = "http://specific-domain.com";
-    final String domainWww = "http://www.specific-domain.com";
-    final String domainWwwSlashEnd = "http://www.specific-domain.com/";
-    final String domainWithTrail = "http://www.specific-domain.com/arb-value/arb-value/";
-    final String domainWithParams =
-        "http://www.specific-domain.com?arbParam1=arbValue1&arbParam2=arbValue2";
-    final String domainWithTrailAndParams =
-        "http://www.specific-domain.com/arb-value/arb-value?arbParam1=arbValue1&arbParam2=arbValue2";
-    final String domainWithNestedTrailAndParams =
-        "http://www.specific-domain.com/arb-value?arbParam=arbValue/arb-value?arbParam1=arbValue1&arbParam2=arbValue2";
+  public void testGetHost() throws Exception {
+    final String host = "http://specific-host.com";
+    final String hostWww = "http://www.specific-host.com";
+    final String hostWwwSlashEnd = "http://www.specific-host.com/";
+    final String hostWithTrail = "http://www.specific-host.com/arb-value/arb-value/";
+    final String hostWithParams =
+        "http://www.specific-host.com?arbParam1=arbValue1&arbParam2=arbValue2";
+    final String hostWithTrailAndParams =
+        "http://www.specific-host.com/arb-value/arb-value?arbParam1=arbValue1&arbParam2=arbValue2";
+    final String hostWithNestedTrailAndParams =
+        "http://www.specific-host.com/arb-value?arbParam=arbValue/arb-value?arbParam1=arbValue1&arbParam2=arbValue2";
 
-    assertEquals("specific-domain.com", getDomain(domain));
-    assertEquals("specific-domain.com", getDomain(domainWww));
-    assertEquals("specific-domain.com", getDomain(domainWwwSlashEnd));
-    assertEquals("specific-domain.com", getDomain(domainWithTrail));
-    assertEquals("specific-domain.com", getDomain(domainWithParams));
-    assertEquals("specific-domain.com", getDomain(domainWithTrailAndParams));
-    assertEquals("specific-domain.com", getDomain(domainWithNestedTrailAndParams));
+    assertEquals("specific-host.com", getHost(host));
+    assertEquals("specific-host.com", getHost(hostWww));
+    assertEquals("specific-host.com", getHost(hostWwwSlashEnd));
+    assertEquals("specific-host.com", getHost(hostWithTrail));
+    assertEquals("specific-host.com", getHost(hostWithParams));
+    assertEquals("specific-host.com", getHost(hostWithTrailAndParams));
+    assertEquals("specific-host.com", getHost(hostWithNestedTrailAndParams));
   }
 }

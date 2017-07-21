@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import static app.util.RequestUtils.isMatching;
 import static app.util.RequestUtils.getFutureResult;
-import static app.util.UrlUtils.getDomain;
+import static app.util.UrlUtils.getHost;
 
 public class UrlNumberIncrementer implements Plugin {
 
@@ -90,15 +90,15 @@ public class UrlNumberIncrementer implements Plugin {
 
   private static String getFullUrl(String url, String subPageWithZero)
       throws URISyntaxException, GalimatiasParseException {
-    return String.format("http://www.%s%s", getDomain(url), subPageWithZero);
+    return String.format("http://www.%s%s", getHost(url), subPageWithZero);
   }
 
   public static String getIncrementedUrl(String url)
       throws URISyntaxException, GalimatiasParseException {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
-    final String domain = getDomain(url);
-    return String.format("http://www.%s%s", domain, incrementedSubPage);
+    final String host = getHost(url);
+    return String.format("http://www.%s%s", host, incrementedSubPage);
   }
 
   public static boolean hasSubPage(String url) throws URISyntaxException {

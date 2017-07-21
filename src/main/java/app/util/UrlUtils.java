@@ -11,7 +11,7 @@ public class UrlUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(UrlUtils.class);
 
-  public static String getDomain(String url) throws URISyntaxException, GalimatiasParseException {
+  public static String getHost(String url) throws URISyntaxException, GalimatiasParseException {
     final String parsedUrl = URL.parse(url).host().toString();
     return parsedUrl.startsWith("www.") ? parsedUrl.substring(4) : parsedUrl;
   }

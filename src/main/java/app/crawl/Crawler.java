@@ -44,12 +44,12 @@ public class Crawler {
       // Select all <a> elements with an href attribute and return their href values
       final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
 
-      final String domain = getDomain(url);
+      final String host = getHost(url);
 
       return subLinks.stream()
           .distinct()
           .filter(this::isValidLink)
-          .map(link -> normalize(domain, link))
+          .map(link -> normalize(host, link))
           .collect(Collectors.toSet());
 
     } catch (BadFutureException e) {
@@ -82,7 +82,7 @@ public class Crawler {
         link.endsWith(".svg"));
   }
 
-  private String normalize(String domain, String link) {
+  private String normalize(String host, String link) {
     // TODO
     return link;
   }
