@@ -78,17 +78,15 @@ public class Application {
       Requester requester) {
     new UrlWorker<>("Requester", executor, supervisor.get(QueueId.TO_BE_REQUESTED),
         (UrlRequest urlRequest) -> {
-          if (urlRequest != null) {
-            final Optional<?> requestValue = requestType(requester, urlRequest);
+          final Optional<?> requestValue = requestType(requester, urlRequest);
 
-            if (requestValue.isPresent()) {
-              urlRequest.future.complete(requestValue.get());
-            } else {
-              urlRequest.future.completeExceptionally(
-                  new RuntimeException(
-                      "Future did not succeed, most likely because the response was a 404")
-              );
-            }
+          if (requestValue.isPresent()) {
+            urlRequest.future.complete(requestValue.get());
+          } else {
+            urlRequest.future.completeExceptionally(
+                new RuntimeException(
+                    "Future did not succeed, most likely because the response was a 404")
+            );
           }
         }
     ).start(10);
@@ -142,21 +140,19 @@ public class Application {
       Parser parser) {
     new UrlWorker<>("Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
-          if (urlToAnalyze != null) {
-            LOG.info("Started analyze thread with name: {}", Thread.currentThread().getName());
+          LOG.info("Started analyze thread with name: {}", Thread.currentThread().getName());
 
-            final List<Plugin> plugins = Arrays.asList(
-                new HtmlComments(requester, parser),
-                new Wordpress(requester),
-                new SubPageFinder(requester),
-                new PhpInfo(requester)
-            );
+          final List<Plugin> plugins = Arrays.asList(
+              new HtmlComments(requester, parser),
+              new Wordpress(requester),
+              new SubPageFinder(requester),
+              new PhpInfo(requester)
+          );
 
-            final Analyzer analyzer = new Analyzer(plugins);
-            final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
+          final Analyzer analyzer = new Analyzer(plugins);
+          final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
-            bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
-          }
+          bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
         }
     ).start(10);
   }
@@ -167,11 +163,9 @@ public class Application {
       Persister persister) {
     new UrlWorker<>("Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
         (Bug bug) -> {
-          if (bug != null) {
-            LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
+          LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
 
-            persister.storeBug(bug);
-          }
+          persister.storeBug(bug);
         }
     ).start(10);
   }

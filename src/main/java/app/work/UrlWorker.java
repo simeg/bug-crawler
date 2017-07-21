@@ -40,6 +40,11 @@ public final class UrlWorker<T> implements Worker {
             try {
               final T url = queue.poll(10, TimeUnit.SECONDS);
 
+              if (url == null) {
+                // If there's nothing on the queue ignore it
+                continue;
+              }
+
               jobToDo.accept(url);
 
             } catch (InterruptedException e) {
