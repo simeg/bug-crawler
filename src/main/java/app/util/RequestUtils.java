@@ -53,6 +53,10 @@ public class RequestUtils {
     return null;
   }
 
+  // TODO: This should be called isDifferent since that's how it's used everywhere
+  // TODO: It should not compare to the base URL, it should compare with a random sub-site
+  // of the base URL. Just like how you can consider the sites we're checking with in SubPageFinder
+  // for example. And if /phpmyadmin and /whatever is different then it might be a potential bug.
   public static boolean isMatching(Requester requester, String baseUrl, String otherUrl) {
     try {
       final CompletableFuture baseUrlFuture =
