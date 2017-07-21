@@ -69,6 +69,8 @@ public class Application {
     initCrawler(executor, supervisor, requester, parser);
     initAnalyzer(executor, supervisor, requester, parser);
     initPersister(executor, supervisor, persister);
+
+    logStartSuccess();
   }
 
   @SuppressWarnings("unchecked")
@@ -191,6 +193,12 @@ public class Application {
         conf.getString("db.name"),
         conf.getString("db.username"),
         conf.getString("db.password"));
+  }
+
+  private void logStartSuccess() {
+    LOG.info("\n##############################################"
+        + "\n###### Application successfully started ######"
+        + "\n##############################################");
   }
 
 }
