@@ -133,6 +133,11 @@
             <artifactId>okhttp</artifactId>
             <version>3.8.1</version>
         </dependency>
+        <dependency>
+            <groupId>io.mola.galimatias</groupId>
+            <artifactId>galimatias</artifactId>
+            <version>0.2.0</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
