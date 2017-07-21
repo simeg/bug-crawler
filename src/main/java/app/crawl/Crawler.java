@@ -61,11 +61,9 @@ public class Crawler {
     }
   }
 
+  // TODO: Move this functionality to UrlUtils.validateUrl
   boolean isValidLink(String link) {
-    return !(link.equals("") ||
-        link.equals("/") ||
-        link.contains("mailto:") ||
-        link.endsWith(".exe") ||
+    return !(link.endsWith(".exe") ||
         link.endsWith(".txt") ||
         link.endsWith(".xml") ||
         link.endsWith(".zip") ||
