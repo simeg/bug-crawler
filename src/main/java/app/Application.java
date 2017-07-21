@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -127,7 +126,7 @@ public class Application {
               LOG.info("No sub-links found for: {}", url);
             }
 
-          } catch (URISyntaxException | GalimatiasParseException e) {
+          } catch (GalimatiasParseException e) {
             LOG.error(String.format("Unable to parse url [%s]", urlToCrawl), e);
           }
 

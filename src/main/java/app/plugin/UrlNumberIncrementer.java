@@ -91,12 +91,11 @@ public class UrlNumberIncrementer implements Plugin {
   }
 
   private static String getFullUrl(String url, String subPageWithZero)
-      throws URISyntaxException, GalimatiasParseException {
+      throws GalimatiasParseException {
     return String.format("http://www.%s%s", getHost(url), subPageWithZero);
   }
 
-  public static String getIncrementedUrl(String url)
-      throws URISyntaxException, GalimatiasParseException {
+  public static String getIncrementedUrl(String url) throws GalimatiasParseException {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
     final String host = getHost(url);

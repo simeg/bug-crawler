@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 import static app.util.UrlUtils.getHost;
@@ -17,8 +16,7 @@ public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
 
-  public static boolean isBlacklisted(String url)
-      throws URISyntaxException, GalimatiasParseException {
+  public static boolean isBlacklisted(String url) throws GalimatiasParseException {
     return Sets.newHashSet(
         "localhost",
         "127.0.0.1",

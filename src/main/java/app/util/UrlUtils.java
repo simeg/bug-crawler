@@ -5,13 +5,11 @@ import io.mola.galimatias.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
-
 public class UrlUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(UrlUtils.class);
 
-  public static String getHost(String url) throws URISyntaxException, GalimatiasParseException {
+  public static String getHost(String url) throws GalimatiasParseException {
     final String parsedUrl = URL.parse(url).host().toString();
     return parsedUrl.startsWith("www.") ? parsedUrl.substring(4) : parsedUrl;
   }
