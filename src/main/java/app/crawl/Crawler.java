@@ -8,7 +8,6 @@ import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static app.util.RequestUtils.getFutureResult;
-import static app.util.UrlUtils.*;
+import static app.util.UrlUtils.validateUrl;
 
 public class Crawler {
   /*
@@ -42,26 +41,24 @@ public class Crawler {
       final String html = String.valueOf(getFutureResult(future));
 
       // Select all <a> elements with an href attribute and return their href values
+      // By including `abs` in the query all relative paths gets resolved into absolute paths
       final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
-
-      final String host = getHost(url);
 
       return subLinks.stream()
           .distinct()
+          .map(String::toLowerCase)
           .filter(this::isValidLink)
-          .map(link -> normalize(host, link))
           .collect(Collectors.toSet());
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
-    } catch (URISyntaxException | GalimatiasParseException e) {
+    } catch (GalimatiasParseException e) {
       LOG.error(String.format("Unable to parse url [%s]", unvalidatedUrl), e);
       return Collections.emptySet();
     }
   }
 
-  boolean isValidLink(String receivedLink) {
-    final String link = receivedLink.toLowerCase().trim();
+  boolean isValidLink(String link) {
     return !(link.equals("") ||
         link.equals("/") ||
         link.contains("mailto:") ||
@@ -82,8 +79,4 @@ public class Crawler {
         link.endsWith(".svg"));
   }
 
-  private String normalize(String host, String link) {
-    // TODO
-    return link;
-  }
 }
