@@ -12,21 +12,25 @@ import app.queue.QueueSupervisor;
 import app.request.JsoupRequester;
 import app.request.Requester;
 import app.request.UrlRequest;
-import app.util.Utilities;
 import app.work.UrlWorker;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.jsoup.Connection;
+import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static app.util.RequestUtils.requestType;
+import static app.util.UrlUtils.validateUrl;
 import static app.util.Utilities.isBlacklisted;
 
 @Component
@@ -44,9 +48,9 @@ public class Application {
 
     final QueueSupervisor supervisor = QueueSupervisor.create(persister);
 
-    final HashMap<String, Connection.Response> requestCache = Maps.newHashMap();
+//    final HashMap<String, Connection.Response> requestCache = Maps.newHashMap();
     final Requester requester =
-        new JsoupRequester(supervisor.get(QueueId.TO_BE_REQUESTED), requestCache);
+        new JsoupRequester(supervisor.get(QueueId.TO_BE_REQUESTED), Maps.newHashMap());
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
@@ -101,34 +105,32 @@ public class Application {
       Parser parser) {
     new UrlWorker<>("Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
         (String urlToCrawl) -> {
-          final String fixedUrl = Utilities.normalizeProtocol(urlToCrawl);
+          try {
+            final String url = validateUrl(urlToCrawl);
 
-          if (!Utilities.isValidUrl(fixedUrl)) {
-            LOG.info("Consumed URL is invalid - skipping: {}", fixedUrl);
-            return;
-          } else try {
-            if (isBlacklisted(Utilities.getDomain(fixedUrl))) {
-              LOG.info("URL is blacklisted - skipping: {}", fixedUrl);
+            if (isBlacklisted(url)) {
+              LOG.info("URL is blacklisted - skipping: {}", url);
               return;
             }
-          } catch (URISyntaxException e) {
-            LOG.error(String.format("Unable to parse url [%s]", fixedUrl), e);
-            return;
+
+            final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(url);
+
+            // URL is crawled and ready to be analyzed
+            supervisor.get(QueueId.TO_BE_ANALYZED).add(url);
+
+            if (subLinks.size() > 0) {
+              // Add sub-links back on URL queue
+              subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_ANALYZED).add(link));
+
+              LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url);
+            } else {
+              LOG.info("No sub-links found for: {}", url);
+            }
+
+          } catch (URISyntaxException | GalimatiasParseException e) {
+            LOG.error(String.format("Unable to parse url [%s]", urlToCrawl), e);
           }
 
-          final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(fixedUrl);
-
-          // URL is crawled and ready to be analyzed
-          supervisor.get(QueueId.TO_BE_ANALYZED).add(fixedUrl);
-
-          if (subLinks.size() > 0) {
-            // Add sub-links back on URL queue
-            subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_ANALYZED).add(link));
-
-            LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), fixedUrl);
-          } else {
-            LOG.info("No sub-links found for: {}", fixedUrl);
-          }
         }
     ).start(10);
   }
@@ -165,24 +167,6 @@ public class Application {
         supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
         persister::storeBug
     ).start(10);
-  }
-
-  private Optional<?> requestType(Requester requester, UrlRequest request) {
-    switch (request.type) {
-      case RAW:
-        return requester.request(request.url);
-      case HTML:
-        return requester.requestHtml(request.url);
-      case HTML_HASH:
-        return requester.requestHtmlHashCode(request.url);
-      case STATUS_CODE:
-        return requester.requestStatusCode(request.url);
-      default:
-        LOG.warn("Unknown request type=[{}]", request.type);
-        break;
-    }
-
-    return Optional.empty();
   }
 
   private Persister getPersister(Config conf) {

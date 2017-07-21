@@ -4,7 +4,7 @@ import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
-import app.util.Utilities;
+import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static app.util.Utilities.getFutureResult;
+import static app.util.RequestUtils.getFutureResult;
+import static app.util.UrlUtils.*;
 
 public class Crawler {
   /*
@@ -32,23 +33,18 @@ public class Crawler {
     this.parser = parser;
   }
 
-  public Set<String> getSubLinks(String url) {
+  public Set<String> getSubLinks(String unvalidatedUrl) {
     try {
-      final String fixedUrl = Utilities.normalizeProtocol(url);
+      final String url = validateUrl(unvalidatedUrl);
 
-      if (!Utilities.isValidUrl(fixedUrl)) {
-        LOG.info("URL not valid, will not crawl [{}]", fixedUrl);
-        return Collections.emptySet();
-      }
-
-      LOG.info("Getting sub-links for URL [{}]", fixedUrl);
-      final CompletableFuture future = this.requester.init(fixedUrl, UrlRequest.RequestType.HTML);
+      LOG.info("Getting sub-links for URL [{}]", url);
+      final CompletableFuture future = this.requester.init(url, UrlRequest.RequestType.HTML);
       final String html = String.valueOf(getFutureResult(future));
 
       // Select all <a> elements with an href attribute and return their href values
       final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
 
-      final String domain = Utilities.getDomain(fixedUrl);
+      final String domain = getDomain(url);
 
       return subLinks.stream()
           .distinct()
@@ -58,8 +54,8 @@ public class Crawler {
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
-    } catch (URISyntaxException e) {
-      LOG.error(String.format("Unable to parse url [%s]", url), e);
+    } catch (URISyntaxException | GalimatiasParseException e) {
+      LOG.error(String.format("Unable to parse url [%s]", unvalidatedUrl), e);
       return Collections.emptySet();
     }
   }
