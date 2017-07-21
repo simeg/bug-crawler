@@ -17,8 +17,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.util.Utilities.*;
-
+import static app.util.RequestUtils.isMatching;
+import static app.util.RequestUtils.getFutureResult;
+import static app.util.UrlUtils.getDomain;
 
 public class UrlNumberIncrementer implements Plugin {
 

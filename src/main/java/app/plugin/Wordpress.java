@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.util.Utilities.getFutureResult;
-import static app.util.Utilities.isMatching;
+import static app.util.RequestUtils.getFutureResult;
+import static app.util.RequestUtils.isMatching;
 
 public class Wordpress implements Plugin {
 

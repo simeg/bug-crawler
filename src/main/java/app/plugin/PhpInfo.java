@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static app.util.Utilities.getFutureResult;
+import static app.util.RequestUtils.getFutureResult;
 import static app.util.Utilities.parse;
 
 public class PhpInfo implements Plugin {

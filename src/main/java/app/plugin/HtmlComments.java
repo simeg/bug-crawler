@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static app.util.Utilities.getFutureResult;
+import static app.util.RequestUtils.getFutureResult;
 
 public class HtmlComments implements Plugin {
 
