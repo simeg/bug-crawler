@@ -5,18 +5,15 @@ import io.mola.galimatias.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 public class UrlUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(UrlUtils.class);
 
-  public static String getDomain(String url) throws URISyntaxException {
-    // TODO: Replace with URL.parse(url).host()?
-    // http://stackoverflow.com/questions/9607903/get-domain-name-from-given-url
-    final String domain = new URI(url).getHost();
-    return domain.startsWith("www.") ? domain.substring(4) : domain;
+  public static String getDomain(String url) throws URISyntaxException, GalimatiasParseException {
+    final String parsedUrl = URL.parse(url).host().toString();
+    return parsedUrl.startsWith("www.") ? parsedUrl.substring(4) : parsedUrl;
   }
 
   public static String validateUrl(String unvalidatedUrl) throws GalimatiasParseException {

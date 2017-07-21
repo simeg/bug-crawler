@@ -1,6 +1,7 @@
 package app.util;
 
 import com.google.common.collect.Sets;
+import io.mola.galimatias.GalimatiasParseException;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -16,7 +17,8 @@ public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
 
-  public static boolean isBlacklisted(String domain) throws URISyntaxException {
+  public static boolean isBlacklisted(String domain)
+      throws URISyntaxException, GalimatiasParseException {
     return Sets.newHashSet(
         "localhost",
         "127.0.0.1",

@@ -1,7 +1,12 @@
 package app.util;
 
+import org.junit.Test;
+
+import static app.util.UrlUtils.getDomain;
+import static org.junit.Assert.assertEquals;
+
 public class UrlUtilsTest {
-/*  @Test
+ /* @Test
   public void testIsValidUrlFormats() throws Exception {
     final String validHttp = "http://www.arb-domain.com/arb/";
     final String validHttpTwoSlashes = "http://www.arb-domain.com//arb/";
@@ -52,7 +57,7 @@ public class UrlUtilsTest {
     assertEquals("http://arb-domain.com", normalizeProtocol(slimDomain));
     assertEquals("http://www.arb-domain.com", normalizeProtocol(domainHttp));
     assertEquals("https://www.arb-domain.com", normalizeProtocol(domainHttps));
-  }
+  }*/
 
   @Test
   public void testGetDomain() throws Exception {
@@ -74,5 +79,5 @@ public class UrlUtilsTest {
     assertEquals("specific-domain.com", getDomain(domainWithParams));
     assertEquals("specific-domain.com", getDomain(domainWithTrailAndParams));
     assertEquals("specific-domain.com", getDomain(domainWithNestedTrailAndParams));
-  }*/
+  }
 }

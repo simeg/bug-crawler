@@ -5,6 +5,7 @@ import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
+import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,17 +82,19 @@ public class UrlNumberIncrementer implements Plugin {
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
-    } catch (URISyntaxException e) {
+    } catch (URISyntaxException | GalimatiasParseException e) {
       LOG.error(String.format("Unable to parse url [%s]", url), e);
       return Collections.emptySet();
     }
   }
 
-  private static String getFullUrl(String url, String subPageWithZero) throws URISyntaxException {
+  private static String getFullUrl(String url, String subPageWithZero)
+      throws URISyntaxException, GalimatiasParseException {
     return String.format("http://www.%s%s", getDomain(url), subPageWithZero);
   }
 
-  public static String getIncrementedUrl(String url) throws URISyntaxException {
+  public static String getIncrementedUrl(String url)
+      throws URISyntaxException, GalimatiasParseException {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
     final String domain = getDomain(url);
