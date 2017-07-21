@@ -3,7 +3,10 @@ package app.util;
 import org.junit.Test;
 
 import static app.util.UrlUtils.*;
+import static app.util.Utilities.isBlacklisted;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UrlUtilsTest {
 
@@ -53,5 +56,17 @@ public class UrlUtilsTest {
     assertEquals("specific-host.com", getHost(hostWithParams));
     assertEquals("specific-host.com", getHost(hostWithTrailAndParams));
     assertEquals("specific-host.com", getHost(hostWithNestedTrailAndParams));
+  }
+
+  @Test
+  public void testIsBlacklisted() throws Exception {
+    String blacklistedUrl = "https://www.google.com";
+    String blacklistedUrl2 = "https://google.com";
+
+    assertTrue(isBlacklisted(blacklistedUrl));
+    assertTrue(isBlacklisted(blacklistedUrl2));
+
+    String notBlacklistedUrl = "https://www.arbitrary-domain.com";
+    assertFalse(isBlacklisted(notBlacklistedUrl));
   }
 }
