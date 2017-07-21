@@ -24,7 +24,7 @@ public class UrlUtils {
     return URL.parse(url).toString();
   }
 
-  private static String normalizeProtocol(String url) {
+  static String normalizeProtocol(String url) {
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }
