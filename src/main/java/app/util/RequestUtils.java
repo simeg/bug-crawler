@@ -50,7 +50,11 @@ public class RequestUtils {
       }
     }
 
-    return null;
+    throw new BadFutureException(
+        String.format("I'm not sure how this happened,"
+            + " future is done=[%s] and future is cancelled=[%s]",
+            future.isDone(),
+            future.isCancelled()));
   }
 
   // TODO: This should be called isDifferent since that's how it's used everywhere
