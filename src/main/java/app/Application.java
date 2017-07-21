@@ -120,7 +120,7 @@ public class Application {
 
             if (subLinks.size() > 0) {
               // Add sub-links back on URL queue
-              subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_ANALYZED).add(link));
+              subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_CRAWLED).add(link));
 
               LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url);
             } else {
