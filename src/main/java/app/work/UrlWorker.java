@@ -62,7 +62,7 @@ public final class UrlWorker<T> implements Worker {
 
         Thread.currentThread().setName(oldName);
       } catch (Throwable e) {
-        LOG.error("UrlWorker failed", e);
+        throw new RuntimeException("UrlWorker failed for some reason", e);
       }
     });
   }
