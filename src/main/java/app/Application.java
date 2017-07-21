@@ -47,7 +47,6 @@ public class Application {
 
     final QueueSupervisor supervisor = QueueSupervisor.create(persister);
 
-//    final HashMap<String, Connection.Response> requestCache = Maps.newHashMap();
     final Requester requester =
         new JsoupRequester(supervisor.get(QueueId.TO_BE_REQUESTED), Maps.newHashMap());
 
@@ -66,6 +65,9 @@ public class Application {
       Persister persister) {
 
     // Add initial URL
+    // TODO: This URL should be validated separately since it's coming from a user,
+    //   all other URLs should be validated inside the Crawler so everything that comes out
+    //   of the Crawler should be validated and good!
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
     initRequester(executor, supervisor, requester);

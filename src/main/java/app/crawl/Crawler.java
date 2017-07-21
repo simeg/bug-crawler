@@ -4,6 +4,7 @@ import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static app.util.RequestUtils.getFutureResult;
+import static app.util.UrlUtils.validateUrl;
 
 public class Crawler {
   /*
@@ -43,6 +45,14 @@ public class Crawler {
       return subLinks.stream()
           .distinct()
           .map(String::toLowerCase)
+          .map(unvalidatedUrl -> {
+            try {
+              return validateUrl(unvalidatedUrl);
+            } catch (GalimatiasParseException e) {
+              return "";
+            }
+          })
+          .filter(url2 -> !url2.isEmpty())
           .filter(this::isValidLink)
           .collect(Collectors.toSet());
 
