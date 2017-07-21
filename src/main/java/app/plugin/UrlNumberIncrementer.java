@@ -74,6 +74,8 @@ public class UrlNumberIncrementer implements Plugin {
             );
           }
         }
+
+        return result;
       }
 
       // TODO: Test this method
