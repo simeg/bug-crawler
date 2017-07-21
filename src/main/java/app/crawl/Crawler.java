@@ -4,7 +4,6 @@ import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
-import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static app.util.RequestUtils.getFutureResult;
-import static app.util.UrlUtils.validateUrl;
 
 public class Crawler {
   /*
@@ -32,10 +30,8 @@ public class Crawler {
     this.parser = parser;
   }
 
-  public Set<String> getSubLinks(String unvalidatedUrl) {
+  public Set<String> getSubLinks(String url) {
     try {
-      final String url = validateUrl(unvalidatedUrl);
-
       LOG.info("Getting sub-links for URL [{}]", url);
       final CompletableFuture future = this.requester.init(url, UrlRequest.RequestType.HTML);
       final String html = String.valueOf(getFutureResult(future));
@@ -51,9 +47,6 @@ public class Crawler {
           .collect(Collectors.toSet());
 
     } catch (BadFutureException e) {
-      return Collections.emptySet();
-    } catch (GalimatiasParseException e) {
-      LOG.error(String.format("Unable to parse url [%s]", unvalidatedUrl), e);
       return Collections.emptySet();
     }
   }
