@@ -109,7 +109,7 @@ public class Application {
             final String url = validateUrl(urlToCrawl);
 
             if (isBlacklisted(url)) {
-              LOG.info("URL is blacklisted - skipping: {}", url);
+              LOG.info("URL is blacklisted - skipping: {}", url.substring(0, 30) + "...");
               return;
             }
 
