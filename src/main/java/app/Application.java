@@ -9,11 +9,11 @@ import app.persist.Persister;
 import app.plugin.*;
 import app.queue.QueueId;
 import app.queue.QueueSupervisor;
-import app.queue.SimpleQueue;
 import app.request.JsoupRequester;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.util.Utilities;
+import app.work.UrlWorker;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -26,8 +26,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static app.util.Utilities.isBlacklisted;
 
@@ -52,6 +50,7 @@ public class Application {
 
     final Parser parser = HtmlParser.create();
     final ExecutorService executor = Executors.newFixedThreadPool(50);
+
     start(url, supervisor, executor, parser, requester, persister);
   }
 
@@ -66,7 +65,41 @@ public class Application {
     // Add initial URL
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
-    submitWorkerNTimes(10, "Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
+    initRequester(executor, supervisor, requester);
+    initCrawler(executor, supervisor, requester, parser);
+    initAnalyzer(executor, supervisor, requester, parser);
+    initPersister(executor, supervisor, persister);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void initRequester(
+      ExecutorService executor,
+      QueueSupervisor supervisor,
+      Requester requester) {
+    new UrlWorker<>("Requester", executor, supervisor.get(QueueId.TO_BE_REQUESTED),
+        (UrlRequest urlRequest) -> {
+          if (urlRequest != null) {
+            final Optional<?> requestValue = requestType(requester, urlRequest);
+
+            if (requestValue.isPresent()) {
+              urlRequest.future.complete(requestValue.get());
+            } else {
+              urlRequest.future.completeExceptionally(
+                  new RuntimeException(
+                      "Future did not succeed, most likely because the response was a 404")
+              );
+            }
+          }
+        }
+    ).start(10);
+  }
+
+  private void initCrawler(
+      ExecutorService executor,
+      QueueSupervisor supervisor,
+      Requester requester,
+      Parser parser) {
+    new UrlWorker<>("Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
         (String urlToCrawl) -> {
           LOG.info("Started crawl thread with name: {}", Thread.currentThread().getName());
 
@@ -98,9 +131,16 @@ public class Application {
           } else {
             LOG.info("No sub-links found for: {}", fixedUrl);
           }
-        });
+        }
+    ).start(10);
+  }
 
-    submitWorkerNTimes(10, "Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
+  private void initAnalyzer(
+      ExecutorService executor,
+      QueueSupervisor supervisor,
+      Requester requester,
+      Parser parser) {
+    new UrlWorker<>("Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
         (String urlToAnalyze) -> {
           if (urlToAnalyze != null) {
             LOG.info("Started analyze thread with name: {}", Thread.currentThread().getName());
@@ -117,93 +157,23 @@ public class Application {
 
             bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
           }
-        });
+        }
+    ).start(10);
+  }
 
-    submitWorkerNTimes(10, "Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
+  private void initPersister(
+      ExecutorService executor,
+      QueueSupervisor supervisor,
+      Persister persister) {
+    new UrlWorker<>("Persister", executor, supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
         (Bug bug) -> {
           if (bug != null) {
             LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
 
             persister.storeBug(bug);
           }
-        });
-
-    submitRequestWorkers(10, executor, supervisor.get(QueueId.TO_BE_REQUESTED), requester);
-  }
-
-  @SuppressWarnings("unchecked")
-  private void submitRequestWorkers(
-      final int times,
-      ExecutorService executor,
-      SimpleQueue<UrlRequest> queue,
-      Requester requester) {
-    for (int i = 0; i < times; i++) {
-      final int number = i;
-      executor.submit(() -> {
-        try {
-          final String oldName = Thread.currentThread().getName();
-          Thread.currentThread().setName("Requester-" + number);
-          LOG.info("Started requester thread with name: {}", Thread.currentThread().getName());
-
-          while (true) {
-            try {
-              final UrlRequest urlRequest = queue.poll(10, TimeUnit.SECONDS);
-              if (urlRequest != null) {
-                final Optional<?> requestValue = requestType(requester, urlRequest);
-
-                if (requestValue.isPresent()) {
-                  urlRequest.future.complete(requestValue.get());
-                } else {
-                  urlRequest.future.completeExceptionally(
-                      new RuntimeException(
-                          "Future did not succeed, most likely"
-                              + "because the response was a 404"));
-                }
-              }
-
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              LOG.warn("Polling was interrupted: {}", e);
-              break;
-            }
-          }
-
-          Thread.currentThread().setName(oldName);
-        } catch (Throwable e) {
-          LOG.error("Worker failed", e);
         }
-      });
-    }
-  }
-
-  private <T> void submitWorkerNTimes(
-      final int times,
-      String threadName,
-      ExecutorService executor,
-      SimpleQueue<T> queue,
-      Consumer<T> jobToDo) {
-    for (int i = 0; i < times; i++) {
-      final int number = i;
-      executor.submit(() -> {
-        final String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName(threadName + "-" + number);
-
-        while (true) {
-          try {
-            final T url = queue.poll(10, TimeUnit.SECONDS);
-
-            jobToDo.accept(url);
-
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Polling was interrupted: {}", e);
-            break;
-          }
-        }
-
-        Thread.currentThread().setName(oldName);
-      });
-    }
+    ).start(10);
   }
 
   private Optional<?> requestType(Requester requester, UrlRequest request) {
