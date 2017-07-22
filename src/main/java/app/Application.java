@@ -14,6 +14,7 @@ import app.request.JsoupRequester;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.work.UrlWorker;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -152,7 +153,7 @@ public class Application {
           );
 
           final Analyzer analyzer = new Analyzer(plugins);
-          final Set<Bug> bugs = analyzer.analyze(urlToAnalyze);
+          final ImmutableSet<Bug> bugs = analyzer.analyze(urlToAnalyze);
 
           bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
         }
