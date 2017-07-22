@@ -42,10 +42,15 @@ public class UrlUtils {
   }
 
   static boolean hasInvalidExtension(String link) {
-    Set<String> result = ImmutableSet.of(
+    ImmutableSet<String> invalidExtensions = ImmutableSet.of(
         "exe", "txt", "xml", "zip", "rar",
         "tar", "pdf", "jpg", "jpeg", "png",
-        "tiff", "gif", "bmp", "exif", "svg")
+        "tiff", "gif", "bmp", "exif", "svg");
+    return hasExtension(invalidExtensions, link);
+  }
+
+  public static boolean hasExtension(ImmutableSet<?> extensions, String link) {
+    Set<String> result = extensions
         .stream()
         .map(ext -> "." + ext)
         .filter(link::endsWith)

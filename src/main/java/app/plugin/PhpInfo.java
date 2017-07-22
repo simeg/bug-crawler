@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static app.util.RequestUtils.getFutureResult;
+import static app.util.UrlUtils.hasExtension;
 import static app.util.Utilities.parse;
 
 public class PhpInfo implements Plugin {
@@ -111,7 +112,7 @@ public class PhpInfo implements Plugin {
   }
 
   private static boolean isFile(String path) {
-    return path.endsWith(".html") || path.endsWith(".php") || path.endsWith(".asp") || path.endsWith(".js");
+    return hasExtension(ImmutableSet.of("html", "php", "asp", "js"), path);
   }
 
   private static Boolean isPhpInfoFile(Optional<Document> document) {
