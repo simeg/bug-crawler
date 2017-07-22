@@ -69,4 +69,19 @@ public class UrlUtilsTest {
     String notBlacklistedUrl = "https://www.arbitrary-domain.com";
     assertFalse(isBlacklisted(notBlacklistedUrl));
   }
+
+  @Test
+  public void testHasInvalidExtension() throws Exception {
+    String validExtension1 = "https://www.arb.com";
+    String validExtension2 = "https://www.arb.org";
+
+    assertFalse(hasInvalidExtension(validExtension1));
+    assertFalse(hasInvalidExtension(validExtension2));
+
+    String invalidExtension1 = "https://www.arb.jpeg";
+    String invalidExtension2 = "https://www.arb.pdf";
+
+    assertTrue(hasInvalidExtension(invalidExtension1));
+    assertTrue(hasInvalidExtension(invalidExtension2));
+  }
 }

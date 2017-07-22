@@ -3,6 +3,7 @@ package app;
 import app.analyze.Analyzer;
 import app.analyze.Bug;
 import app.crawl.Crawler;
+import app.crawl.InvalidExtensionException;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
@@ -128,7 +129,7 @@ public class Application {
               LOG.info("No sub-links found for: {}", url);
             }
 
-          } catch (GalimatiasParseException e) {
+          } catch (InvalidExtensionException | GalimatiasParseException e) {
             LOG.error(String.format("Unable to parse url [%s]", urlToCrawl), e);
           }
 

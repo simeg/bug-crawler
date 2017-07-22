@@ -48,36 +48,16 @@ public class Crawler {
           .map(unvalidatedUrl -> {
             try {
               return validateUrl(unvalidatedUrl);
-            } catch (GalimatiasParseException e) {
+            } catch (InvalidExtensionException | GalimatiasParseException e) {
               return "";
             }
           })
           .filter(url2 -> !url2.isEmpty())
-          .filter(this::isValidLink)
           .collect(Collectors.toSet());
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
     }
-  }
-
-  // TODO: Move this functionality to UrlUtils.validateUrl
-  boolean isValidLink(String link) {
-    return !(link.endsWith(".exe") ||
-        link.endsWith(".txt") ||
-        link.endsWith(".xml") ||
-        link.endsWith(".zip") ||
-        link.endsWith(".rar") ||
-        link.endsWith(".tar") ||
-        link.endsWith(".pdf") ||
-        link.endsWith(".jpg") ||
-        link.endsWith(".jpeg") ||
-        link.endsWith(".png") ||
-        link.endsWith(".tiff") ||
-        link.endsWith(".gif") ||
-        link.endsWith(".bmp") ||
-        link.endsWith(".exif") ||
-        link.endsWith(".svg"));
   }
 
 }
