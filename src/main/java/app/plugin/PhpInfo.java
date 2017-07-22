@@ -89,7 +89,8 @@ public class PhpInfo implements Plugin {
         StringBuilder phpInfoPathToQuery = new StringBuilder(pathToQuery);
         phpInfoPathToQuery.append("/").append(phpInfoFile);
 
-        CompletableFuture future = requester.init(phpInfoPathToQuery.toString(), UrlRequest.RequestType.RAW);
+        CompletableFuture future =
+            requester.init(phpInfoPathToQuery.toString(), UrlRequest.RequestType.RAW);
         Connection.Response response = (Connection.Response) getFutureResult(future);
         Optional<Document> document = parse(response);
 

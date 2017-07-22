@@ -20,13 +20,15 @@ public class JsoupRequester implements Requester {
 
   private static final int TIMEOUT_MS = 3000;
   private static final String USER_AGENT =
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
-          "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36"
+          + " (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final SimpleQueue<UrlRequest> queue;
   private final HashMap<String, Connection.Response> cache;
 
-  public JsoupRequester(SimpleQueue<UrlRequest> queue, HashMap<String, Connection.Response> requestCache) {
+  public JsoupRequester(
+      SimpleQueue<UrlRequest> queue,
+      HashMap<String, Connection.Response> requestCache) {
     this.queue = queue;
     this.cache = requestCache;
   }

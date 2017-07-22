@@ -44,7 +44,8 @@ public class RequestUtils {
       } catch (InterruptedException e) {
         throw new BadFutureException("Thread was interrupted", e);
       } catch (ExecutionException e) {
-        throw new BadFutureException("Future was interrupted. A bad response may have caused this.", e);
+        throw new BadFutureException(
+            "Future was interrupted. A bad response may have caused this.", e);
       } catch (TimeoutException e) {
         throw new BadFutureException("Future took too long to finish", e);
       }

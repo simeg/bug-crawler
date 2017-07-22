@@ -54,7 +54,8 @@ public class Wordpress implements Plugin {
     try {
       final String wpLoginUrl = url + "/wp-login.php";
 
-      final CompletableFuture future = requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
+      final CompletableFuture future =
+          requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
       final int statusCode = (int) getFutureResult(future);
 
       final boolean isWordpressInstance =
