@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import static app.util.UrlUtils.validateUrl;
 import static app.util.Utilities.isBlacklisted;
+import static app.work.QueuePoller.pollQueue;
 
 public class CrawlerWorker implements Worker<String> {
 
@@ -44,42 +44,12 @@ public class CrawlerWorker implements Worker<String> {
 
   @Override
   public void start(int threadCount) {
-    IntStream.range(0, threadCount).forEach(this::pollQueue);
+    IntStream.range(0, threadCount).forEach(i ->
+        pollQueue("Crawler", i, LOG, executor, queue, this::crawl)
+    );
   }
 
-  private void pollQueue(int threadNumber) {
-    executor.submit(() -> {
-      try {
-        final String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName("Crawler-" + threadNumber);
-        LOG.info("Started crawler thread with name: {}", Thread.currentThread().getName());
-
-        while (true) {
-          try {
-            final String url = queue.poll(10, TimeUnit.SECONDS);
-
-            if (url == null) {
-              // If there's nothing on the queue ignore it
-              continue;
-            }
-
-            doWork(url); // TODO: DRY?
-
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Polling was interrupted: {}", e);
-            break;
-          }
-        }
-
-        Thread.currentThread().setName(oldName);
-      } catch (Throwable e) {
-        LOG.error("CrawlerWorker failed", e);
-      }
-    });
-  }
-
-  private void doWork(String urlToCrawl) {
+  private void crawl(String urlToCrawl) {
     try {
       final String url = validateUrl(urlToCrawl);
 
@@ -89,7 +59,7 @@ public class CrawlerWorker implements Worker<String> {
         return;
       }
 
-      final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(url);
+      Set<String> subLinks = new Crawler(requester, parser).getSubLinks(url);
 
       // URL is crawled and ready to be analyzed
       supervisor.get(QueueId.TO_BE_ANALYZED).add(url);
@@ -107,4 +77,5 @@ public class CrawlerWorker implements Worker<String> {
       LOG.error(String.format("Unable to parse url [%s]", urlToCrawl), e);
     }
   }
+
 }
