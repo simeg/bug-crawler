@@ -1,34 +1,33 @@
 package app.work;
 
+import app.analyze.Bug;
+import app.persist.Persister;
 import app.queue.SimpleQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-public final class UrlWorker<T> implements Worker {
+public class PersisterWorker implements Worker<Bug> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(UrlWorker.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PersisterWorker.class);
 
-  private final String name;
   private final ExecutorService executor;
-  private final SimpleQueue<T> queue;
-  private final Consumer<T> jobToDo;
+  private final Persister persister;
+  private final SimpleQueue<Bug> queue;
 
-  public UrlWorker(
-      String name,
+  public PersisterWorker(
       ExecutorService executor,
-      SimpleQueue<T> queue,
-      Consumer<T> jobToDo) {
-    this.name = name;
+      Persister persister,
+      SimpleQueue<Bug> queue) {
     this.executor = executor;
+    this.persister = persister;
     this.queue = queue;
-    this.jobToDo = jobToDo;
   }
 
+  @Override
   public void start(int threadCount) {
     IntStream.range(0, threadCount).forEach(this::pollQueue);
   }
@@ -37,21 +36,19 @@ public final class UrlWorker<T> implements Worker {
     executor.submit(() -> {
       try {
         final String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName(name + "-" + threadNumber);
-        LOG.info("Started {} thread with name: {}",
-            name.toLowerCase(),
-            Thread.currentThread().getName());
+        Thread.currentThread().setName("Persister-" + threadNumber);
+        LOG.info("Started persister thread with name: {}", Thread.currentThread().getName());
 
         while (true) {
           try {
-            final T url = queue.poll(10, TimeUnit.SECONDS);
+            final Bug bug = queue.poll(10, TimeUnit.SECONDS);
 
-            if (url == null) {
+            if (bug == null) {
               // If there's nothing on the queue ignore it
               continue;
             }
 
-            jobToDo.accept(url);
+            doWork(bug); // TODO: DRY?
 
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -62,9 +59,12 @@ public final class UrlWorker<T> implements Worker {
 
         Thread.currentThread().setName(oldName);
       } catch (Throwable e) {
-        throw new RuntimeException("UrlWorker failed for some reason", e);
+        LOG.error("PersisterWorker failed", e);
       }
     });
   }
 
+  private void doWork(Bug bug) {
+    persister.storeBug(bug);
+  }
 }

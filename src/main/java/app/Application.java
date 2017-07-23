@@ -1,38 +1,25 @@
 package app;
 
-import app.analyze.Analyzer;
-import app.analyze.Bug;
-import app.crawl.Crawler;
-import app.crawl.InvalidExtensionException;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
-import app.plugin.*;
 import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.request.JsoupRequester;
 import app.request.Requester;
-import app.request.UrlRequest;
-import app.work.UrlWorker;
-import com.google.common.collect.ImmutableSet;
+import app.work.AnalyzerWorker;
+import app.work.CrawlerWorker;
+import app.work.PersisterWorker;
+import app.work.RequesterWorker;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static app.util.RequestUtils.requestType;
-import static app.util.UrlUtils.validateUrl;
-import static app.util.Utilities.isBlacklisted;
 
 @Component
 public class Application {
@@ -72,105 +59,38 @@ public class Application {
     //   of the Crawler should be validated and good!
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
-    initRequester(executor, supervisor, requester);
-    initCrawler(executor, supervisor, requester, parser);
-    initAnalyzer(executor, supervisor, requester, parser);
-    initPersister(executor, supervisor, persister);
+    initWorkers(executor, requester, parser, supervisor, persister);
 
     logStartSuccess();
   }
 
-  @SuppressWarnings("unchecked")
-  private void initRequester(
+  private void initWorkers(
       ExecutorService executor,
-      QueueSupervisor supervisor,
-      Requester requester) {
-    new UrlWorker<>("Requester", executor, supervisor.get(QueueId.TO_BE_REQUESTED),
-        (UrlRequest urlRequest) -> {
-          final Optional<?> requestValue = requestType(requester, urlRequest);
-
-          if (requestValue.isPresent()) {
-            urlRequest.future.complete(requestValue.get());
-          } else {
-            urlRequest.future.completeExceptionally(
-                new RuntimeException(
-                    "Future did not succeed, most likely because the response was a 404")
-            );
-          }
-        }
-    ).start(10);
-  }
-
-  private void initCrawler(
-      ExecutorService executor,
-      QueueSupervisor supervisor,
       Requester requester,
-      Parser parser) {
-    new UrlWorker<>("Crawler", executor, supervisor.get(QueueId.TO_BE_CRAWLED),
-        (String urlToCrawl) -> {
-          try {
-            final String url = validateUrl(urlToCrawl);
-
-            if (isBlacklisted(url)) {
-              String logUrl = (url.length() > 30 ? url.substring(0, 30) : url);
-              LOG.info("URL is blacklisted - skipping: {}", logUrl + "...");
-              return;
-            }
-
-            final Set<String> subLinks = new Crawler(requester, parser).getSubLinks(url);
-
-            // URL is crawled and ready to be analyzed
-            supervisor.get(QueueId.TO_BE_ANALYZED).add(url);
-
-            if (subLinks.size() > 0) {
-              // Add sub-links back on URL queue
-              subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_CRAWLED).add(link));
-
-              LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url);
-            } else {
-              LOG.info("No sub-links found for: {}", url);
-            }
-
-          } catch (InvalidExtensionException | GalimatiasParseException e) {
-            LOG.error(String.format("Unable to parse url [%s]", urlToCrawl), e);
-          }
-
-        }
-    ).start(10);
-  }
-
-  private void initAnalyzer(
-      ExecutorService executor,
-      QueueSupervisor supervisor,
-      Requester requester,
-      Parser parser) {
-    new UrlWorker<>("Analyzer", executor, supervisor.get(QueueId.TO_BE_ANALYZED),
-        (String urlToAnalyze) -> {
-          final List<Plugin> plugins = Arrays.asList(
-              new HtmlComments(requester, parser),
-              new Wordpress(requester),
-              new SubPageFinder(requester),
-              new PhpInfo(requester)
-          );
-
-          final Analyzer analyzer = new Analyzer(plugins);
-          final ImmutableSet<Bug> bugs = analyzer.analyze(urlToAnalyze);
-
-          bugs.forEach(bug -> supervisor.get(QueueId.TO_BE_STORED_AS_BUG).add(bug));
-        }
-    ).start(10);
-  }
-
-  private void initPersister(
-      ExecutorService executor,
+      Parser parser,
       QueueSupervisor supervisor,
       Persister persister) {
-    new UrlWorker<>(
-        "Persister",
+    new RequesterWorker(executor, requester, supervisor.get(QueueId.TO_BE_REQUESTED))
+        .start(10);
+
+    new CrawlerWorker(
         executor,
-        supervisor.get(QueueId.TO_BE_STORED_AS_BUG),
-        persister::storeBug
+        requester,
+        parser,
+        supervisor,
+        supervisor.get(QueueId.TO_BE_CRAWLED)
     ).start(10);
+
+    new AnalyzerWorker(
+        executor,
+        requester,
+        parser,
+        supervisor,
+        supervisor.get(QueueId.TO_BE_ANALYZED)
+    ).start(10);
+
+    new PersisterWorker(executor, persister, supervisor.get(QueueId.TO_BE_STORED_AS_BUG))
+        .start(10);
   }
 
   private Persister getPersister(Config conf) {
