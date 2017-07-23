@@ -112,7 +112,8 @@ public class Application {
             final String url = validateUrl(urlToCrawl);
 
             if (isBlacklisted(url)) {
-              LOG.info("URL is blacklisted - skipping: {}", url.substring(0, 30) + "...");
+              String logUrl = (url.length() > 30 ? url.substring(0, 30) : url);
+              LOG.info("URL is blacklisted - skipping: {}", logUrl + "...");
               return;
             }
 
