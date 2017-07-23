@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.util.Utilities.getFutureResult;
-import static app.util.Utilities.isMatching;
+import static app.util.RequestUtils.getFutureResult;
+import static app.util.RequestUtils.isMatching;
 
 public class Wordpress implements Plugin {
 
@@ -54,7 +54,8 @@ public class Wordpress implements Plugin {
     try {
       final String wpLoginUrl = url + "/wp-login.php";
 
-      final CompletableFuture future = requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
+      final CompletableFuture future =
+          requester.init(wpLoginUrl, UrlRequest.RequestType.STATUS_CODE);
       final int statusCode = (int) getFutureResult(future);
 
       final boolean isWordpressInstance =

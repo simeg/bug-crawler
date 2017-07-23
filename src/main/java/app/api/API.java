@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
-import static org.jooq.util.maven.web_crawler.Tables.BUG;
+import static org.simeg.jooq.web_crawler.Tables.BUG;
 
 @Component
 public class API {

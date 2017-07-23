@@ -5,6 +5,7 @@ import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import com.google.common.collect.Sets;
+import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.util.Utilities.*;
-
+import static app.util.RequestUtils.isMatching;
+import static app.util.RequestUtils.getFutureResult;
+import static app.util.UrlUtils.getHost;
 
 public class UrlNumberIncrementer implements Plugin {
 
@@ -52,7 +54,8 @@ public class UrlNumberIncrementer implements Plugin {
           final String subPageWithZero = replaceDigitsWith(subPage, String.valueOf(i));
           final String fullUrl = getFullUrl(url, subPageWithZero);
 
-          final CompletableFuture future = requester.init(fullUrl, UrlRequest.RequestType.STATUS_CODE);
+          final CompletableFuture future =
+              requester.init(fullUrl, UrlRequest.RequestType.STATUS_CODE);
           final int statusCode = (int) getFutureResult(future);
 
           // If the url + path has exactly the same HTML content as the url,
@@ -72,6 +75,8 @@ public class UrlNumberIncrementer implements Plugin {
             );
           }
         }
+
+        return result;
       }
 
       // TODO: Test this method
@@ -80,28 +85,25 @@ public class UrlNumberIncrementer implements Plugin {
 
     } catch (BadFutureException e) {
       return Collections.emptySet();
+    } catch (URISyntaxException | GalimatiasParseException e) {
+      LOG.error(String.format("Unable to parse url [%s]", url), e);
+      return Collections.emptySet();
     }
   }
 
-  private static String getFullUrl(String url, String subPageWithZero) {
-    return String.format("http://www.%s%s", getDomain(url), subPageWithZero);
+  private static String getFullUrl(String url, String subPageWithZero)
+      throws GalimatiasParseException {
+    return String.format("http://www.%s%s", getHost(url), subPageWithZero);
   }
 
-  public static String getIncrementedUrl(String url) {
+  public static String getIncrementedUrl(String url) throws GalimatiasParseException {
     final String subPage = getSubPage(url);
     final String incrementedSubPage = incrementOne(subPage);
-    final String domain = getDomain(url);
-    return String.format("http://www.%s%s", domain, incrementedSubPage);
+    final String host = getHost(url);
+    return String.format("http://www.%s%s", host, incrementedSubPage);
   }
 
-  public static boolean hasSubPage(String url) {
-    final String domain = getDomain(url);
-
-    if (domain == null) {
-      LOG.warn("Parsing domain from URL=[{}] gave a null response", url);
-      return false;
-    }
-
+  public static boolean hasSubPage(String url) throws URISyntaxException {
     final String subPage = getSubPage(url);
 
     if (subPage.length() <= 1) {

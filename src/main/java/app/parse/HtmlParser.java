@@ -18,6 +18,7 @@ public class HtmlParser implements Parser {
 
   private final static int TIMEOUT = 10000;
 
+  // TODO: Use cache, maybe pass as argument?
   private final HashMap<String, Document> cache;
 
   private HtmlParser(HashMap<String, Document> cache) {

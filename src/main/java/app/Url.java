@@ -1,5 +1,11 @@
 package app;
 
+import okhttp3.HttpUrl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 /**
  * TODO
  * The type Url will hold all information regarding the URL.
@@ -27,10 +33,32 @@ package app;
  */
 public final class Url {
 
+  private static final Logger LOG = LoggerFactory.getLogger(Url.class);
+
   public final String url;
+  private final HttpUrl httpUrl;
 
   public Url(String url) {
     this.url = url;
+    this.httpUrl = HttpUrl.parse(url);
+    if (this.httpUrl == null) {
+      LOG.warn("Unable to parse URL: [{}]", url);
+    }
   }
 
+  public List<String> getPathSegments() {
+    return httpUrl.encodedPathSegments();
+  }
+
+  public String getHost() {
+    return httpUrl.host();
+  }
+
+  public String getProtocol() {
+    return httpUrl.scheme();
+  }
+
+  public String getFullHost() {
+    return this.getProtocol() + "://" + this.getHost();
+  }
 }

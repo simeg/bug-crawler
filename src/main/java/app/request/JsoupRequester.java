@@ -1,6 +1,7 @@
 package app.request;
 
 import app.queue.SimpleQueue;
+import app.util.Utilities;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,13 +20,15 @@ public class JsoupRequester implements Requester {
 
   private static final int TIMEOUT_MS = 3000;
   private static final String USER_AGENT =
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 " +
-          "(KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36"
+          + " (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
 
   private final SimpleQueue<UrlRequest> queue;
   private final HashMap<String, Connection.Response> cache;
 
-  public JsoupRequester(SimpleQueue<UrlRequest> queue, HashMap<String, Connection.Response> requestCache) {
+  public JsoupRequester(
+      SimpleQueue<UrlRequest> queue,
+      HashMap<String, Connection.Response> requestCache) {
     this.queue = queue;
     this.cache = requestCache;
   }
@@ -36,6 +39,11 @@ public class JsoupRequester implements Requester {
     queue.add(new UrlRequest(url, future, type));
 
     return future;
+  }
+
+  @Override
+  public Optional<Connection.Response> request(String url) {
+    return makeRequest(url);
   }
 
   @Override
@@ -79,6 +87,7 @@ public class JsoupRequester implements Requester {
       return Optional.empty();
 
     } catch (IOException e) {
+      // If status != 200 then HttpStatusException will be thrown and caught here
       return Optional.empty();
 
     } catch (Throwable e) {
@@ -88,16 +97,6 @@ public class JsoupRequester implements Requester {
 
   private Optional<Document> getParsedResponse(String url) {
     Optional<Connection.Response> response = this.makeRequest(url);
-
-    if (response.isPresent()) {
-      try {
-        return Optional.of(response.get().parse());
-
-      } catch (IOException e) {
-        LOG.warn("Unable to parse response from URL: [{}]", url);
-      }
-    }
-
-    return Optional.empty();
+    return response.flatMap(Utilities::parse);
   }
 }
