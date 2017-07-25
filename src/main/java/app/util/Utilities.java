@@ -1,7 +1,5 @@
 package app.util;
 
-import com.google.common.collect.Sets;
-import io.mola.galimatias.GalimatiasParseException;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -10,30 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Optional;
 
-import static app.util.UrlUtils.getHost;
-
 public final class Utilities {
 
   private static final Logger LOG = LoggerFactory.getLogger(Utilities.class);
-
-  public static boolean isBlacklisted(String url) throws GalimatiasParseException {
-    return Sets.newHashSet(
-        "localhost",
-        "127.0.0.1",
-        "google.com",
-        "youtube.com",
-        "facebook.com",
-        "baidu.com",
-        "wikipedia.org",
-        "yahoo.com",
-        "reddit.com",
-        "amazon.com",
-        "twitter.com",
-        "instagram.com",
-        "linkedin.com",
-        "github.com"
-    ).contains(getHost(url));
-  }
 
   public static Optional<Document> parse(Connection.Response response) {
     try {

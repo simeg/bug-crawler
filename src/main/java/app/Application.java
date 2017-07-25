@@ -7,6 +7,7 @@ import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.request.JsoupRequester;
 import app.request.Requester;
+import app.url.Url;
 import app.work.AnalyzerWorker;
 import app.work.CrawlerWorker;
 import app.work.PersisterWorker;
@@ -46,29 +47,23 @@ public class Application {
   }
 
   private void start(
-      String url,
+      String rawUrl,
       QueueSupervisor supervisor,
       ExecutorService executor,
       Parser parser,
       Requester requester,
       Persister persister) {
+    try {
+      Url url = new Url(rawUrl);
+      supervisor.get(QueueId.TO_BE_CRAWLED).add(url.rawUrl); // TODO: Use Url class
 
-     /* Add initial URL
-      * TODO: This URL should be validated separately since it's coming from a user,
-      * all other URLs should be validated inside the Crawler so everything that comes out
-      * of the Crawler should be validated and good!
-      *
-      * if (url != validated)
-      *   isRunning = false
-      *
-      * This will propagate to the UI and info should be shown to the user that the initial
-      * url was not validated
-      */
-    supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
+      initWorkers(executor, requester, parser, supervisor, persister);
 
-    initWorkers(executor, requester, parser, supervisor, persister);
-
-    logStartSuccess();
+      logStartSuccess();
+    } catch (Exception e) {
+      isRunning = false;
+      LOG.error("Could not start application due to invalid initial URL={}", rawUrl, e);
+    }
   }
 
   private void initWorkers(

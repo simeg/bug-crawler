@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import static app.util.RequestUtils.getFutureResult;
 import static app.util.RequestUtils.isMatching;
-import static app.util.UrlUtils.getHost;
+import static app.url.UrlUtils.getHost;
 
 public class UrlNumberIncrementer implements Plugin {
 
