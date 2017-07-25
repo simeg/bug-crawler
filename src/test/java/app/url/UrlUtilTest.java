@@ -1,11 +1,11 @@
-package app.util;
+package app.url;
 
 import org.junit.Test;
 
-import static app.url.UrlUtils.getHost;
+import static app.url.UrlUtil.getHost;
 import static org.junit.Assert.assertEquals;
 
-public class UrlUtilsTest {
+public class UrlUtilTest {
 
   @Test
   public void testGetHost() throws Exception {

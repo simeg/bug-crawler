@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static app.url.UrlUtils.hasExtension;
+import static app.url.UrlUtil.hasExtension;
 
 public final class Url {
 

@@ -1,8 +1,5 @@
-package app.util;
+package app.request;
 
-import app.request.BadFutureException;
-import app.request.Requester;
-import app.request.UrlRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +9,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class RequestUtils {
+public class RequestUtil {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RequestUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RequestUtil.class);
 
   private static final int FUTURE_TIMEOUT_SEC = 15;
 

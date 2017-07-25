@@ -1,7 +1,7 @@
 package app.request;
 
 import app.queue.SimpleQueue;
-import app.util.Utilities;
+import app.parse.ParseUtil;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -97,6 +97,6 @@ public class JsoupRequester implements Requester {
 
   private Optional<Document> getParsedResponse(String url) {
     Optional<Connection.Response> response = this.makeRequest(url);
-    return response.flatMap(Utilities::parse);
+    return response.flatMap(ParseUtil::parse);
   }
 }

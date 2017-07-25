@@ -7,7 +7,7 @@ import io.mola.galimatias.URL;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class UrlUtils {
+public final class UrlUtil {
 
   // TODO: Replace with Url class method getHost
   public static String getHost(String url) throws GalimatiasParseException {

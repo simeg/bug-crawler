@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.util.RequestUtils.getFutureResult;
-import static app.util.RequestUtils.isMatching;
+import static app.request.RequestUtil.getFutureResult;
+import static app.request.RequestUtil.isMatching;
 
 public class Wordpress implements Plugin {
 

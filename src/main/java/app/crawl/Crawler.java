@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static app.util.RequestUtils.getFutureResult;
+import static app.request.RequestUtil.getFutureResult;
 
 public class Crawler {
   /*

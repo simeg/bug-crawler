@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
-import static app.util.RequestUtils.requestType;
+import static app.request.RequestUtil.requestType;
 import static app.work.QueuePoller.pollQueue;
 
 public class RequesterWorker implements Worker<UrlRequest> {

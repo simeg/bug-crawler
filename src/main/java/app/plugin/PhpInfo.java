@@ -20,9 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static app.url.UrlUtils.hasExtension;
-import static app.util.RequestUtils.getFutureResult;
-import static app.util.Utilities.parse;
+import static app.url.UrlUtil.hasExtension;
+import static app.request.RequestUtil.getFutureResult;
+import static app.parse.ParseUtil.parse;
 
 public class PhpInfo implements Plugin {
 
