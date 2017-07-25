@@ -19,7 +19,7 @@ final class QueuePoller {
     executor.submit(() -> {
       try {
         String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName(name + "-" + threadNumber);
+        Thread.currentThread().setName(String.format("%s-%s", name, threadNumber));
         logger.info("Started {} thread with name: {}",
             name.toLowerCase(),
             Thread.currentThread().getName());
@@ -44,7 +44,7 @@ final class QueuePoller {
 
         Thread.currentThread().setName(oldName);
       } catch (Throwable e) {
-        logger.error(name + "Worker failed", e);
+        logger.error(String.format("%sWorker failed", name), e);
       }
     });
   }
