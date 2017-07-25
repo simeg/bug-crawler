@@ -4,16 +4,16 @@ import app.analyze.Bug;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.util.RequestUtils.getFutureResult;
-import static app.util.RequestUtils.isMatching;
+import static app.request.RequestUtil.getFutureResult;
+import static app.request.RequestUtil.isMatching;
 
 public class Wordpress implements Plugin {
 
@@ -32,7 +32,7 @@ public class Wordpress implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String url) {
+  public ImmutableSet<Bug> inspect(String url) {
     if (isWordpress(url)) {
       final Set<Bug> result = Sets.newHashSet();
       final int wpVersion = getWpVersion(url);
@@ -42,7 +42,7 @@ public class Wordpress implements Plugin {
       LOG.info("Website is not a Wordpress instance, will not look for Wordpress bugs");
     }
 
-    return Collections.emptySet();
+    return ImmutableSet.of();
   }
 
   private int getWpVersion(String url) {

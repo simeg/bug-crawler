@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static app.util.RequestUtils.getFutureResult;
-import static app.util.RequestUtils.isMatching;
+import static app.request.RequestUtil.getFutureResult;
+import static app.request.RequestUtil.isMatching;
 
 public class SubPageFinder implements Plugin {
 
@@ -46,7 +46,7 @@ public class SubPageFinder implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String url) {
+  public ImmutableSet<Bug> inspect(String url) {
     final Set<Bug> result = Sets.newHashSet();
 
     pagePaths.forEach(path -> {
@@ -77,7 +77,7 @@ public class SubPageFinder implements Plugin {
       }
     });
 
-    return result;
+    return ImmutableSet.copyOf(result);
   }
 
 }

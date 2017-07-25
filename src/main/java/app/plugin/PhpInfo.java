@@ -1,10 +1,10 @@
 package app.plugin;
 
-import app.Url;
 import app.analyze.Bug;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import app.url.Url;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -20,9 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static app.util.RequestUtils.getFutureResult;
-import static app.util.UrlUtils.hasExtension;
-import static app.util.Utilities.parse;
+import static app.url.UrlUtil.hasExtension;
+import static app.request.RequestUtil.getFutureResult;
+import static app.parse.ParseUtil.parse;
 
 public class PhpInfo implements Plugin {
 
@@ -51,36 +51,41 @@ public class PhpInfo implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String urlInput) {
-    Url url = new Url(urlInput);
-    Set<Bug> result = Sets.newHashSet();
+  public ImmutableSet<Bug> inspect(String urlInput) {
+    try {
+      Url url = new Url(urlInput); // TODO: Remove this when Url class is being used
+      Set<Bug> result = Sets.newHashSet();
 
-    StringBuilder pathToQuery = new StringBuilder(url.getFullHost());
+      StringBuilder pathToQuery = new StringBuilder(url.getFullHost());
 
-    // Run it once on the root domain as this case will not be run by the forEach below
-    final Optional<Bug> rootDomainBug = analyzeForBug(url.url, pathToQuery);
-    rootDomainBug.ifPresent(result::add);
+      // Run it once on the root domain as this case will not be run by the forEach below
+      final Optional<Bug> rootDomainBug = analyzeForBug(url.rawUrl, pathToQuery);
+      rootDomainBug.ifPresent(result::add);
 
-    // Filter to remove empty strings
-    ImmutableList<String> pathSegments = ImmutableList.copyOf(
-        url.getPathSegments()
-            .stream()
-            .filter(path -> !path.trim().isEmpty())
-            .collect(Collectors.toList()));
+      // Filter to remove empty strings
+      ImmutableList<String> pathSegments = ImmutableList.copyOf(
+          url.getPathSegments()
+              .stream()
+              .filter(path -> !path.trim().isEmpty())
+              .collect(Collectors.toList()));
 
-    // Iterate over all segments and query each segment for all phpInfo possibilities
-    for (String pathSegment : pathSegments) {
-      if (isFile(pathSegment)) {
-        continue;
+      // Iterate over all segments and query each segment for all phpInfo possibilities
+      for (String pathSegment : pathSegments) {
+        if (isFile(pathSegment)) {
+          continue;
+        }
+
+        pathToQuery.append("/").append(pathSegment);
+
+        final Optional<Bug> bug = analyzeForBug(url.rawUrl, pathToQuery);
+        bug.ifPresent(result::add);
       }
 
-      pathToQuery.append("/").append(pathSegment);
+      return ImmutableSet.copyOf(result);
 
-      final Optional<Bug> bug = analyzeForBug(url.url, pathToQuery);
-      bug.ifPresent(result::add);
+    } catch (Exception e) {
+      return ImmutableSet.of();
     }
-
-    return result;
   }
 
   private Optional<Bug> analyzeForBug(String rootDomain, StringBuilder pathToQuery) {

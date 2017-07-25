@@ -1,12 +1,11 @@
 package app.plugin;
 
 import app.analyze.Bug;
-
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 public interface Plugin {
 
-  Set<Bug> inspect(String url);
+  ImmutableSet<Bug> inspect(String url);
 
   String getDescription();
 

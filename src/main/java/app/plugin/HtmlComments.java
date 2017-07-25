@@ -5,6 +5,7 @@ import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static app.util.RequestUtils.getFutureResult;
+import static app.request.RequestUtil.getFutureResult;
 
 public class HtmlComments implements Plugin {
 
@@ -37,11 +38,11 @@ public class HtmlComments implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String url) {
-    return Sets.union(
+  public ImmutableSet<Bug> inspect(String url) {
+    return ImmutableSet.copyOf(Sets.union(
         queryForString(url, "admin"),
         queryForString(url, "password")
-    );
+    ));
   }
 
   private Set<Bug> queryForString(String url, String query) {
