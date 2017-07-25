@@ -46,7 +46,7 @@ public class Application {
     start(url, supervisor, executor, parser, requester, persister);
   }
 
-  private void start(
+  void start(
       String rawUrl,
       QueueSupervisor supervisor,
       ExecutorService executor,
