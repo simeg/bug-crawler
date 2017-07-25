@@ -53,10 +53,17 @@ public class Application {
       Requester requester,
       Persister persister) {
 
-    // Add initial URL
-    // TODO: This URL should be validated separately since it's coming from a user,
-    //   all other URLs should be validated inside the Crawler so everything that comes out
-    //   of the Crawler should be validated and good!
+     /* Add initial URL
+      * TODO: This URL should be validated separately since it's coming from a user,
+      * all other URLs should be validated inside the Crawler so everything that comes out
+      * of the Crawler should be validated and good!
+      *
+      * if (url != validated)
+      *   isRunning = false
+      *
+      * This will propagate to the UI and info should be shown to the user that the initial
+      * url was not validated
+      */
     supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
     initWorkers(executor, requester, parser, supervisor, persister);
