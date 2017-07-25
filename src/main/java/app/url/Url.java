@@ -39,8 +39,7 @@ public final class Url {
   }
 
   public String getHost() {
-    // Returns "domain.com"
-    // TODO: Verify and perhaps handle that it returns www.domain.com and not domain.com
+    // Returns "(www.)domain.com"
     return httpUrl.host();
   }
 
@@ -49,7 +48,7 @@ public final class Url {
   }
 
   public String getFullHost() {
-    // Returns "https://www.domain.com"
+    // Returns "https://(www.)domain.com"
     return this.getProtocol() + "://" + this.getHost();
   }
 
@@ -85,7 +84,8 @@ public final class Url {
     return hasExtension(invalidExtensions, link);
   }
 
-  private static boolean isBlacklisted(String url) {
+  private static boolean isBlacklisted(String rawUrl) {
+    String url = rawUrl.startsWith("www.") ? rawUrl.substring(4) : rawUrl;
     return Sets.newHashSet(
         "localhost",
         "127.0.0.1",
