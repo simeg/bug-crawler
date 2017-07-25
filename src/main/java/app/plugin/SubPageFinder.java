@@ -46,7 +46,7 @@ public class SubPageFinder implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String url) {
+  public ImmutableSet<Bug> inspect(String url) {
     final Set<Bug> result = Sets.newHashSet();
 
     pagePaths.forEach(path -> {
@@ -77,7 +77,7 @@ public class SubPageFinder implements Plugin {
       }
     });
 
-    return result;
+    return ImmutableSet.copyOf(result);
   }
 
 }

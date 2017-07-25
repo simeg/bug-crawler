@@ -51,7 +51,7 @@ public class PhpInfo implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String urlInput) {
+  public ImmutableSet<Bug> inspect(String urlInput) {
     Url url = new Url(urlInput);
     Set<Bug> result = Sets.newHashSet();
 
@@ -80,7 +80,7 @@ public class PhpInfo implements Plugin {
       bug.ifPresent(result::add);
     }
 
-    return result;
+    return ImmutableSet.copyOf(result);
   }
 
   private Optional<Bug> analyzeForBug(String rootDomain, StringBuilder pathToQuery) {

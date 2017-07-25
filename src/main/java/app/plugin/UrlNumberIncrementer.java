@@ -4,6 +4,7 @@ import app.analyze.Bug;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
@@ -11,15 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.util.RequestUtils.isMatching;
 import static app.util.RequestUtils.getFutureResult;
+import static app.util.RequestUtils.isMatching;
 import static app.util.UrlUtils.getHost;
 
 public class UrlNumberIncrementer implements Plugin {
@@ -43,7 +43,7 @@ public class UrlNumberIncrementer implements Plugin {
   }
 
   @Override
-  public Set<Bug> inspect(String url) {
+  public ImmutableSet<Bug> inspect(String url) {
     try {
       if (hasSubPage(url) && hasNumber(getSubPage(url))) {
         final Set<Bug> result = Sets.newHashSet();
@@ -76,18 +76,18 @@ public class UrlNumberIncrementer implements Plugin {
           }
         }
 
-        return result;
+        return ImmutableSet.copyOf(result);
       }
 
       // TODO: Test this method
 
-      return Collections.emptySet();
+      return ImmutableSet.of();
 
     } catch (BadFutureException e) {
-      return Collections.emptySet();
+      return ImmutableSet.of();
     } catch (URISyntaxException | GalimatiasParseException e) {
       LOG.error(String.format("Unable to parse url [%s]", url), e);
-      return Collections.emptySet();
+      return ImmutableSet.of();
     }
   }
 

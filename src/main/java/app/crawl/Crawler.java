@@ -4,13 +4,12 @@ import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
+import com.google.common.collect.ImmutableSet;
 import io.mola.galimatias.GalimatiasParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,7 @@ public class Crawler {
     this.parser = parser;
   }
 
-  public Set<String> getSubLinks(String url) {
+  public ImmutableSet<String> getSubLinks(String url) {
     try {
       LOG.info("Getting sub-links for URL [{}]", url);
       final CompletableFuture future = this.requester.init(url, UrlRequest.RequestType.HTML);
@@ -42,7 +41,7 @@ public class Crawler {
       // By including `abs` in the query all relative paths gets resolved into absolute paths
       final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
 
-      return subLinks.stream()
+      return ImmutableSet.copyOf(subLinks.stream()
           .distinct()
           .map(String::toLowerCase)
           .map(unvalidatedUrl -> {
@@ -53,10 +52,10 @@ public class Crawler {
             }
           })
           .filter(url2 -> !url2.isEmpty())
-          .collect(Collectors.toSet());
+          .collect(Collectors.toSet()));
 
     } catch (BadFutureException e) {
-      return Collections.emptySet();
+      return ImmutableSet.of();
     }
   }
 
