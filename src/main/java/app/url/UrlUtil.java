@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public final class UrlUtil {
 
   // TODO: Replace with Url class method getHost
+  @Deprecated
   public static String getHost(String url) throws GalimatiasParseException {
     final String parsedUrl = URL.parse(url).host().toString();
     return parsedUrl.startsWith("www.") ? parsedUrl.substring(4) : parsedUrl;
