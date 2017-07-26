@@ -26,7 +26,7 @@ final class QueuePoller {
 
         while (true) {
           try {
-            T item = queue.poll(10, TimeUnit.SECONDS);
+            T item = queue.poll(1, TimeUnit.SECONDS);
 
             if (item == null) {
               // If there's nothing on the queue ignore it
