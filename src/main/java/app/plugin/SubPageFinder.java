@@ -51,7 +51,7 @@ public class SubPageFinder implements Plugin {
 
     pagePaths.forEach(path -> {
       try {
-        final String fullUrlPath = url + "/" + path;
+        final String fullUrlPath = formatFullPath(url, path);
 
         final CompletableFuture future = requester.init(url, UrlRequest.RequestType.STATUS_CODE);
         final int statusCode = (int) getFutureResult(future);
@@ -72,12 +72,20 @@ public class SubPageFinder implements Plugin {
               )
           );
         }
-      } catch (BadFutureException e) {
+      } catch (BadFutureException ignored) {
         // Continue
       }
     });
 
     return ImmutableSet.copyOf(result);
+  }
+
+  private static String formatFullPath(String baseUrl, String path) {
+    if (baseUrl.endsWith("/")) {
+      return baseUrl + path;
+    } else {
+      return baseUrl + "/" + path;
+    }
   }
 
 }
