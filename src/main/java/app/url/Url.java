@@ -1,18 +1,14 @@
 package app.url;
 
+import static app.url.UrlUtil.hasExtension;
+
 import app.crawl.InvalidExtensionException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import io.mola.galimatias.GalimatiasParseException;
-import io.mola.galimatias.URL;
+import java.util.List;
 import okhttp3.HttpUrl;
-import org.apache.el.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import static app.url.UrlUtil.hasExtension;
 
 public final class Url {
 
@@ -21,16 +17,15 @@ public final class Url {
   public String rawUrl;
   private HttpUrl httpUrl;
 
-  public Url(String rawUrl) throws GalimatiasParseException, InvalidExtensionException, ParseException {
+  public Url(String rawUrl) throws InvalidExtensionException, UrlParseException {
     this.rawUrl = rawUrl;
     String validatedUrl = validateAndNormalize(rawUrl);
     this.httpUrl = HttpUrl.parse(validatedUrl);
+
     if (this.httpUrl == null) {
-      // TODO: Log exception to file/Sentry
-      throw new ParseException(String.format("Could not parse URL=[%s]", rawUrl));
+      throw new UrlParseException(String.format("Could not parse URL=[%s]", rawUrl));
     } else if (isBlacklisted(this.getHost())) {
-      // TODO: Log exception to file/Sentry
-      throw new ParseException(String.format("Blacklisted URL=[%s]", this.getHost()));
+      throw new UrlParseException(String.format("Blacklisted URL=[%s]", this.getHost()));
     }
   }
 
@@ -56,7 +51,7 @@ public final class Url {
    * Validation and normalization
    */
   private static String validateAndNormalize(String unvalidatedUrl)
-      throws GalimatiasParseException, InvalidExtensionException {
+      throws InvalidExtensionException {
     // Make sure it's http or https
     String url = normalizeProtocol(unvalidatedUrl.toLowerCase());
 
@@ -64,7 +59,7 @@ public final class Url {
       throw new InvalidExtensionException(String.format("URL has invalid extension=[%s]", url));
     }
 
-    return URL.parse(url).toString();
+    return url;
   }
 
   private static String normalizeProtocol(String url) {

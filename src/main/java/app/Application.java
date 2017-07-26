@@ -1,5 +1,6 @@
 package app;
 
+import app.crawl.InvalidExtensionException;
 import app.parse.HtmlParser;
 import app.parse.Parser;
 import app.persist.Persister;
@@ -8,6 +9,7 @@ import app.queue.QueueSupervisor;
 import app.request.JsoupRequester;
 import app.request.Requester;
 import app.url.Url;
+import app.url.UrlParseException;
 import app.work.AnalyzerWorker;
 import app.work.CrawlerWorker;
 import app.work.PersisterWorker;
@@ -60,7 +62,7 @@ public class Application {
       initWorkers(executor, requester, parser, supervisor, persister);
 
       logStartSuccess();
-    } catch (Exception e) {
+    } catch (InvalidExtensionException | UrlParseException e) {
       isRunning = false;
       LOG.error("Could not start application due to invalid initial URL={}", rawUrl, e);
     }

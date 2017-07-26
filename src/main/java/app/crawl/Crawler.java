@@ -1,27 +1,22 @@
 package app.crawl;
 
+import static app.request.RequestUtil.getFutureResult;
+
 import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
 import app.request.UrlRequest;
 import app.url.Url;
+import app.url.UrlParseException;
 import com.google.common.collect.ImmutableSet;
-import io.mola.galimatias.GalimatiasParseException;
-import org.apache.el.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import static app.request.RequestUtil.getFutureResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Crawler {
-  /*
-   * Finds sub-links for consumed URL
-   */
 
   private static final Logger LOG = LoggerFactory.getLogger(Crawler.class);
 
@@ -41,7 +36,8 @@ public class Crawler {
 
       // Select all <a> elements with an href attribute and return their href values
       // By including `abs` in the query all relative paths gets resolved into absolute paths
-      final List<String> subLinks = this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
+      final List<String> subLinks =
+          this.parser.queryForAttributeValues(html, "a[href]", "abs:href");
 
       return ImmutableSet.copyOf(subLinks.stream()
           .distinct()
@@ -58,7 +54,7 @@ public class Crawler {
   private static Optional<Url> validateUrl(String unvalidatedUrl) {
     try {
       return Optional.of(new Url(unvalidatedUrl));
-    } catch (ParseException | InvalidExtensionException | GalimatiasParseException e) {
+    } catch (InvalidExtensionException | UrlParseException e) {
       return Optional.empty();
     }
   }
