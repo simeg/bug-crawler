@@ -35,6 +35,7 @@ public class ApplicationTest {
 
   @Test
   public void testStart() throws Exception {
+    // See that correct queue is being used initially
     SimpleQueue<String> toBeCrawledQueue = SimpleQueue.create(Queues.newLinkedBlockingQueue());
     when(supervisor.get(QueueId.TO_BE_CRAWLED)).thenReturn(toBeCrawledQueue);
 
