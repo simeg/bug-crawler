@@ -9,7 +9,8 @@ import java.io.IOException;
 @SpringBootApplication
 public class Main {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Application.class);
+  // TODO: Setup Sentry
+  // TODO: SubPageFinder is reporting bugs even though status other than 200
 
   public static void main(String[] args) throws IOException, InterruptedException {
 //    SpringApplication.run(Main.class, args);
