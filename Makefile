@@ -14,7 +14,7 @@ build:
 	  clean \
 	  jooq-codegen:generate \
 	  package \
-	  docker:build
+	  dockerfile:build -DskipTests
 
 build-db:
 	docker-compose build db

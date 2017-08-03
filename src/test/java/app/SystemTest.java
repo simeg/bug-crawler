@@ -1,7 +1,6 @@
 package app;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,25 +15,32 @@ public class SystemTest {
 //  @Rule
 //  public NginxContainer nginx = new NginxContainer();
 
-  @Rule
-  public PostgreSQLContainer psql = new PostgreSQLContainer()
-      .withDatabaseName("web_crawler")
-      .withPassword("postgres")
-      .withUsername("postgres");
-
-  @Rule
-  public GenericContainer container =
-      new GenericContainer("simeg/web-crawler:latest");
 
   @Before
   public void setUp() throws Exception {
-    Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOG);
-    container.followOutput(logConsumer);
+    PostgreSQLContainer database = new PostgreSQLContainer()
+        .withDatabaseName("web_crawler")
+        .withUsername("postgres")
+        .withPassword("");
+
+    database.start();
+
+    GenericContainer app =
+        new GenericContainer("simeg/web-crawler:latest")
+            .withEnv("DATABASE_HOST", getHost(database))
+            .withEnv("DATABASE_PORT", String.valueOf(database.getMappedPort(5432)));
+
+    app.followOutput(new Slf4jLogConsumer(LOG));
+    app.start();
   }
 
   @Test
   public void testSystem() throws Exception {
-    psql.start();
-    container.start();
+    System.out.println("hello");
+  }
+
+  private static String getHost(PostgreSQLContainer database) {
+    return database.getContainerInfo().getNetworkSettings()
+        .getNetworks().get("bridge").getGateway();
   }
 }
