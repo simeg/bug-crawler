@@ -1,9 +1,9 @@
 #!/bin/sh
 
-set -e
+set -xe
 
 function wait_for_db_container {
-  until psql -h db -U postgres -l > /dev/null 2>&1; do
+  until psql -h $DATABASE_HOST -p $DATABASE_PORT -U postgres -l > /dev/null 2>&1; do
     echo "Postgres is down, waiting.."
     sleep 1
   done
