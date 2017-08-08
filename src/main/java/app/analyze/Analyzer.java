@@ -1,6 +1,7 @@
 package app.analyze;
 
 import app.plugin.Plugin;
+import app.url.Url;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -19,12 +20,12 @@ public class Analyzer {
     this.plugins = plugins;
   }
 
-  public ImmutableSet<Bug> analyze(String url) {
-    LOG.info("Will now analyze URL: {}", url);
+  public ImmutableSet<Bug> analyze(Url url) {
+    LOG.info("Will now analyze URL: {}", url.rawUrl);
     final Set<Bug> result = Sets.newHashSet();
 
     plugins.forEach((plugin ->
-        result.addAll(plugin.inspect(url))
+        result.addAll(plugin.inspect(url.rawUrl))
     ));
 
     return ImmutableSet.copyOf(result);

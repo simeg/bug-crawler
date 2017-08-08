@@ -1,7 +1,5 @@
 package app.crawl;
 
-import static app.request.RequestUtil.getFutureResult;
-
 import app.parse.Parser;
 import app.request.BadFutureException;
 import app.request.Requester;
@@ -9,12 +7,15 @@ import app.request.UrlRequest;
 import app.url.Url;
 import app.url.UrlParseException;
 import com.google.common.collect.ImmutableSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static app.request.RequestUtil.getFutureResult;
 
 public class Crawler {
 
@@ -28,10 +29,10 @@ public class Crawler {
     this.parser = parser;
   }
 
-  public ImmutableSet<Url> getSubLinks(String url) {
+  public ImmutableSet<Url> getSubLinks(Url url) {
     try {
-      LOG.info("Getting sub-links for URL [{}]", url);
-      final CompletableFuture future = this.requester.init(url, UrlRequest.RequestType.HTML);
+      LOG.info("Getting sub-links for URL [{}]", url.rawUrl);
+      final CompletableFuture future = this.requester.init(url.rawUrl, UrlRequest.RequestType.HTML);
       final String html = String.valueOf(getFutureResult(future));
 
       // Select all <a> elements with an href attribute and return their href values

@@ -24,14 +24,14 @@ public class CrawlerWorker implements Worker<String> {
   private final Requester requester;
   private final Parser parser;
   private final QueueSupervisor supervisor;
-  private final SimpleQueue<String> queue;
+  private final SimpleQueue<Url> queue;
 
   public CrawlerWorker(
       ExecutorService executor,
       Requester requester,
       Parser parser,
       QueueSupervisor supervisor,
-      SimpleQueue<String> queue) {
+      SimpleQueue<Url> queue) {
     this.executor = executor;
     this.requester = requester;
     this.parser = parser;
@@ -46,9 +46,7 @@ public class CrawlerWorker implements Worker<String> {
     );
   }
 
-  private void crawl(String url) {
-    // Every url that is received here has been validated
-
+  private void crawl(Url url) {
     Set<Url> subLinks = new Crawler(requester, parser).getSubLinks(url);
 
     // URL is crawled and ready to be analyzed
@@ -56,11 +54,11 @@ public class CrawlerWorker implements Worker<String> {
 
     if (subLinks.size() > 0) {
       // Add sub-links back on URL queue
-      subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_CRAWLED).add(link.rawUrl));
+      subLinks.forEach(link -> supervisor.get(QueueId.TO_BE_CRAWLED).add(link));
 
-      LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url);
+      LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url.rawUrl);
     } else {
-      LOG.info("No sub-links found for: {}", url);
+      LOG.info("No sub-links found for: {}", url.rawUrl);
     }
   }
 

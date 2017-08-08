@@ -57,7 +57,7 @@ public class Application {
       Persister persister) {
     try {
       Url url = new Url(rawUrl);
-      supervisor.get(QueueId.TO_BE_CRAWLED).add(url.rawUrl); // TODO: Use Url class
+      supervisor.get(QueueId.TO_BE_CRAWLED).add(url);
 
       initWorkers(executor, requester, parser, supervisor, persister);
 

@@ -8,6 +8,7 @@ import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.queue.SimpleQueue;
 import app.request.Requester;
+import app.url.Url;
 import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +28,14 @@ public class AnalyzerWorker implements Worker<String> {
   private final Requester requester;
   private final Parser parser;
   private final QueueSupervisor supervisor;
-  private final SimpleQueue<String> queue;
+  private final SimpleQueue<Url> queue;
 
   public AnalyzerWorker(
       ExecutorService executor,
       Requester requester,
       Parser parser,
       QueueSupervisor supervisor,
-      SimpleQueue<String> queue) {
+      SimpleQueue<Url> queue) {
     this.executor = executor;
     this.requester = requester;
     this.parser = parser;
@@ -49,7 +50,7 @@ public class AnalyzerWorker implements Worker<String> {
     );
   }
 
-  private void analyze(String urlToAnalyze) {
+  private void analyze(Url urlToAnalyze) {
     List<Plugin> plugins = Arrays.asList(
         new HtmlComments(requester, parser),
         new Wordpress(requester),

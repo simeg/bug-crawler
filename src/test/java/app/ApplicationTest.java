@@ -6,6 +6,7 @@ import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.queue.SimpleQueue;
 import app.request.Requester;
+import app.url.Url;
 import com.google.common.collect.Queues;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class ApplicationTest {
   @Test
   public void testStart() throws Exception {
     // See that correct queue is being used initially
-    SimpleQueue<String> toBeCrawledQueue = SimpleQueue.create(Queues.newLinkedBlockingQueue());
+    SimpleQueue<Url> toBeCrawledQueue = SimpleQueue.create(Queues.newLinkedBlockingQueue());
     when(supervisor.get(QueueId.TO_BE_CRAWLED)).thenReturn(toBeCrawledQueue);
 
     assertEquals(0, toBeCrawledQueue.size());
