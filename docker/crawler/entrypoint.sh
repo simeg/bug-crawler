@@ -12,8 +12,9 @@ function wait_for_db_container {
 }
 
 function start_java_app {
-  java -XX:-UsePerfData -Djava.security.egd=file:/dev/./urandom -jar /usr/share/web-crawler/app.jar
+  java -XX:-UsePerfData -Djava.security.egd=file:/dev/./urandom -jar /usr/share/web-crawler/app.jar "$@" bla
 }
 
 wait_for_db_container
-start_java_app
+#start_java_app
+exec java -XX:-UsePerfData -Djava.security.egd=file:/dev/./urandom -jar /usr/share/web-crawler/app.jar "$@" bla

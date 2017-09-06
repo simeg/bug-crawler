@@ -1,8 +1,6 @@
 package app.work;
 
-import app.crawl.Crawler;
 import app.parse.Parser;
-import app.queue.QueueId;
 import app.queue.QueueSupervisor;
 import app.queue.SimpleQueue;
 import app.request.Requester;
@@ -10,7 +8,6 @@ import app.url.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
@@ -47,7 +44,7 @@ public class CrawlerWorker implements Worker<String> {
   }
 
   private void crawl(Url url) {
-    Set<Url> subLinks = new Crawler(requester, parser).getSubLinks(url);
+/*    Set<Url> subLinks = new Crawler(requester, parser).getSubLinks(url);
 
     // URL is crawled and ready to be analyzed
     supervisor.get(QueueId.TO_BE_ANALYZED).add(url);
@@ -59,7 +56,7 @@ public class CrawlerWorker implements Worker<String> {
       LOG.info("Found {} sub-links for: {}", String.valueOf(subLinks.size()), url.rawUrl);
     } else {
       LOG.info("No sub-links found for: {}", url.rawUrl);
-    }
+    }*/
   }
 
 }

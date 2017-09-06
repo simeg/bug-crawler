@@ -1,14 +1,15 @@
 package app.url;
 
-import static app.url.UrlUtil.hasExtension;
-
 import app.crawl.InvalidExtensionException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import java.util.List;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+import static app.url.UrlUtil.hasExtension;
 
 public final class Url {
 
@@ -82,8 +83,8 @@ public final class Url {
   private static boolean isBlacklisted(String rawUrl) {
     String url = rawUrl.startsWith("www.") ? rawUrl.substring(4) : rawUrl;
     return Sets.newHashSet(
-        "localhost",
-        "127.0.0.1",
+//        "localhost",
+//        "127.0.0.1",
         "google.com",
         "youtube.com",
         "facebook.com",
